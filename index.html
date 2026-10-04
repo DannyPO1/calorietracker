@@ -161,7 +161,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.0.0';
+const APP_VERSION='5.0.1';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -205,7 +205,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.6.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="5.0.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -968,7 +968,7 @@ function render(){
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" over":"—";
  document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const dft=document.getElementById("dashboardFooterText");if(dft)dft.textContent=Math.round(pct)+"% van dagdoel";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
- document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
+ const legacyMeals=document.getElementById("meals"); if(legacyMeals) legacyMeals.innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
  document.getElementById("entryDate").value=d;renderMealTiles();renderMealCurrent();renderSettings()
 }
 function saveProfile(){
