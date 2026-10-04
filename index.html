@@ -37,7 +37,7 @@ Object.assign(DB, DB_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.4.4';
+const APP_VERSION='4.4.5';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -81,7 +81,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.4.4"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.4.5"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -341,7 +341,7 @@ function calc(){
 function render(){
  let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
  document.getElementById("dateLabel").textContent=dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
- document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";
+ const dayTitle=document.getElementById("dayTitle"); if(dayTitle) dayTitle.textContent=d===today()?"Vandaag":"Dagoverzicht";
  let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";
  document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
  document.getElementById("totalKcal").textContent=Math.round(t.kcal)+" kcal";document.getElementById("protein").textContent=Math.round(t.p)+" g";
@@ -370,7 +370,7 @@ function openNewRecipe(){
  setTimeout(()=>openModal("recipeModal"),0);
 }
 function renderSettings(){
- let p=data.profile;["age","height","weight","goalWeight","sex","activity","rate"].forEach(id=>{if(p[id]!=null)document.getElementById(id).value=p[id]});
+ let p=data.profile;["age","height","weight","goalWeight","sex","activity","rate"].forEach(id=>{const el=document.getElementById(id);if(el&&p[id]!=null)el.value=p[id]});
  let c=calc();document.getElementById("goalExplanation").innerHTML=c?`BMR: <b>${Math.round(c.bmr)} kcal</b> • geschat onderhoud: <b>${Math.round(c.tdee)} kcal/dag</b> • rekenkundig tekort: <b>${Math.round(c.def)} kcal/dag</b> • calorie-doel: <b>${c.target} kcal/dag</b>.<br><span class="tiny">Het doel wordt automatisch opnieuw berekend wanneer je je actuele gewicht bijwerkt. De formule is Mifflin-St Jeor + activiteitsfactor. Werkelijke behoefte kan afwijken.</span>`:"Vul je profiel in om je persoonlijke doel te berekenen.";
 
 }
