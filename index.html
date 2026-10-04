@@ -116,6 +116,22 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 @media(max-width:560px){.barcodeActions{grid-template-columns:1fr}.scannerWrap,#barcodeReader{min-height:230px}}
 @media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) 132px;gap:12px}.foodItemActions,.foodItemActions button{width:132px}.foodItemActions button{min-height:42px;padding:9px 6px;font-size:14px}}
 
+
+/* v5.0.0 meal tiles + four-week dashboard */
+.mealTileGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:2px 0 15px}
+.mealTile{position:relative;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:16px;min-height:132px;text-align:left;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.mealTile:active{transform:scale(.985)}
+.mealTile:hover{border-color:#c8d9ce;box-shadow:0 9px 28px rgba(24,59,43,.11)}
+.mealTileIcon{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:20px;margin-bottom:12px}
+.mealTileTitle{font-size:16px;font-weight:800}.mealTileMeta{margin-top:5px;color:var(--muted);font-size:12px}.mealTileKcal{position:absolute;right:14px;top:15px;font-size:12px;font-weight:800;color:var(--accent)}
+.mealModal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}.mealModalBackdrop{position:absolute;inset:0;background:rgba(0,0,0,.58);backdrop-filter:blur(3px)}
+.mealModalPanel{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -12px 45px rgba(0,0,0,.24);animation:mealUp .2s ease}
+@keyframes mealUp{from{transform:translateY(20px);opacity:.7}to{transform:translateY(0);opacity:1}}
+.mealModalHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.mealModalHeader h2{margin:2px 0 0;font-size:22px}.closeCircle{width:42px;height:42px;padding:0;border-radius:50%;font-size:26px;line-height:1}
+.mealEntrySection{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
+.fourWeekDashboard .foodRank{margin-top:10px}.foodRankRow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.foodRankRow:first-child{border-top:0}.rankNum{width:28px;height:28px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:850;font-size:12px}.rankName{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rankMeta{font-size:11px;color:var(--muted);margin-top:2px}.rankKcal{text-align:right;font-weight:800;font-size:13px}.rankBar{height:5px;background:#e6ebe6;border-radius:99px;overflow:hidden;margin-top:5px}.rankBar>div{height:100%;background:var(--accent);border-radius:99px}.adviceBox{padding:14px;border-radius:16px;background:var(--accent-soft);border:1px solid #d5e6da}.adviceBox.warnAdvice{background:#fff5e6;border-color:#f0d8ae}.adviceTitle{font-weight:850;margin-bottom:5px}.adviceText{font-size:13px;line-height:1.45}.adviceBullets{margin:9px 0 0;padding-left:18px;font-size:13px;line-height:1.55}.adviceTag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:5px}
+html[data-theme="dark"] .mealTile:hover{border-color:#3c5b49;box-shadow:0 10px 30px rgba(0,0,0,.28)}html[data-theme="dark"] .mealTileKcal{color:var(--accent)}html[data-theme="dark"] .mealModalPanel{box-shadow:0 -12px 45px rgba(0,0,0,.55)}html[data-theme="dark"] .mealCurrent .item{background:#1c2b23}html[data-theme="dark"] .rankBar{background:#293a31}html[data-theme="dark"] .adviceBox{background:#20372b;border-color:#315541}html[data-theme="dark"] .adviceBox.warnAdvice{background:#3b2e1e;border-color:#624b2d}
+@media(max-width:560px){.mealTileGrid{gap:10px}.mealTile{min-height:125px;padding:14px}.mealTileIcon{width:36px;height:36px;font-size:18px}.mealModalPanel{max-height:94vh;padding-left:14px;padding-right:14px}.foodRankRow{grid-template-columns:28px minmax(0,1fr) auto}}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -145,7 +161,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='4.6.3';
+const APP_VERSION='5.0.0';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -242,47 +258,52 @@ function updateRecipeLineCalorie(i){
   <div class="dashboardBar"><div id="progress"></div></div>
  </div>
 
- <div class="card">
-  <h2>Voeding vandaag</h2>
-  <div class="grid">
-   <div><label>Maaltijd</label><select id="mealType"><option>Ontbijt</option><option>Lunch</option><option>Avondeten</option><option>Snack</option></select></div>
-   <div><label>Datum</label><input id="entryDate" type="date"></div>
-  </div>
+ <div class="mealTileGrid" id="mealTiles"></div>
 
-  <div style="margin-top:14px">
-   <label>Bestaand product toevoegen</label>
-   <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
-   <button class="secondary barcodeButton" type="button" onclick="openBarcodeScanner()"><span class="barcodeIcon">▦</span> Barcode scannen</button>
+ <div id="foodEntryModal" class="mealModal hidden" role="dialog" aria-modal="true" aria-labelledby="foodEntryTitle">
+  <div class="mealModalBackdrop" onclick="closeMealEntry()"></div>
+  <div class="mealModalPanel">
+   <div class="mealModalHeader">
+    <div><div class="sectionKicker" id="foodEntryDateLabel"></div><h2 id="foodEntryTitle">Ontbijt</h2></div>
+    <button class="ghost closeCircle" type="button" onclick="closeMealEntry()" aria-label="Sluiten">×</button>
+   </div>
    <div class="grid">
-    <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
-    <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
+    <div><label>Maaltijd</label><select id="mealType" onchange="updateMealModalHeader()"><option>Ontbijt</option><option>Lunch</option><option>Avondeten</option><option>Snack</option></select></div>
+    <div><label>Datum</label><input id="entryDate" type="date" onchange="renderMealTiles();updateMealModalHeader()"></div>
    </div>
-   <div id="selectedInfo" class="notice">Kies een bestaand product uit de zoekresultaten.</div>
-   <div class="actions"><button class="primary" onclick="addSelected()">Product toevoegen</button></div>
-  </div>
 
-  <div style="margin-top:18px">
-   <label>Bestaand recept toevoegen</label>
-   <div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div>
-   <div class="grid">
-    <div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div>
-    <div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addRecipeFromToday()">Recept toevoegen</button></div>
+   <div class="mealEntrySection">
+    <label>Bestaand product toevoegen</label>
+    <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
+    <button class="secondary barcodeButton" type="button" onclick="openBarcodeScanner()"><span class="barcodeIcon">▦</span> Barcode scannen</button>
+    <div class="grid">
+     <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
+     <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
+    </div>
+    <div id="selectedInfo" class="notice">Kies een bestaand product uit de zoekresultaten.</div>
+    <div class="actions"><button class="primary" onclick="addSelected()">Product toevoegen</button></div>
    </div>
-   <div id="recipeAddInfo" class="muted" style="margin-top:8px"></div>
-  </div>
 
-  <div class="notice" style="margin-top:18px">
-   <b>Niet gevonden?</b> Maak het product of recept aan via het tabblad <b>Voeding</b>.
-   <div class="actions" style="margin-top:10px">
-    <button class="secondary" onclick="openNewProduct()">Nieuw product</button>
-    <button class="secondary" onclick="openNewRecipe()">Nieuw recept</button>
+   <div class="mealEntrySection">
+    <label>Bestaand recept toevoegen</label>
+    <div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div>
+    <div class="grid">
+     <div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div>
+     <div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addRecipeFromToday()">Recept toevoegen</button></div>
+    </div>
+    <div id="recipeAddInfo" class="muted" style="margin-top:8px"></div>
    </div>
-  </div>
 
-  <div id="addMessage"></div>
+   <div class="notice" style="margin-top:18px">
+    <b>Niet gevonden?</b> Maak het product of recept aan via het tabblad <b>Voeding</b>.
+    <div class="actions" style="margin-top:10px"><button class="secondary" onclick="openNewProduct()">Nieuw product</button><button class="secondary" onclick="openNewRecipe()">Nieuw recept</button></div>
+   </div>
+
+   <div class="mealCurrent" id="mealCurrentItems"></div>
+   <div id="addMessage"></div>
+   <div class="mealModalFooter"><button class="primary" onclick="closeMealEntry()">Klaar</button></div>
+  </div>
  </div>
-
- <div class="card"><h2>Overzicht voeding</h2><div id="meals"></div></div>
 
  <div class="card">
   <h2>Gewicht vandaag</h2>
@@ -297,6 +318,14 @@ function updateRecipeLineCalorie(i){
 
 <section id="history" class="hidden">
  <div class="card"><h2>Voortgang</h2><div id="weightSummary"></div><svg id="weightChart" class="chart" viewBox="0 0 700 220" preserveAspectRatio="none"></svg><div class="legend"><span>● Gewicht</span><span>Stippellijn = streefgewicht</span></div></div>
+ <div class="card fourWeekDashboard">
+  <div class="row between"><div><h2>Voeding · afgelopen 4 weken</h2><p class="muted">Welke producten en maaltijden komen het vaakst terug?</p></div><span class="chip">28 dagen</span></div>
+  <div id="fourWeekStats"></div>
+ </div>
+ <div class="card adviceCard">
+  <div class="row between"><div><h2>Advies voor je doel</h2><p class="muted">Op basis van je geregistreerde voeding en je ingestelde calorie-doel.</p></div><span class="adviceIcon">↗</span></div>
+  <div id="foodAdvice"></div>
+ </div>
  <div class="card"><h2>Dagtotalen</h2><div id="historyList"></div></div>
 </section>
 
@@ -324,7 +353,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.6.0</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.0.0</b></div>
 
   </div>
 
@@ -844,12 +873,89 @@ function addSelected(){
  msg("Toegevoegd aan "+(activeDate()===today()?"vandaag":new Date(activeDate()+"T12:00:00").toLocaleDateString("nl-NL"))+".","success");render();
 }
 function msg(t,kind="success"){document.getElementById("addMessage").innerHTML=`<div class="notice ${kind}">${t}</div>`}
-function removeItem(i){let a=data.days[activeDate()]||[];a.splice(i,1);save();render()}
 function totals(items){return items.reduce((o,x)=>{o.kcal+=x.kcal;o.p+=x.p;o.c+=x.c;o.f+=x.f;return o},{kcal:0,p:0,c:0,f:0})}
 function calc(){
  let p=data.profile;if(!p.age||!p.height||!p.weight)return null;
  let bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="female"?-161:5),tdee=bmr*(+p.activity||1.2),def=7700*(+p.rate||.5)/7,target=Math.round(tdee-def);
  return {bmr,tdee,target:Math.max(1200,target),def}
+}
+function mealTileConfig(){
+ return [
+  {key:"Ontbijt",icon:"☀️",label:"Ontbijt"},
+  {key:"Lunch",icon:"🥗",label:"Lunch"},
+  {key:"Avondeten",icon:"🍽️",label:"Avondeten"},
+  {key:"Snack",icon:"🍎",label:"Snacks"}
+ ];
+}
+function openMealEntry(meal){
+ const d=activeDate();
+ document.getElementById("foodEntryModal").classList.remove("hidden");
+ document.getElementById("mealType").value=meal;
+ document.getElementById("entryDate").value=d;
+ document.getElementById("productSearch").value="";
+ document.getElementById("recipeSearchToday").value="";
+ document.getElementById("amount").value=100;
+ document.getElementById("unit").innerHTML='<option value="g">gram</option><option value="ml">ml</option>';
+ document.getElementById("selectedInfo").textContent="Kies een bestaand product uit de zoekresultaten.";
+ document.getElementById("addMessage").innerHTML="";
+ selectedRecipeToday="";
+ updateMealModalHeader();
+ renderMealCurrent();
+ setTimeout(()=>document.getElementById("productSearch")?.focus(),80);
+}
+function closeMealEntry(){
+ document.getElementById("foodEntryModal")?.classList.add("hidden");
+ document.getElementById("suggestions")?.classList.add("hidden");
+ document.getElementById("recipeSuggestionsToday")?.classList.add("hidden");
+}
+function updateMealModalHeader(){
+ const meal=document.getElementById("mealType")?.value||"Ontbijt", d=document.getElementById("entryDate")?.value||activeDate();
+ const labels={Ontbijt:"Ontbijt",Lunch:"Lunch",Avondeten:"Avondeten",Snack:"Snacks"};
+ const title=document.getElementById("foodEntryTitle"); if(title)title.textContent=labels[meal]||meal;
+ const dateEl=document.getElementById("foodEntryDateLabel"); if(dateEl)dateEl.textContent=new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
+ renderMealCurrent();
+}
+function renderMealTiles(){
+ const d=document.getElementById("entryDate")?.value||today(), items=data.days[d]||[], box=document.getElementById("mealTiles"); if(!box)return;
+ box.innerHTML=mealTileConfig().map(m=>{
+  const a=items.filter(x=>x.meal===m.key), kcal=Math.round(a.reduce((s,x)=>s+(+x.kcal||0),0));
+  return `<button class="mealTile" type="button" onclick="openMealEntry('${m.key}')"><span class="mealTileIcon" aria-hidden="true">${m.icon}</span><span class="mealTileKcal">${kcal?kcal+' kcal':'—'}</span><div class="mealTileTitle">${m.label}</div><div class="mealTileMeta">${a.length?a.length+' registratie'+(a.length===1?'':'s'):'Nog niets geregistreerd'}</div></button>`;
+ }).join("");
+}
+function renderMealCurrent(){
+ const box=document.getElementById("mealCurrentItems"); if(!box)return;
+ const meal=document.getElementById("mealType")?.value||"Ontbijt", d=document.getElementById("entryDate")?.value||activeDate(), items=(data.days[d]||[]).map((x,i)=>({...x,i})).filter(x=>x.meal===meal);
+ const kcal=Math.round(items.reduce((s,x)=>s+(+x.kcal||0),0));
+ box.innerHTML=`<div class="mealCurrentTitle"><b>Toegevoegd aan deze maaltijd</b><span class="chip">${kcal} kcal</span></div>`+(items.length?items.map(x=>`<div class="item"><span>${esc(x.name)} <small>${esc(x.amount)} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join(""):'<div class="empty" style="padding:12px 0">Nog geen voeding toegevoegd.</div>');
+}
+function removeItem(i){let d=activeDate(),a=data.days[d]||[];a.splice(i,1);save();render();renderMealCurrent();}
+function foodAnalytics28(){
+ const end=new Date((activeDate()||today())+"T12:00:00"), start=new Date(end); start.setDate(start.getDate()-27);
+ const map=new Map(), days=[]; let totalKcal=0, loggedDays=0;
+ for(let i=0;i<28;i++){const dt=new Date(start);dt.setDate(start.getDate()+i);const key=dt.toISOString().slice(0,10);const items=data.days[key]||[]; if(items.length)loggedDays++; days.push({key,items}); items.forEach(x=>{const name=String(x.name||"Onbekend").trim();const kcal=+x.kcal||0;if(!name)return;totalKcal+=kcal;const cur=map.get(name)||{name,count:0,kcal:0,p:0,c:0,f:0};cur.count++;cur.kcal+=kcal;cur.p+=+x.p||0;cur.c+=+x.c||0;cur.f+=+x.f||0;map.set(name,cur);});}
+ const rows=[...map.values()].sort((a,b)=>b.count-a.count||b.kcal-a.kcal).slice(0,8);
+ const calorieRows=[...map.values()].filter(x=>x.count>=2).sort((a,b)=>b.kcal-a.kcal).slice(0,5);
+ const target=calc()?.target||0, avg=loggedDays?totalKcal/loggedDays:0;
+ return {rows,calorieRows,totalKcal,loggedDays,avg,target,days};
+}
+function renderFourWeekDashboard(){
+ const box=document.getElementById("fourWeekStats"), advice=document.getElementById("foodAdvice"); if(!box||!advice)return;
+ const a=foodAnalytics28();
+ if(!a.rows.length){box.innerHTML='<div class="empty">Nog geen voedingsregistraties in de afgelopen 4 weken. Zodra je meer registreert, verschijnt hier je eetpatroon.</div>';advice.innerHTML='<div class="adviceBox"><div class="adviceTitle">Nog te weinig gegevens</div><div class="adviceText">Registreer je voeding een paar dagen. Daarna kan CalorieTracker aangeven welke producten het vaakst terugkomen en waar je de meeste calorieën binnenkrijgt.</div></div>';return;}
+ const maxCount=Math.max(...a.rows.map(x=>x.count),1);
+ box.innerHTML=`<div class="foodRank">${a.rows.map((x,i)=>`<div class="foodRankRow"><span class="rankNum">${i+1}</span><div><div class="rankName">${esc(x.name)}</div><div class="rankMeta">${x.count}× geregistreerd · ${Math.round(x.kcal)} kcal totaal</div><div class="rankBar"><div style="width:${Math.max(5,x.count/maxCount*100)}%"></div></div></div><span class="rankKcal">${Math.round(x.kcal/a.loggedDays)}<small class="muted"> kcal/dag*</small></span></div>`).join("")}</div><p class="tiny" style="margin-top:10px">* Gemiddeld over ${a.loggedDays} dag${a.loggedDays===1?'':'en'} waarop je voeding hebt geregistreerd.</p>`;
+ let html="";
+ if(a.target && a.avg>a.target*1.08){
+   const row=a.calorieRows[0];
+   html=`<div class="adviceBox warnAdvice"><div class="adviceTag">Belangrijkste hefboom</div><div class="adviceTitle">Je gemiddelde ligt ongeveer ${Math.round(a.avg-a.target)} kcal boven je dagdoel.</div><div class="adviceText">Je hoeft niet alles te schrappen. De grootste winst zit meestal in voeding die vaak terugkomt én relatief veel calorieën levert.</div>${row?`<ul class="adviceBullets"><li><b>${esc(row.name)}</b> was ${row.count}× geregistreerd en leverde samen ongeveer ${Math.round(row.kcal)} kcal.</li><li>Probeer hiervan eerst de portie of frequentie met ongeveer 25–30% te verlagen en kijk of dat haalbaar is.</li></ul>`:''}</div>`;
+ }else if(a.target && a.avg>a.target){
+   html=`<div class="adviceBox"><div class="adviceTag">Kleine bijsturing</div><div class="adviceTitle">Je zit gemiddeld ongeveer ${Math.round(a.avg-a.target)} kcal boven je dagdoel.</div><div class="adviceText">Een kleine dagelijkse vermindering is waarschijnlijk voldoende. Kijk vooral naar je meest calorierijke terugkerende producten en snacks; daar is de aanpassing meestal het makkelijkst.</div></div>`;
+ }else if(a.target){
+   html=`<div class="adviceBox"><div class="adviceTag">Goed bezig</div><div class="adviceTitle">Je gemiddelde ligt rond of onder je dagdoel.</div><div class="adviceText">Blijf vooral consistent. Als je wilt bijsturen, kijk dan eerst naar producten die vaak terugkomen en weinig verzadiging per calorie geven.</div></div>`;
+ }else{
+   const row=a.calorieRows[0]; html=`<div class="adviceBox"><div class="adviceTitle">Stel eerst je calorie-doel in</div><div class="adviceText">Daarna kan CalorieTracker je geregistreerde eetpatroon vergelijken met je persoonlijke doel. ${row?`Op dit moment levert <b>${esc(row.name)}</b> van je terugkerende voeding de meeste geregistreerde calorieën.`:''}</div></div>`;
+ }
+ advice.innerHTML=html;
 }
 function render(){
  let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
@@ -863,7 +969,7 @@ function render(){
  document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const dft=document.getElementById("dashboardFooterText");if(dft)dft.textContent=Math.round(pct)+"% van dagdoel";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
  document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
- document.getElementById("entryDate").value=d;renderSettings()
+ document.getElementById("entryDate").value=d;renderMealTiles();renderMealCurrent();renderSettings()
 }
 function saveProfile(){
  let vals={age:+age.value,height:+height.value,weight:+weight.value,goalWeight:+goalWeight.value,sex:sex.value,activity:+activity.value,rate:+rate.value};
@@ -1112,7 +1218,7 @@ function renderHistory(){
  let dates=Object.keys(data.days).sort().reverse(),arr=data.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)),goal=data.profile.goalWeight;
  document.getElementById("weightSummary").innerHTML=arr.length?`Laatste gewicht: <b>${arr[arr.length-1].weight.toFixed(1)} kg</b>${goal?` • streefgewicht: <b>${goal} kg</b>`:""}`:"Log je gewicht bij Instellingen.";
  document.getElementById("historyList").innerHTML=dates.length?dates.map(d=>`<div class="item"><span>${new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"})}</span><b>${Math.round(totals(data.days[d]).kcal)} kcal</b></div>`).join(""):'<div class="empty">Nog geen dagen geregistreerd.</div>';
- drawChart()
+ drawChart();renderFourWeekDashboard()
 }
 function drawChart(){
  let svg=document.getElementById("weightChart"),a=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)),w=700,h=220,pad=28;svg.innerHTML="";if(!a.length){svg.innerHTML='<text x="350" y="110" text-anchor="middle" fill="#667085">Nog geen gewichtsmetingen</text>';return}
