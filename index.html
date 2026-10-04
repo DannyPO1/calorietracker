@@ -3,31 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#183b2b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CalorieTracker">
 <title>CalorieTracker</title>
 <style>
-:root{--bg:#f4f6f8;--card:#fff;--text:#111827;--muted:#667085;--line:#e5e7eb;--accent:#2563eb;--green:#059669;--red:#dc2626;--amber:#d97706}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;padding-bottom:88px}
-header{background:#111827;color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20}header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#cbd5e1;font-size:12px}
-main{max-width:760px;margin:auto;padding:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 2px 10px #00000009}
-h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:15px 0 8px}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
+:root{--bg:#f6f5ef;--card:#fffdf8;--text:#17231c;--muted:#68746d;--line:#e3e7df;--accent:#236b45;--accent-dark:#183b2b;--accent-soft:#e8f2eb;--green:#2f855a;--red:#c2413b;--amber:#c77a22;--cream:#f4f0e4;--shadow:0 6px 24px rgba(24,59,43,.07)}
+
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7f5ee 0%,var(--bg) 35%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;padding-bottom:92px}
+header{background:linear-gradient(135deg,#183b2b 0%,#24563b 100%);color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(24,59,43,.18)}header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#d7e5dc;font-size:12px}
+main{max-width:760px;margin:auto;padding:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2{font-size:18px;margin:0 0 13px;letter-spacing:-.2px}h3{font-size:14px;margin:15px 0 8px}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
 .row{display:flex;gap:9px;align-items:center}.between{justify-content:space-between}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}input,select{width:100%;border:1px solid #d0d5dd;border-radius:11px;padding:11px;background:#fff;color:var(--text);font-size:16px}
-button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#eef2ff;color:#1d4ed8}.ghost{background:#f2f4f7;color:#344054}.danger{background:#fee4e2;color:#b42318}
+label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}input,select{width:100%;border:1px solid #d9dfd8;border-radius:13px;padding:12px;background:#fffefb;color:var(--text);font-size:16px}
+button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(35,107,69,.18)}.secondary{background:var(--accent-soft);color:var(--accent)}.ghost{background:#f0f2ed;color:#34483b}.danger{background:#fee7e3;color:#a73731}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.big{font-size:34px;font-weight:850;letter-spacing:-1px}.right{text-align:right}
-.bar{height:13px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:11px 0}.bar>div{height:100%;background:var(--accent);transition:width .2s}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.stat{background:#f8fafc;border-radius:13px;padding:10px}.stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted)}
-.meal{border-top:1px solid var(--line);padding:12px 0}.meal:first-child{border-top:0}.item{display:flex;justify-content:space-between;gap:9px;padding:7px 0;font-size:14px}.item small{color:var(--muted)}
-.chip{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 8px;font-size:11px}
-.notice{padding:11px 12px;border-radius:12px;background:#eff6ff;color:#1e40af;font-size:13px;margin-top:10px}.success{background:#ecfdf3;color:#067647}.warn{background:#fffaeb;color:#92400e}
+.bar{height:9px;background:#e4e9e2;border-radius:99px;overflow:hidden;margin:11px 0}.bar>div{height:100%;background:var(--accent);transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.stat{background:#f3f6f1;border-radius:15px;padding:11px}.stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted)}
+.meal{border-top:1px solid var(--line);padding:14px 0}.meal:first-child{border-top:0}.item{display:flex;justify-content:space-between;gap:9px;padding:9px 0;font-size:14px}.item small{color:var(--muted)}
+.chip{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:750}
+.notice{padding:12px 13px;border-radius:15px;background:#eef6f0;color:#245b3d;font-size:13px;margin-top:10px}.success{background:#e9f6ed;color:#176b3e}.warn{background:#fff5e6;color:#8a5a19}
 .searchbox{position:relative}.suggestions{position:absolute;left:0;right:0;top:72px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 25px #0002;z-index:30;max-height:260px;overflow:auto}.suggestion{padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.suggestion:last-child{border:0}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}.tabs button{flex:1;max-width:180px;background:transparent;color:#667085}.tabs button.active{color:var(--accent)}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 6px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px rgba(24,59,43,.05)}.tabs button{flex:1;max-width:180px;background:transparent;color:#6b776f}.tabs button.active{color:var(--accent)}
 .hidden{display:none!important}.empty{padding:20px 0;text-align:center;color:var(--muted)}
-.chart{width:100%;height:220px;background:#fafafa;border-radius:14px;border:1px solid var(--line)}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.chart{width:100%;height:220px;background:#fafbf8;border-radius:16px;border:1px solid var(--line)}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(4){grid-column:1/-1}}
+
+.calorieHero{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:center;background:linear-gradient(145deg,#fffdf8,#f0f7f1);border:1px solid #dfe8df;border-radius:24px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.calorieRing{width:172px;height:172px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) var(--pct,0%),#dfe8df 0);position:relative;box-shadow:inset 0 0 0 1px rgba(35,107,69,.08)}
+.calorieRing:before{content:"";position:absolute;inset:10px;background:#fffdf8;border-radius:50%}
+.ringInner{position:relative;text-align:center;padding:10px}.ringLabel{font-size:11px;color:var(--muted);margin-bottom:4px}.ringKcal{font-size:28px;font-weight:850;letter-spacing:-1px}.ringRemaining{font-size:12px;color:var(--accent);font-weight:750;margin-top:3px}
+.goalSummary{display:flex;flex-direction:column;gap:10px}.goalSummary .goalLine{display:flex;justify-content:space-between;gap:10px;align-items:end}.goalSummary .goalValue{font-size:26px;font-weight:800;letter-spacing:-.5px}.goalSummary .goalCaption{font-size:12px;color:var(--muted)}
+.motivation{padding:11px 13px;background:#e8f2eb;border-radius:15px;color:#245b3d;font-size:13px;font-weight:650}
+.sectionKicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:800;margin-bottom:5px}
+@media(max-width:560px){.calorieHero{grid-template-columns:150px 1fr;gap:14px;padding:15px}.calorieRing{width:146px;height:146px}.ringKcal{font-size:24px}.goalSummary .goalValue{font-size:21px}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <script>
@@ -37,7 +47,7 @@ Object.assign(DB, DB_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.4.6';
+const APP_VERSION='4.5.0';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -81,7 +91,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.4.6"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.5.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -105,20 +115,31 @@ function updateRecipeLineCalorie(i){
 }
 </script></head>
 <body>
-<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1"></span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
+<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#d7e5dc"></span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#b8cbbf">v4</span></header>
 <main>
 
 <section id="today">
- <div class="card">
-  <div class="row between"><div><div class="muted" id="dateLabel"></div><div class="big" id="totalKcal">0 kcal</div></div><div class="right"><span class="chip" id="goalTag">Stel doel in</span></div></div>
-  <div class="bar"><div id="progress"></div></div>
-  <div class="stats">
-   <div class="stat"><b id="targetKcal">—</b><span>dagdoel</span></div>
-   <div class="stat"><b id="remainingKcal">—</b><span>resterend</span></div>
-   <div class="stat"><b id="protein">0 g</b><span>eiwit</span></div>
-   <div class="stat"><b id="macro">0/0/0</b><span>koolhydraten / vet (g)</span></div>
+ <div class="calorieHero">
+  <div class="calorieRing" id="calorieRing" style="--pct:0%">
+   <div class="ringInner">
+    <div class="ringLabel">vandaag gegeten</div>
+    <div class="ringKcal" id="totalKcal">0</div>
+    <div class="ringRemaining" id="remainingKcal">— over</div>
+   </div>
+  </div>
+  <div class="goalSummary">
+   <div><div class="sectionKicker" id="dateLabel"></div><div class="goalCaption">Dagdoel</div><div class="goalValue" id="targetKcal">—</div></div>
+   <div class="goalLine"><span class="goalCaption">Streefgewicht</span><span class="chip" id="goalTag">Stel doel in</span></div>
+   <div class="motivation" id="dailyMessage">Rustig opbouwen. Elke registratie telt.</div>
   </div>
  </div>
+ <div class="stats">
+  <div class="stat"><b id="protein">0 g</b><span>eiwit</span></div>
+  <div class="stat"><b id="macro">0/0</b><span>koolhydraten / vet</span></div>
+  <div class="stat"><b id="dayProgress">0%</b><span>van dagdoel</span></div>
+  <div class="stat"><b id="mealCount">0</b><span>registraties</span></div>
+ </div>
+ <div class="bar" style="display:none"><div id="progress"></div></div>
 
  <div class="card">
   <h2>Voeding vandaag</h2>
@@ -547,10 +568,10 @@ function render(){
  const dayTitle=document.getElementById("dayTitle"); if(dayTitle) dayTitle.textContent=d===today()?"Vandaag":"Dagoverzicht";
  let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";
  document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
- document.getElementById("totalKcal").textContent=Math.round(t.kcal)+" kcal";document.getElementById("protein").textContent=Math.round(t.p)+" g";
- document.getElementById("macro").textContent=Math.round(t.c)+"/"+Math.round(t.f);
- document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" kcal":"—";
- document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";document.getElementById("progress").style.width=c?Math.min(100,t.kcal/c.target*100)+"%":"0%";
+ document.getElementById("totalKcal").textContent=Math.round(t.kcal);document.getElementById("protein").textContent=Math.round(t.p)+" g";
+ document.getElementById("macro").textContent=Math.round(t.c)+" / "+Math.round(t.f);
+ document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" over":"—";
+ document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
  document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
  document.getElementById("entryDate").value=d;renderSettings()
