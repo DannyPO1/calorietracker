@@ -38,7 +38,7 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION="4.3.1";
+const APP_VERSION='4.4.0';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -82,7 +82,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.3.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.4.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -122,30 +122,75 @@ function updateRecipeLineCalorie(i){
  </div>
 
  <div class="card">
-  <h2>Voeding toevoegen</h2>
+  <h2>Voeding vandaag</h2>
   <div class="grid">
    <div><label>Maaltijd</label><select id="mealType"><option>Ontbijt</option><option>Lunch</option><option>Avondeten</option><option>Snack</option></select></div>
    <div><label>Datum</label><input id="entryDate" type="date"></div>
   </div>
-  <label>Product zoeken</label>
-  <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
-  <div class="grid">
-   <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
-   <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
+
+  <div style="margin-top:14px">
+   <label>Bestaand product toevoegen</label>
+   <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
+   <div class="grid">
+    <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
+    <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
+   </div>
+   <div id="selectedInfo" class="notice">Kies een bestaand product uit de zoekresultaten.</div>
+   <div class="actions"><button class="primary" onclick="addSelected()">Product toevoegen</button></div>
   </div>
-  <div id="selectedInfo" class="notice">Kies een product uit de suggesties of typ een eigen product.</div>
-  <div class="actions"><button class="primary" onclick="addSelected()">Toevoegen</button><button class="secondary" onclick="openModal('foodModal')">Eigen product</button><button class="ghost" onclick="openModal('recipeModal')">Recept</button></div>
+
+  <div style="margin-top:18px">
+   <label>Bestaand recept toevoegen</label>
+   <div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div>
+   <div class="grid">
+    <div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div>
+    <div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addRecipeFromToday()">Recept toevoegen</button></div>
+   </div>
+   <div id="recipeAddInfo" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div class="notice" style="margin-top:18px">
+   <b>Niet gevonden?</b> Maak het product of recept aan via het tabblad <b>Voeding</b>.
+   <div class="actions" style="margin-top:10px">
+    <button class="secondary" onclick="openNewProduct()">Nieuw product</button>
+    <button class="secondary" onclick="openNewRecipe()">Nieuw recept</button>
+   </div>
+  </div>
+
   <div id="addMessage"></div>
  </div>
 
- <div class="card"><h2>Mijn recepten toevoegen</h2><label>Recept zoeken</label><div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div><div class="grid"><div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div><div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addRecipeFromToday()">Recept toevoegen</button></div></div><div id="recipeAddInfo" class="muted" style="margin-top:8px"></div></div>
- <div class="card"><h2 id="dayTitle">Vandaag</h2><div id="meals"></div><div class="notice success" style="margin-top:10px"><b>Porties:</b> producten met een betrouwbare gemiddelde portiegrootte kunnen nu als stuk, snee, plak, eetlepel enz. worden ingevoerd. Gram/ml blijft beschikbaar voor nauwkeurige invoer.</div>
-</div>
+ <div class="card"><h2>Overzicht voeding</h2><div id="meals"></div></div>
+
+ <div class="card">
+  <h2>Gewicht vandaag</h2>
+  <div class="grid">
+   <div><label>Datum</label><input id="weightDate" type="date"></div>
+   <div><label>Gewicht (kg)</label><input id="weightEntry" type="number" step=".1" min="35" max="250"></div>
+  </div>
+  <div class="actions"><button class="primary" onclick="logWeight()">Gewicht opslaan</button></div>
+  <div id="todayWeightInfo" class="muted" style="margin-top:8px"></div>
+ </div>
 </section>
 
 <section id="history" class="hidden">
  <div class="card"><h2>Voortgang</h2><div id="weightSummary"></div><svg id="weightChart" class="chart" viewBox="0 0 700 220" preserveAspectRatio="none"></svg><div class="legend"><span>● Gewicht</span><span>Stippellijn = streefgewicht</span></div></div>
  <div class="card"><h2>Dagtotalen</h2><div id="historyList"></div></div>
+</section>
+
+<section id="food" class="hidden">
+ <div class="card">
+  <div class="row between"><div><h2>Eigen producten</h2><p class="muted">Producten die je zelf hebt toegevoegd en kunt gebruiken bij Vandaag en in recepten.</p></div>
+   <button class="primary" onclick="openNewProduct()">Toevoegen</button>
+  </div>
+  <div id="customList"></div>
+ </div>
+ <div class="card">
+  <div class="row between"><div><h2>Eigen recepten</h2><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div>
+   <button class="primary" onclick="openNewRecipe()">Toevoegen</button>
+  </div>
+  <div id="recipeList"></div>
+ </div>
 </section>
 
 <section id="settings" class="hidden">
@@ -157,7 +202,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.3.1</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.0</b></div>
 
   </div>
 
@@ -173,15 +218,10 @@ function updateRecipeLineCalorie(i){
   </div>
   <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
   <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
- </div>
- <div class="card"><h2>Gewicht loggen</h2><div class="grid"><div><label>Datum</label><input id="weightDate" type="date"></div><div><label>Gewicht (kg)</label><input id="weightEntry" type="number" step=".1" min="35" max="250"></div></div><div class="actions"><button class="primary" onclick="logWeight()">Gewicht opslaan</button></div></div>
- <div class="card"><h2>Opslag & privacy</h2><p class="muted">De app gebruikt alleen lokale browseropslag. Er worden geen voedings- of profielgegevens naar een server gestuurd. Met een back-up kun je het bestand bewaren in iCloud Drive en later terugzetten.</p><div class="actions"><button class="secondary" onclick="exportData()">Back-up exporteren</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up importeren</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div></div>
- <div class="card"><h2>Eigen producten</h2><div id="customList"></div></div>
- <div class="card"><h2>Recepten</h2><div id="recipeList"></div></div>
-</section>
+ </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">De app gebruikt alleen lokale browseropslag. Er worden geen voedings- of profielgegevens naar een server gestuurd. Met een back-up kun je het bestand bewaren in iCloud Drive en later terugzetten.</p><div class="actions"><button class="secondary" onclick="exportData()">Back-up exporteren</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up importeren</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div></div></section>
 </main>
 
-<nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('settings',this)">Instellingen</button></nav>
+<nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('food',this)">Voeding</button><button onclick="tab('settings',this)">Instellingen</button></nav>
 
 <div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
 
@@ -224,7 +264,7 @@ function product(name){let ps=allProducts(),n=name.toLowerCase().trim();if(ps[n]
 function suggestProducts(){
  let q=document.getElementById("productSearch").value.toLowerCase().trim(), box=document.getElementById("suggestions"), keys=Object.keys(allProducts());
  if(!q){box.classList.add("hidden");return}
- let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchCalorieLabel(k)}</div></div>`).join(""):`<div class="suggestion" onclick="openModal('foodModal')">Geen match. Maak een eigen product.</div>`;box.classList.remove("hidden")
+ let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchCalorieLabel(k)}</div></div>`).join(""):`<div class="suggestion" onclick="openNewProduct()">Geen match. Maak een eigen product in Voeding.</div>`;box.classList.remove("hidden")
 }
 function portionOptions(productName){
  const key=productName.toLowerCase().trim();
@@ -289,7 +329,7 @@ function calc(){
 function render(){
  let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
  document.getElementById("dateLabel").textContent=dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
- document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";
+ document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";\n let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";\n document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
  document.getElementById("totalKcal").textContent=Math.round(t.kcal)+" kcal";document.getElementById("protein").textContent=Math.round(t.p)+" g";
  document.getElementById("macro").textContent=Math.round(t.c)+"/"+Math.round(t.f);
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" kcal":"—";
@@ -303,10 +343,22 @@ function saveProfile(){
  if(!vals.age||!vals.height||!vals.weight||!vals.goalWeight){alert("Vul leeftijd, lengte, gewicht en streefgewicht in.");return}
  data.profile=vals;data.weights=data.weights.filter(x=>x.date!==today());data.weights.push({date:today(),weight:vals.weight});save();render();alert("Doel berekend en profiel opgeslagen.")
 }
+function renderFood(){
+ renderCustom();
+ renderRecipes();
+}
+function openNewProduct(){
+ tab("food",document.querySelectorAll(".tabs button")[2]);
+ setTimeout(()=>openModal("foodModal"),0);
+}
+function openNewRecipe(){
+ tab("food",document.querySelectorAll(".tabs button")[2]);
+ setTimeout(()=>openModal("recipeModal"),0);
+}
 function renderSettings(){
  let p=data.profile;["age","height","weight","goalWeight","sex","activity","rate"].forEach(id=>{if(p[id]!=null)document.getElementById(id).value=p[id]});
  let c=calc();document.getElementById("goalExplanation").innerHTML=c?`BMR: <b>${Math.round(c.bmr)} kcal</b> • geschat onderhoud: <b>${Math.round(c.tdee)} kcal/dag</b> • rekenkundig tekort: <b>${Math.round(c.def)} kcal/dag</b> • calorie-doel: <b>${c.target} kcal/dag</b>.<br><span class="tiny">Het doel wordt automatisch opnieuw berekend wanneer je je actuele gewicht bijwerkt. De formule is Mifflin-St Jeor + activiteitsfactor. Werkelijke behoefte kan afwijken.</span>`:"Vul je profiel in om je persoonlijke doel te berekenen.";
- renderCustom();renderRecipes()
+
 }
 
 let editingCustomProduct = null;
@@ -470,7 +522,7 @@ function suggestRecipesToday(){
  let q=document.getElementById("recipeSearchToday").value.toLowerCase().trim();
  if(q!==selectedRecipeToday)selectedRecipeToday="";
  let box=document.getElementById("recipeSuggestionsToday"),keys=Object.keys(data.recipes).filter(k=>!q||k.includes(q)).sort().slice(0,10);
- box.innerHTML=keys.length?keys.map(k=>{let r=data.recipes[k],ps=r.perServing||{kcal:r.kcal};return `<div class="suggestion" onclick="selectRecipeToday('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${Math.round(ps.kcal)} kcal per portie</div></div>`}).join(""):'<div class="suggestion">Geen opgeslagen recepten gevonden.</div>';
+ box.innerHTML=keys.length?keys.map(k=>{let r=data.recipes[k],ps=r.perServing||{kcal:r.kcal};return `<div class="suggestion" onclick="selectRecipeToday('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${Math.round(ps.kcal)} kcal per portie</div></div>`}).join(""):'<div class="suggestion" onclick="openNewRecipe()">Geen opgeslagen recepten gevonden. Maak een nieuw recept in Voeding.</div>';
  box.classList.remove("hidden");
 }
 function selectRecipeToday(n){
@@ -538,7 +590,14 @@ function drawChart(){
 }
 function exportData(){let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="calorietracker-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={profile:{},days:{},weights:[],custom:{},recipes:{},...JSON.parse(r.result)};save();render();alert("Back-up geïmporteerd.")}catch(x){alert("Dit is geen geldige CalorieTracker-back-up.")}};r.readAsText(f)}
-function tab(id,btn){["today","history","settings"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="history")renderHistory();if(id==="settings")renderSettings()}
+function tab(id,btn){
+ ["today","history","food","settings"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));
+ document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+ if(btn)btn.classList.add("active");
+ if(id==="history")renderHistory();
+ if(id==="food")renderFood();
+ if(id==="settings")renderSettings();
+}
 function openModal(id){
  document.getElementById(id).classList.remove("hidden");
  if(id==="foodModal"){resetCustomEditor()}
@@ -552,7 +611,7 @@ function closeModal(id){
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 
-/* CalorieTracker 4.3.1 — portion system */
+/* CalorieTracker 4.4.0 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},
@@ -623,7 +682,7 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.3.1';
+const APP_VERSION='4.4.0';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
