@@ -38,7 +38,7 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.4.1';
+const APP_VERSION='4.4.2';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -82,7 +82,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.4.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.4.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -202,7 +202,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.1</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.2</b></div>
 
   </div>
 
@@ -218,7 +218,7 @@ function updateRecipeLineCalorie(i){
   </div>
   <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
   <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
- </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">De app gebruikt alleen lokale browseropslag. Er worden geen voedings- of profielgegevens naar een server gestuurd. Met een back-up kun je het bestand bewaren in iCloud Drive en later terugzetten.</p><div class="actions"><button class="secondary" onclick="exportData()">Back-up exporteren</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up importeren</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div></div></section>
+ </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt deze gegevens niet naar een server. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
 </main>
 
 <nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('food',this)">Voeding</button><button onclick="tab('settings',this)">Instellingen</button></nav>
@@ -590,6 +590,77 @@ function drawChart(){
  let pts=a.map((x,i)=>[pad+i*sx,h-pad-(x.weight-min)*sy]);if(data.profile.goalWeight){let gy=h-pad-(data.profile.goalWeight-min)*sy;svg.innerHTML+=`<line x1="${pad}" y1="${gy}" x2="${w-pad}" y2="${gy}" stroke="#98a2b3" stroke-dasharray="5 5"/>`}
  svg.innerHTML+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2563eb" stroke-width="4"/>`;pts.forEach((p,i)=>svg.innerHTML+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#2563eb"/><text x="${p[0]}" y="${h-7}" text-anchor="middle" font-size="10" fill="#667085">${a[i].date.slice(5)}</text>`)
 }
+function appDataShape(d){
+  return d && typeof d==='object' && (d.profile||d.days||d.weights||d.custom||d.recipes);
+}
+function appDataStats(d){
+  if(!appDataShape(d)) return null;
+  const days=d.days&&typeof d.days==='object'?Object.keys(d.days).length:0;
+  const weights=Array.isArray(d.weights)?d.weights.length:0;
+  const custom=d.custom&&typeof d.custom==='object'?Object.keys(d.custom).length:0;
+  const recipes=d.recipes&&typeof d.recipes==='object'?Object.keys(d.recipes).length:0;
+  return {days,weights,custom,recipes};
+}
+function storageKeyInfo(){
+  const found=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i); if(!key) continue;
+    const raw=localStorage.getItem(key); let parsed=null;
+    try{parsed=JSON.parse(raw)}catch(e){}
+    const stats=appDataStats(parsed);
+    if(stats) found.push({key,stats,size:raw?raw.length:0,current:key==='calorieTrackerV2'});
+  }
+  return found;
+}
+function formatStats(st){return `${st.days} dagen · ${st.weights} gewichten · ${st.custom} eigen producten · ${st.recipes} recepten`}
+function inspectStorage(){
+  const el=document.getElementById('storageDiagnostics'), status=document.getElementById('storageActionStatus');
+  if(!el)return;
+  const found=storageKeyInfo();
+  const current=found.find(x=>x.current);
+  const candidates=found.filter(x=>!x.current);
+  let html=`<b>Huidige opslag:</b> <code>calorieTrackerV2</code><br>${current?formatStats(current.stats):'Geen gegevens gevonden.'}`;
+  if(candidates.length){
+    html+=`<br><br><b>Andere CalorieTracker-opslagen gevonden:</b>`;
+    candidates.forEach((x,i)=>{
+      html+=`<div style="margin-top:8px;padding:9px;background:#fff;border:1px solid var(--line);border-radius:10px"><code>${esc(x.key)}</code><br><span class="tiny">${formatStats(x.stats)} · ${Math.round(x.size/1024)} KB</span><br><button class="secondary" style="margin-top:6px" onclick="mergeStorageKey(${i})">Samenvoegen met huidige gegevens</button></div>`;
+    });
+    window._storageCandidates=candidates;
+  } else {
+    html+=`<br><span class="tiny">Geen tweede CalorieTracker-dataset in deze websiteopslag gevonden.</span>`;
+    window._storageCandidates=[];
+  }
+  el.innerHTML=html;
+  if(status) status.textContent=`Gecontroleerd: ${found.length} CalorieTracker-dataset${found.length===1?'':'s'} gevonden in deze websiteopslag.`;
+}
+function mergeStorageKey(index){
+  const candidate=window._storageCandidates&&window._storageCandidates[index]; if(!candidate)return;
+  let incoming=null; try{incoming=JSON.parse(localStorage.getItem(candidate.key)||'null')}catch(e){}
+  if(!appDataShape(incoming))return;
+  if(!confirm(`De gegevens uit “${candidate.key}” worden toegevoegd aan de huidige gegevens. Bestaande dagen, gewichten, producten en recepten worden niet overschreven. Doorgaan?`))return;
+  const before=JSON.parse(JSON.stringify(data));
+  const merged={...data};
+  merged.profile={...incoming.profile,...data.profile};
+  merged.days={...(incoming.days||{}),...(data.days||{})};
+  merged.weights=[...(incoming.weights||[]),...(data.weights||[])];
+  const wm=new Map(); merged.weights.forEach(x=>{if(x&&x.date)wm.set(x.date,x)}); merged.weights=[...wm.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  merged.custom={...(incoming.custom||{}),...(data.custom||{})};
+  merged.recipes={...(incoming.recipes||{}),...(data.recipes||{})};
+  data=merged; save(); render(); inspectStorage();
+  const st=appDataStats(data); document.getElementById('storageActionStatus').textContent=`Samengevoegd. Huidige gegevens: ${formatStats(st)}.`;
+}
+function exportStorageSnapshot(){
+  const snapshot={app:'CalorieTracker',version:APP_VERSION,exportedAt:new Date().toISOString(),origin:location.origin,storage:{}};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k)continue;let raw=localStorage.getItem(k);let v=raw;try{v=JSON.parse(raw)}catch(e){}snapshot.storage[k]=v}
+  const b=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`calorietracker-opslag-${APP_VERSION}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+async function clearAppCaches(){
+  const status=document.getElementById('storageActionStatus');
+  if(!('caches' in window)){if(status)status.textContent='Cachebeheer wordt door deze browser niet beschikbaar gesteld.';return}
+  const keys=await caches.keys(); const old=keys.filter(k=>k.startsWith('calorietracker-')&&k!==`calorietracker-${APP_VERSION}`);
+  await Promise.all(old.map(k=>caches.delete(k)));
+  if(status)status.textContent=old.length?`${old.length} oude app-cache${old.length===1?'':'s'} verwijderd. Je voedingsgegevens zijn hierbij niet verwijderd.`:'Er waren geen oude CalorieTracker-caches om te verwijderen.';
+}
 function exportData(){let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="calorietracker-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={profile:{},days:{},weights:[],custom:{},recipes:{},...JSON.parse(r.result)};save();render();alert("Back-up geïmporteerd.")}catch(x){alert("Dit is geen geldige CalorieTracker-back-up.")}};r.readAsText(f)}
 function tab(id,btn){
@@ -611,9 +682,9 @@ function closeModal(id){
  if(id==="recipeModal")resetRecipeEditor();
 }
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
-render();renderSettings();
+render();renderSettings();inspectStorage();
 
-/* CalorieTracker 4.4.1 — portion system */
+/* CalorieTracker 4.4.2 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},

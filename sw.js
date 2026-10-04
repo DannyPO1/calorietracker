@@ -1,4 +1,4 @@
-const APP_VERSION="4.4.1";
+const APP_VERSION="4.4.2";
 const CACHE="calorietracker-"+APP_VERSION;
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
