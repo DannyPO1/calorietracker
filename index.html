@@ -7,22 +7,26 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CalorieTracker">
+<link rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <title>CalorieTracker</title>
 <style>
 :root{--bg:#f6f5ef;--card:#fffdf8;--text:#17231c;--muted:#68746d;--line:#e3e7df;--accent:#236b45;--accent-dark:#183b2b;--accent-soft:#e8f2eb;--green:#2f855a;--red:#c2413b;--amber:#c77a22;--cream:#f4f0e4;--shadow:0 6px 24px rgba(24,59,43,.07)}
 
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7f5ee 0%,var(--bg) 35%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;padding-bottom:92px}
-header{background:linear-gradient(135deg,#183b2b 0%,#24563b 100%);color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(24,59,43,.18)}
+header{background:linear-gradient(135deg,#183b2b 0%,#24563b 100%);color:#fff;padding:18px 17px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(24,59,43,.18)}
 .themeSwitch{position:relative;width:54px;height:30px;padding:0;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 2px rgba(0,0,0,.12);flex:0 0 auto}
 .themeSwitch .trackIcon{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;line-height:1;color:#fff;transition:opacity .2s}.themeSwitch .moon{left:8px}.themeSwitch .sun{right:8px}
 .themeSwitch .knob{position:absolute;left:4px;top:4px;width:20px;height:20px;border-radius:50%;background:#fffdf8;box-shadow:0 2px 7px rgba(0,0,0,.22);transition:transform .22s ease,background .22s ease}
 .headerMeta{display:flex;align-items:center;gap:9px}.headerMeta .versionStack{text-align:right}.headerMeta .versionStack .major{display:block;font-size:10px;color:#b8cbbf}.headerMeta .versionStack .full{display:block;font-size:11px;color:#d7e5dc}
-header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#d7e5dc;font-size:12px}
+header h1{font-size:23px;margin:0}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}.brandLogo{width:42px;height:42px;border-radius:12px;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.18);flex:0 0 auto}.brandTitle{min-width:0}header p{margin:4px 0 0;color:#d7e5dc;font-size:12px}
 
 /* Premium dark theme */
 html[data-theme="dark"]{color-scheme:dark;--bg:#0f1713;--card:#17211b;--text:#edf4ef;--muted:#a8b7ae;--line:#2a3931;--accent:#56b87d;--accent-dark:#0b2016;--accent-soft:#20372b;--green:#63c98c;--red:#f07870;--amber:#e8a64d;--cream:#18241d;--shadow:0 8px 28px rgba(0,0,0,.28)}
 html[data-theme="dark"] body{background:linear-gradient(180deg,#0c120f 0%,var(--bg) 38%)}
 html[data-theme="dark"] header{background:linear-gradient(135deg,#0a2116 0%,#123a26 100%);box-shadow:0 5px 22px rgba(0,0,0,.28)}
+html[data-theme="dark"] .brandLogo{box-shadow:0 3px 12px rgba(0,0,0,.35)}
 html[data-theme="dark"] input,html[data-theme="dark"] select{background:#111a15;border-color:#34453b;color:var(--text)}
 html[data-theme="dark"] .calorieHero{background:linear-gradient(145deg,#17211b,#1c2d23);border-color:#304239}
 html[data-theme="dark"] .calorieRing{background:conic-gradient(var(--accent) var(--pct,0%),#2b3c32 0);box-shadow:inset 0 0 0 1px rgba(86,184,125,.12)}
@@ -127,7 +131,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='4.5.4';
+const APP_VERSION='4.5.5';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -195,7 +199,7 @@ function updateRecipeLineCalorie(i){
 }
 </script></head>
 <body>
-<header><div class="row between"><h1>CalorieTracker</h1><div class="headerMeta"><button id="themeToggle" class="themeSwitch" type="button" aria-label="Donker thema inschakelen" aria-pressed="false" onclick="toggleTheme()"><span class="trackIcon moon">☾</span><span class="trackIcon sun">☼</span><span class="knob"></span></button><span class="versionStack"><span class="major">v4</span><span id="headerVersion" class="full"></span></span></div></div><p>Privé • lokaal opgeslagen • geen account nodig</p></header>
+<header><div class="row between"><div class="brand"><img class="brandLogo" src="./icon-192.png" alt="CalorieTracker logo"><div class="brandTitle"><h1>CalorieTracker</h1></div></div><div class="headerMeta"><button id="themeToggle" class="themeSwitch" type="button" aria-label="Donker thema inschakelen" aria-pressed="false" onclick="toggleTheme()"><span class="trackIcon moon">☾</span><span class="trackIcon sun">☼</span><span class="knob"></span></button><span class="versionStack"><span class="major">v4</span><span id="headerVersion" class="full"></span></span></div></div><p>Privé • lokaal opgeslagen • geen account nodig</p></header>
 <main>
 
 <section id="today">
