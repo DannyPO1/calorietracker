@@ -101,9 +101,23 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .foodItemInfo small{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
 .foodItemActions{width:146px;display:flex;flex-direction:column;gap:7px;align-items:stretch}
 .foodItemActions button{width:146px;min-height:44px;padding:10px 8px;white-space:nowrap}
+.barcodeButton{margin-top:8px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.barcodeIcon{font-size:17px;line-height:1}
+.scannerWrap{background:#0b120e;border-radius:18px;overflow:hidden;border:1px solid var(--line);min-height:250px}
+#barcodeReader{width:100%;min-height:250px}
+#barcodeReader video{width:100%!important;border-radius:18px;object-fit:cover}
+#barcodeReader__scan_region{border:0!important}
+.scannerHint{padding:10px 12px;border-radius:13px;background:var(--accent-soft);color:var(--text);font-size:12px}
+.barcodeProductCard{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center}
+.barcodeProductCard img{width:64px;height:64px;border-radius:12px;object-fit:cover;background:#eef2ed}
+.barcodeProductCard .barcodeNoImage{width:64px;height:64px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-size:24px}
+.barcodeMeta{font-size:11px;color:var(--muted);line-height:1.5}
+.barcodeActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:560px){.barcodeActions{grid-template-columns:1fr}.scannerWrap,#barcodeReader{min-height:230px}}
 @media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) 132px;gap:12px}.foodItemActions,.foodItemActions button{width:132px}.foodItemActions button{min-height:42px;padding:9px 6px;font-size:14px}}
 
 </style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
 <script>
 const DB_EXPANDED = {"banaan":{kcal:89,p:1.1,c:23,f:0.3,unit:"g"},"appel":{kcal:52,p:0.3,c:14,f:0.2,unit:"g"},"peer":{kcal:57,p:0.4,c:15,f:0.1,unit:"g"},"sinaasappel":{kcal:47,p:0.9,c:12,f:0.1,unit:"g"},"mandarijn":{kcal:53,p:0.8,c:13,f:0.3,unit:"g"},"kiwi":{kcal:61,p:1.1,c:15,f:0.5,unit:"g"},"aardbeien":{kcal:32,p:0.7,c:7.7,f:0.3,unit:"g"},"druiven":{kcal:69,p:0.7,c:18,f:0.2,unit:"g"},"mango":{kcal:60,p:0.8,c:15,f:0.4,unit:"g"},"ananas":{kcal:50,p:0.5,c:13,f:0.1,unit:"g"},"perzik":{kcal:39,p:0.9,c:10,f:0.3,unit:"g"},"nectarine":{kcal:44,p:1.1,c:11,f:0.3,unit:"g"},"blauwe bessen":{kcal:57,p:0.7,c:14,f:0.3,unit:"g"},"frambozen":{kcal:52,p:1.2,c:12,f:0.7,unit:"g"},"watermeloen":{kcal:30,p:0.6,c:8,f:0.2,unit:"g"},"avocado":{kcal:160,p:2,c:8.5,f:14.7,unit:"g"},"tomaat":{kcal:18,p:0.9,c:3.9,f:0.2,unit:"g"},"komkommer":{kcal:15,p:0.7,c:3.6,f:0.1,unit:"g"},"paprika":{kcal:31,p:1,c:6,f:0.3,unit:"g"},"ui":{kcal:40,p:1.1,c:9.3,f:0.1,unit:"g"},"rode ui":{kcal:40,p:1.1,c:9.3,f:0.1,unit:"g"},"knoflook":{kcal:149,p:6.4,c:33,f:0.5,unit:"g"},"wortel":{kcal:41,p:0.9,c:10,f:0.2,unit:"g"},"broccoli":{kcal:34,p:2.8,c:7,f:0.4,unit:"g"},"bloemkool":{kcal:25,p:1.9,c:5,f:0.3,unit:"g"},"spinazie":{kcal:23,p:2.9,c:3.6,f:0.4,unit:"g"},"courgette":{kcal:17,p:1.2,c:3.1,f:0.3,unit:"g"},"champignons":{kcal:22,p:3.1,c:3.3,f:0.3,unit:"g"},"ijsbergsla":{kcal:14,p:0.9,c:3,f:0.1,unit:"g"},"sla":{kcal:15,p:1.4,c:2.9,f:0.2,unit:"g"},"mais":{kcal:86,p:3.2,c:19,f:1.2,unit:"g"},"doperwten":{kcal:81,p:5.4,c:14.5,f:0.4,unit:"g"},"boerenkool":{kcal:49,p:4.3,c:9,f:0.9,unit:"g"},"sperziebonen":{kcal:31,p:1.8,c:7,f:0.2,unit:"g"},"zoete aardappel":{kcal:86,p:1.6,c:20,f:0.1,unit:"g"},"kipfilet":{kcal:110,p:23,c:0,f:1.5,unit:"g"},"kipdij":{kcal:177,p:18,c:0,f:11,unit:"g"},"kipgehakt":{kcal:170,p:19,c:0,f:10,unit:"g"},"rundergehakt":{kcal:250,p:26,c:0,f:16,unit:"g"},"mager rundergehakt":{kcal:172,p:21,c:0,f:10,unit:"g"},"biefstuk":{kcal:200,p:26,c:0,f:10,unit:"g"},"hamburger":{kcal:250,p:17,c:5,f:18,unit:"g"},"kipburger":{kcal:210,p:16,c:10,f:12,unit:"g"},"kipnuggets":{kcal:260,p:15,c:18,f:15,unit:"g"},"kiprookworst":{kcal:250,p:14,c:2,f:20,unit:"g"},"zalm":{kcal:208,p:20,c:0,f:13,unit:"g"},"tonijn uit blik op water":{kcal:116,p:26,c:0,f:1,unit:"g"},"kabeljauw":{kcal:82,p:18,c:0,f:0.7,unit:"g"},"garnalen":{kcal:99,p:24,c:0,f:0.3,unit:"g"},"ei":{kcal:143,p:12.6,c:0.7,f:9.5,unit:"g"},"ei M":{kcal:143,p:12.6,c:0.7,f:9.5,unit:"g"},"ei L":{kcal:143,p:12.6,c:0.7,f:9.5,unit:"g"},"magere kwark":{kcal:59,p:10,c:3.5,f:0.2,unit:"g"},"volle kwark":{kcal:120,p:8,c:4.5,f:8,unit:"g"},"skyr":{kcal:63,p:11,c:4,f:0.2,unit:"g"},"griekse yoghurt":{kcal:120,p:6,c:4,f:9,unit:"g"},"yoghurt mager":{kcal:41,p:4.3,c:5.2,f:0.1,unit:"g"},"melk halfvol":{kcal:47,p:3.4,c:4.8,f:1.5,unit:"ml"},"melk vol":{kcal:64,p:3.5,c:4.8,f:3.5,unit:"ml"},"karnemelk":{kcal:37,p:3.4,c:4.8,f:0.5,unit:"ml"},"kaas 48+":{kcal:356,p:25,c:0,f:29,unit:"g"},"mozzarella":{kcal:280,p:28,c:3,f:17,unit:"g"},"feta":{kcal:264,p:14,c:4,f:21,unit:"g"},"roomboter":{kcal:717,p:0.9,c:0.1,f:81,unit:"g"},"halvarine":{kcal:360,p:0,c:0,f:40,unit:"g"},"brood":{kcal:250,p:9,c:47,f:3.2,unit:"g"},"volkorenbrood":{kcal:235,p:9,c:40,f:3.5,unit:"g"},"witbrood":{kcal:265,p:9,c:49,f:3.2,unit:"g"},"krentenbol":{kcal:290,p:8,c:55,f:4,unit:"g"},"croissant":{kcal:406,p:8,c:46,f:21,unit:"g"},"beschuit":{kcal:380,p:11,c:75,f:3,unit:"g"},"rijstwafel":{kcal:387,p:8,c:81,f:3,unit:"g"},"havermout":{kcal:389,p:16.9,c:66,f:6.9,unit:"g"},"muesli":{kcal:370,p:10,c:65,f:7,unit:"g"},"cornflakes":{kcal:357,p:7,c:84,f:0.4,unit:"g"},"wrap":{kcal:310,p:8,c:52,f:8,unit:"g"},"volkoren wrap":{kcal:300,p:9,c:48,f:7,unit:"g"},"paratha":{kcal:320,p:7,c:44,f:12,unit:"g"},"rijst gekookt":{kcal:130,p:2.7,c:28,f:0.3,unit:"g"},"zilvervliesrijst gekookt":{kcal:123,p:2.7,c:25.6,f:1,unit:"g"},"basmatirijst gekookt":{kcal:130,p:2.7,c:28,f:0.3,unit:"g"},"pasta gekookt":{kcal:158,p:5.8,c:30.9,f:0.9,unit:"g"},"spaghetti gekookt":{kcal:158,p:5.8,c:31,f:0.9,unit:"g"},"couscous gekookt":{kcal:112,p:3.8,c:23,f:0.2,unit:"g"},"aardappel gekookt":{kcal:87,p:1.9,c:20,f:0.1,unit:"g"},"aardappelpuree":{kcal:100,p:2,c:16,f:3,unit:"g"},"friet":{kcal:312,p:3.4,c:41,f:15,unit:"g"},"kikkererwten gekookt":{kcal:164,p:8.9,c:27.4,f:2.6,unit:"g"},"linzen gekookt":{kcal:116,p:9,c:20,f:0.4,unit:"g"},"kidneybonen gekookt":{kcal:127,p:8.7,c:23,f:0.5,unit:"g"},"witte bonen gekookt":{kcal:114,p:7.7,c:21,f:0.5,unit:"g"},"pindakaas":{kcal:588,p:25,c:20,f:50,unit:"g"},"amandelen":{kcal:579,p:21,c:22,f:50,unit:"g"},"walnoten":{kcal:654,p:15,c:14,f:65,unit:"g"},"cashewnoten":{kcal:553,p:18,c:30,f:44,unit:"g"},"hazelnoten":{kcal:628,p:15,c:17,f:61,unit:"g"},"olijfolie":{kcal:884,p:0,c:0,f:100,unit:"g"},"zonnebloemolie":{kcal:884,p:0,c:0,f:100,unit:"g"},"mayonaise":{kcal:680,p:1,c:2,f:75,unit:"g"},"ketchup":{kcal:100,p:1.2,c:23,f:0.1,unit:"g"},"chilisaus":{kcal:220,p:0.5,c:53,f:0.5,unit:"g"},"sojasaus":{kcal:53,p:8,c:5,f:0.6,unit:"g"},"pesto":{kcal:450,p:6,c:6,f:43,unit:"g"},"pure chocolade":{kcal:600,p:8,c:46,f:43,unit:"g"},"melkchocolade":{kcal:535,p:8,c:59,f:30,unit:"g"},"drop":{kcal:330,p:5,c:78,f:0.2,unit:"g"},"chips":{kcal:530,p:6,c:53,f:31,unit:"g"},"popcorn":{kcal:387,p:13,c:78,f:4.5,unit:"g"},"honing":{kcal:304,p:0.3,c:82,f:0,unit:"g"},"jam":{kcal:250,p:0.4,c:63,f:0.1,unit:"g"},"cola":{kcal:42,p:0,c:10.6,f:0,unit:"ml"},"cola zero":{kcal:0.2,p:0,c:0,f:0,unit:"ml"},"fanta":{kcal:43,p:0,c:10.5,f:0,unit:"ml"},"sinas":{kcal:45,p:0,c:11,f:0,unit:"ml"},"appelsap":{kcal:46,p:0.1,c:11,f:0.1,unit:"ml"},"sinaasappelsap":{kcal:45,p:0.7,c:10,f:0.2,unit:"ml"},"koffie":{kcal:2,p:0.3,c:0,f:0,unit:"ml"},"thee":{kcal:1,p:0,c:0,f:0,unit:"ml"}};
@@ -131,7 +145,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='4.5.5';
+const APP_VERSION='4.6.0';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -175,7 +189,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.5.4"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.6.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -238,6 +252,7 @@ function updateRecipeLineCalorie(i){
   <div style="margin-top:14px">
    <label>Bestaand product toevoegen</label>
    <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
+   <button class="secondary barcodeButton" type="button" onclick="openBarcodeScanner()"><span class="barcodeIcon">▦</span> Barcode scannen</button>
    <div class="grid">
     <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
     <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
@@ -305,11 +320,11 @@ function updateRecipeLineCalorie(i){
     <h2>Over CalorieTracker</h2>
     <div class="item"><span>Versie</span><b id="appVersion"></b></div>
     <div class="item"><span>Uitgebracht</span><span>4 oktober 2026</span></div>
-    <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p><p class="muted"><b>Voedingsdatabase:</b> 118 standaardproducten met gangbare porties.</p>
+    <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p><p class="muted"><b>Voedingsdatabase:</b> standaardproducten + je eigen producten. Een gescand product wordt na bevestiging automatisch toegevoegd aan je eigen database.</p>
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.5.1</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.6.0</b></div>
 
   </div>
 
@@ -325,13 +340,27 @@ function updateRecipeLineCalorie(i){
   </div>
   <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
   <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
- </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt deze gegevens niet naar een server. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
+ </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt je geregistreerde voedingsgegevens niet naar een server. Bij een barcode-scan wordt alleen de barcode naar Open Food Facts gestuurd om productgegevens op te halen. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
 </main>
 
 <nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('food',this)">Voeding</button><button onclick="tab('settings',this)">Instellingen</button></nav>
 
 <div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
 
+
+<div id="barcodeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:90;padding:14px;overflow:auto">
+  <div class="card" style="max-width:600px;margin:20px auto">
+    <div class="row between"><div><h2>Barcode scannen</h2><p class="muted" style="margin:0">Richt je camera op de EAN-streepjescode.</p></div><button class="ghost" type="button" onclick="closeBarcodeScanner()">Sluiten</button></div>
+    <div id="barcodeScannerStatus" class="notice" style="margin-top:12px">Camera wordt voorbereid…</div>
+    <div class="scannerWrap" style="margin-top:12px"><div id="barcodeReader"></div></div>
+    <div id="barcodeResult" style="margin-top:12px"></div>
+    <div class="card" style="padding:14px;margin-top:12px;margin-bottom:0;background:var(--cream)">
+      <label>Barcode handmatig invoeren</label>
+      <div class="row"><input id="manualBarcode" inputmode="numeric" autocomplete="off" placeholder="Bijv. 8710398524006"><button class="secondary" type="button" onclick="lookupManualBarcode()">Opzoeken</button></div>
+      <p class="tiny" style="margin:8px 0 0">Werkt de camera niet, dan kun je het EAN-nummer van de verpakking hier invullen.</p>
+    </div>
+  </div>
+</div>
 
 <div id="importModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:100;padding:20px;overflow:auto">
   <div class="card" style="max-width:500px;margin:20vh auto 0">
@@ -583,12 +612,171 @@ function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function today(){return new Date().toISOString().slice(0,10)}
 function activeDate(){return document.getElementById("entryDate").value||today()}
 function allProducts(){return {...BASE,...data.custom}}
+function isCustomProduct(name){return !!(data.custom && data.custom[name])}
 function product(name){let ps=allProducts(),n=name.toLowerCase().trim();if(ps[n])return [n,ps[n]];let keys=Object.keys(ps);let exact=keys.find(k=>k===n);if(exact)return [exact,ps[exact]];let hits=keys.filter(k=>k.includes(n)||n.includes(k));return hits.length?[hits[0],ps[hits[0]]]:null}
+function productSearchLabel(name){return `${productSearchCalorieLabel(name)}${isCustomProduct(name)?' · <b>Eigen product</b>':''}`}
 function suggestProducts(){
  let q=document.getElementById("productSearch").value.toLowerCase().trim(), box=document.getElementById("suggestions"), keys=Object.keys(allProducts());
  if(!q){box.classList.add("hidden");return}
- let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchCalorieLabel(k)}</div></div>`).join(""):`<div class="suggestion" onclick="openNewProduct()">Geen match. Maak een eigen product in Voeding.</div>`;box.classList.remove("hidden")
+ let hits=keys.filter(k=>k.includes(q));
+ hits.sort((a,b)=>Number(isCustomProduct(b))-Number(isCustomProduct(a)) || a.localeCompare(b,'nl'));
+ hits=hits.slice(0,10);
+ box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchLabel(k)}</div></div>`).join(""):`<div class="suggestion" onclick="openNewProduct()">Geen match. Maak een eigen product in Voeding.</div>`;box.classList.remove("hidden")
 }
+let barcodeScanner=null;
+let scannedBarcodeProduct=null;
+let pendingBarcodeForCustom=null;
+let barcodeLookupBusy=false;
+function normalizeBarcode(value){return String(value||'').replace(/\D/g,'').trim()}
+function findCustomByBarcode(code){
+  code=normalizeBarcode(code);
+  if(!code)return null;
+  const key=Object.keys(data.custom||{}).find(n=>String(data.custom[n]?.barcode||'')===code);
+  return key?{name:key,value:data.custom[key]}:null;
+}
+function openBarcodeScanner(){
+  document.getElementById('barcodeModal').classList.remove('hidden');
+  document.getElementById('barcodeResult').innerHTML='';
+  document.getElementById('manualBarcode').value='';
+  scannedBarcodeProduct=null;
+  setBarcodeStatus('Camera wordt voorbereid…');
+  setTimeout(startBarcodeScanner,120);
+}
+async function startBarcodeScanner(){
+  if(barcodeScanner){try{await barcodeScanner.stop();}catch(e){} barcodeScanner=null;}
+  const status=document.getElementById('barcodeScannerStatus');
+  if(typeof Html5Qrcode==='undefined'){
+    setBarcodeStatus('De scannerbibliotheek is nog niet geladen. Gebruik hieronder eventueel het EAN-nummer handmatig.');
+    return;
+  }
+  try{
+    barcodeScanner=new Html5Qrcode('barcodeReader',{formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E]});
+    await barcodeScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:280,height:150},aspectRatio:1.777778},onBarcodeDetected,()=>{});
+    setBarcodeStatus('Scanner actief. Houd de barcode binnen het kader.');
+  }catch(e){
+    setBarcodeStatus('Camera kon niet worden gestart. Controleer of je camera-toegang hebt toegestaan, of gebruik handmatige invoer.');
+    console.warn('Barcode scanner start failed',e);
+  }
+}
+async function onBarcodeDetected(decodedText){
+  const code=normalizeBarcode(decodedText);
+  if(!code || barcodeLookupBusy)return;
+  barcodeLookupBusy=true;
+  setBarcodeStatus('Barcode gevonden: '+code+' — product wordt opgezocht…');
+  try{if(barcodeScanner){await barcodeScanner.stop();barcodeScanner.clear();barcodeScanner=null;}}catch(e){}
+  await lookupBarcode(code);
+  barcodeLookupBusy=false;
+}
+async function lookupManualBarcode(){
+  const code=normalizeBarcode(document.getElementById('manualBarcode').value);
+  if(!code){setBarcodeStatus('Vul een geldige barcode in.');return;}
+  if(barcodeScanner){try{await barcodeScanner.stop();barcodeScanner.clear();}catch(e){} barcodeScanner=null;}
+  await lookupBarcode(code);
+}
+function setBarcodeStatus(text,kind='notice'){
+  const el=document.getElementById('barcodeScannerStatus');
+  if(el)el.className='notice '+kind,el.textContent=text;
+}
+function barcodeValue(n, fallback=0){const v=Number(n);return Number.isFinite(v)?v:fallback}
+async function lookupBarcode(code){
+  code=normalizeBarcode(code);
+  if(!code)return;
+  const local=findCustomByBarcode(code);
+  if(local){
+    scannedBarcodeProduct={barcode:code,name:local.name,value:local.value,existing:true};
+    renderBarcodeProduct(scannedBarcodeProduct);
+    setBarcodeStatus('Dit product staat al in je eigen database. Je hoeft het niet opnieuw op te slaan.','success');
+    return;
+  }
+  setBarcodeStatus('Productgegevens ophalen uit Open Food Facts…');
+  try{
+    const fields='code,product_name,product_name_nl,generic_name,generic_name_nl,brands,nutriments,image_front_small_url';
+    const url='https://world.openfoodfacts.org/api/v3/product/'+encodeURIComponent(code)+'.json?lc=nl&cc=nl&fields='+encodeURIComponent(fields)+'&User-Agent='+encodeURIComponent('CalorieTracker/4.6.0');
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    if(Number(json.status)!==1 || !json.product){
+      scannedBarcodeProduct=null;
+      document.getElementById('barcodeResult').innerHTML='<div class="notice warn"><b>Product niet gevonden.</b><br>Dit barcodeproduct staat niet in Open Food Facts. Je kunt het hieronder handmatig als eigen product aanmaken.</div><div class="actions"><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Handmatig eigen product maken</button></div>';
+      setBarcodeStatus('Geen product gevonden voor deze barcode.','warn');
+      return;
+    }
+    const pr=json.product||{},n=pr.nutriments||{};
+    const isMl=n['energy-kcal_100ml']!=null || n['proteins_100ml']!=null || n['carbohydrates_100ml']!=null || n['fat_100ml']!=null;
+    const suffix=isMl?'_100ml':'_100g';
+    let kcal=barcodeValue(n['energy-kcal'+suffix],NaN);
+    if(!Number.isFinite(kcal)){const kj=barcodeValue(n['energy-kj'+suffix],NaN);if(Number.isFinite(kj))kcal=kj/4.184;}
+    const protein=barcodeValue(n['proteins'+suffix],NaN),carbs=barcodeValue(n['carbohydrates'+suffix],NaN),fat=barcodeValue(n['fat'+suffix],NaN);
+    if(!pr.product_name && !pr.product_name_nl || !Number.isFinite(kcal) || !Number.isFinite(protein) || !Number.isFinite(carbs) || !Number.isFinite(fat)){
+      document.getElementById('barcodeResult').innerHTML='<div class="notice warn"><b>Onvoldoende voedingsgegevens.</b><br>Open Food Facts kent deze barcode wel, maar niet genoeg voedingswaarden om hem betrouwbaar aan CalorieTracker toe te voegen.</div><div class="actions"><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Handmatig eigen product maken</button></div>';
+      setBarcodeStatus('Product gevonden, maar de voedingswaarden zijn onvolledig.','warn');
+      return;
+    }
+    const rawName=(pr.product_name_nl||pr.product_name||pr.generic_name_nl||pr.generic_name||'product').trim();
+    const brand=(pr.brands||'').split(',')[0].trim();
+    let name=rawName;
+    if(brand && !rawName.toLowerCase().includes(brand.toLowerCase()))name=brand+' '+rawName;
+    name=name.replace(/\s+/g,' ').trim().toLowerCase();
+    scannedBarcodeProduct={barcode:code,name,value:{kcal:Math.round(kcal*10)/10,p:Math.round(protein*10)/10,c:Math.round(carbs*10)/10,f:Math.round(fat*10)/10,u:isMl?'ml':'g',barcode:code,source:'openfoodfacts',brand:brand||'',image:pr.image_front_small_url||''},existing:false};
+    renderBarcodeProduct(scannedBarcodeProduct);
+    setBarcodeStatus('Product gevonden. Controleer de gegevens voordat je het opslaat.','success');
+  }catch(e){
+    console.warn('Open Food Facts lookup failed',e);
+    document.getElementById('barcodeResult').innerHTML='<div class="notice warn"><b>Opzoeken mislukt.</b><br>Controleer je internetverbinding of voer de barcode later opnieuw in.</div>';
+    setBarcodeStatus('Het product kon nu niet worden opgehaald.','warn');
+  }
+}
+function renderBarcodeProduct(result){
+  const v=result.value||{};
+  const image=v.image?`<img src="${esc(v.image)}" alt="" onerror="this.style.display='none'">`:'<div class="barcodeNoImage">🥗</div>';
+  const title=result.existing?'Product al opgeslagen':'Product gevonden';
+  document.getElementById('barcodeResult').innerHTML=`<div class="card" style="margin:0;padding:14px;background:var(--cream)"><div class="barcodeProductCard">${image}<div><div class="sectionKicker">${title}</div><b>${esc(result.name)}</b><div class="barcodeMeta">${v.brand?esc(v.brand)+' · ':''}${v.kcal} kcal / 100 ${v.u} · ${v.p} g eiwit · ${v.c} g koolhydraten · ${v.f} g vet<br>EAN ${esc(result.barcode)}</div></div></div><div class="barcodeActions" style="margin-top:12px">${result.existing?'<button class="primary" type="button" onclick="useScannedExistingProduct()">Gebruik product</button><button class="ghost" type="button" onclick="closeBarcodeScanner()">Klaar</button>':'<button class="primary" type="button" onclick="saveScannedProductAndUse()">Opslaan & gebruiken</button><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Gegevens aanpassen</button>'}</div></div>`;
+}
+function useScannedExistingProduct(){
+  if(!scannedBarcodeProduct)return;
+  closeBarcodeScanner();
+  selectProduct(scannedBarcodeProduct.name);
+  document.getElementById('productSearch').focus();
+  showSelected();
+}
+function saveScannedProductAndUse(){
+  if(!scannedBarcodeProduct || scannedBarcodeProduct.existing)return useScannedExistingProduct();
+  const r=scannedBarcodeProduct;
+  let n=r.name.toLowerCase().trim();
+  if(data.custom[n] && data.custom[n].barcode && String(data.custom[n].barcode)!==String(r.barcode)){
+    n=(r.value.brand ? (r.value.brand+' '+r.name) : (r.name+' '+r.barcode)).toLowerCase().trim();
+  }
+  data.custom[n]={...r.value};
+  save();
+  closeBarcodeScanner();
+  render();
+  selectProduct(n);
+  msg('Opgeslagen in je eigen productdatabase en geselecteerd. De volgende keer kun je het product gewoon zoeken.','success');
+}
+function openNewProductFromBarcode(){
+  if(!scannedBarcodeProduct)return openNewProduct();
+  const r=scannedBarcodeProduct;
+  pendingBarcodeForCustom=r.barcode||null;
+  closeBarcodeScanner();
+  tab('food',document.querySelectorAll('.tabs button')[2]);
+  setTimeout(()=>{
+    resetCustomEditor();
+    document.getElementById('newName').value=r.name||'';
+    document.getElementById('newKcal').value=r.value?.kcal||'';
+    document.getElementById('newUnit').value=r.value?.u||'g';
+    document.getElementById('newP').value=r.value?.p||0;
+    document.getElementById('newC').value=r.value?.c||0;
+    document.getElementById('newF').value=r.value?.f||0;
+    document.querySelector('#foodModal h2').textContent='Eigen product vanuit barcode';
+    document.querySelector('#foodModal .primary').textContent='Opslaan';
+    document.getElementById('foodModal').classList.remove('hidden');
+  },80);
+}
+async function closeBarcodeScanner(){
+  if(barcodeScanner){try{await barcodeScanner.stop();barcodeScanner.clear();}catch(e){} barcodeScanner=null;}
+  document.getElementById('barcodeModal').classList.add('hidden');
+}
+
 function portionOptions(productName){
  const key=productName.toLowerCase().trim();
  return (PORTIONS && PORTIONS[key]) ? PORTIONS[key] : [];
@@ -673,6 +861,7 @@ function renderFood(){
  renderRecipes();
 }
 function openNewProduct(){
+ pendingBarcodeForCustom=null;
  tab("food",document.querySelectorAll(".tabs button")[2]);
  setTimeout(()=>openModal("foodModal"),0);
 }
@@ -760,7 +949,11 @@ function saveCustom(){
    }
    delete data.custom[old];
  }
- data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value};
+ const previous=data.custom[n]||{};
+ const barcode=pendingBarcodeForCustom||previous.barcode||null;
+ const source=barcode ? (previous.source||'openfoodfacts') : previous.source;
+ data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value,...(barcode?{barcode,source}:{}),...(previous.brand?{brand:previous.brand}:{}),...(previous.image?{image:previous.image}:{})};
+ pendingBarcodeForCustom=null;
  save();
  closeModal("foodModal");
  resetCustomEditor();
@@ -770,7 +963,7 @@ function saveCustom(){
 function renderCustom(){
  let keys=Object.keys(data.custom).sort();
  document.getElementById("customList").innerHTML=keys.length?
- keys.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</small></div><div class="foodItemActions">
+ keys.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}${data.custom[n].barcode?` • barcode ${esc(data.custom[n].barcode)}`:''}${data.custom[n].source==='openfoodfacts'?' • Open Food Facts':''}</small></div><div class="foodItemActions">
  <button class="secondary" onclick="editCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button>
  <button class="danger" onclick="deleteCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button>
  </div></div>`).join("")
