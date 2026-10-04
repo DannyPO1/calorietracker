@@ -31,7 +31,7 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
 </style>
 <link rel="manifest" href="manifest.webmanifest"></head>
 <body>
-<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1">v4.0.0</span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
+<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1">v4.1.0</span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
 <main>
 
 <section id="today">
@@ -64,7 +64,8 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
  </div>
 
  <div class="card"><h2>Mijn recepten toevoegen</h2><label>Recept zoeken</label><div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div><div class="grid"><div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div><div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addRecipeFromToday()">Recept toevoegen</button></div></div><div id="recipeAddInfo" class="muted" style="margin-top:8px"></div></div>
- <div class="card"><h2 id="dayTitle">Vandaag</h2><div id="meals"></div></div>
+ <div class="card"><h2 id="dayTitle">Vandaag</h2><div id="meals"></div><div class="notice success" style="margin-top:10px"><b>Porties:</b> producten met een betrouwbare gemiddelde portiegrootte kunnen nu als stuk, snee, plak, eetlepel enz. worden ingevoerd. Gram/ml blijft beschikbaar voor nauwkeurige invoer.</div>
+</div>
 </section>
 
 <section id="history" class="hidden">
@@ -75,7 +76,7 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
 <section id="settings" class="hidden">
   <div class="card" id="aboutApp">
     <h2>Over CalorieTracker</h2>
-    <div class="item"><span>Versie</span><b id="appVersion">4.0.0</b></div>
+    <div class="item"><span>Versie</span><b id="appVersion">4.1.0</b></div>
     <div class="item"><span>Uitgebracht</span><span>4 oktober 2026</span></div>
     <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p>
   </div>
@@ -257,6 +258,76 @@ function openModal(id){document.getElementById(id).classList.remove("hidden");if
 function closeModal(id){document.getElementById(id).classList.add("hidden")}
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
+
+/* CalorieTracker 4.1.0 — portion system */
+const PORTIONS = {
+  "banaan": [
+    {label:"1 stuk (eetbaar)", grams:120},
+    {label:"½ stuk", grams:60}
+  ],
+  "ei": [
+    {label:"1 ei M", grams:50},
+    {label:"1 ei L", grams:60},
+    {label:"1 ei S", grams:40},
+    {label:"1 ei XL", grams:70}
+  ],
+  "ei M": [{label:"1 stuk", grams:50}],
+  "ei L": [{label:"1 stuk", grams:60}],
+  "ei S": [{label:"1 stuk", grams:40}],
+  "ei XL": [{label:"1 stuk", grams:70}],
+  "appel": [{label:"1 stuk (eetbaar)", grams:150}],
+  "sinaasappel": [{label:"1 stuk (eetbaar)", grams:130}],
+  "mandarijn": [{label:"1 stuk (eetbaar)", grams:80}],
+  "peer": [{label:"1 stuk (eetbaar)", grams:140}],
+  "kiwi": [{label:"1 stuk (eetbaar)", grams:75}],
+  "perzik": [{label:"1 stuk (eetbaar)", grams:130}],
+  "nectarine": [{label:"1 stuk (eetbaar)", grams:130}],
+  "aardappel gekookt": [{label:"1 middelgrote aardappel", grams:150}],
+  "avocado": [{label:"½ avocado (eetbaar)", grams:100}],
+  "wrap": [{label:"1 stuk", grams:60}],
+  "brood": [{label:"1 snee", grams:35}],
+  "kaas 48+": [{label:"1 plak", grams:20}],
+  "olijfolie": [
+    {label:"1 eetlepel", grams:10},
+    {label:"1 theelepel", grams:5}
+  ],
+  "pindakaas": [
+    {label:"1 eetlepel", grams:15},
+    {label:"1 theelepel", grams:5}
+  ],
+  "havermout": [{label:"1 eetlepel", grams:10}],
+  "rijst gekookt": [{label:"1 opscheplepel", grams:50}],
+  "zilvervliesrijst gekookt": [{label:"1 opscheplepel", grams:50}],
+  "pasta gekookt": [{label:"1 opscheplepel", grams:50}],
+  "doperwten": [{label:"1 opscheplepel", grams:50}],
+  "broccoli": [{label:"1 roosje", grams:20}],
+  "paprika": [{label:"½ paprika", grams:75}],
+  "ui": [{label:"½ ui", grams:50}]
+};
+
+function portionOptions(productName) {
+  const p = PORTIONS[productName] || [];
+  return p;
+}
+
+function kcalForPortion(productName, grams) {
+  const item = DB[productName];
+  return item ? item.kcal * Number(grams) / 100 : 0;
+}
+
+function getPortionText(productName, grams) {
+  const p = portionOptions(productName);
+  const exact = p.find(x => Math.abs(Number(x.grams) - Number(grams)) < 0.01);
+  return exact ? exact.label : `${grams} g`;
+}
+
+function buildAmountOptions(productName) {
+  const p = portionOptions(productName);
+  if (!p.length) return `<option value="g">gram</option>`;
+  return p.map(x => `<option value="${x.grams}">${x.label} (${x.grams} g)</option>`).join("") +
+         `<option value="g">Zelf gewicht invoeren (g)</option>`;
+}
+
 </script>
 <script>
 const APP_VERSION='4.0.0';
