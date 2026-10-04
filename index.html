@@ -38,7 +38,7 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION="4.2.3";
+const APP_VERSION="4.3.1";
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -82,7 +82,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.2.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.3.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -157,7 +157,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.2.3</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.3.1</b></div>
 
   </div>
 
@@ -184,6 +184,18 @@ function updateRecipeLineCalorie(i){
 <nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('settings',this)">Instellingen</button></nav>
 
 <div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
+
+
+<div id="confirmModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:100;padding:20px;overflow:auto">
+  <div class="card" style="max-width:480px;margin:25vh auto 0">
+    <h2 id="confirmTitle">Verwijderen?</h2>
+    <p id="confirmMessage" class="muted"></p>
+    <div class="actions" style="margin-top:18px">
+      <button class="ghost" onclick="closeConfirm()">Annuleren</button>
+      <button class="danger" id="confirmDeleteBtn">Verwijderen</button>
+    </div>
+  </div>
+</div>
 
 <div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:650px;margin:20px auto"><h2>Recept maken</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><div class="grid"><div><label>Aantal porties uit dit recept</label><input id="recipeServings" type="number" min="1" step="1" value="1"></div><div><label>Gebruik</label><div class="notice" style="margin-top:0">De app berekent totaal én per portie.</div></div></div><p class="muted">Zoek per ingrediënt een product, kies de suggestie en vul de hoeveelheid in. Eigen producten staan ook in de zoekresultaten.</p><div id="recipeBuilder"></div><div id="recipePreview" class="notice"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">+ Ingrediënt</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="ghost" onclick="closeModal('recipeModal')">Annuleren</button></div></div></div>
 
@@ -296,11 +308,109 @@ function renderSettings(){
  let c=calc();document.getElementById("goalExplanation").innerHTML=c?`BMR: <b>${Math.round(c.bmr)} kcal</b> • geschat onderhoud: <b>${Math.round(c.tdee)} kcal/dag</b> • rekenkundig tekort: <b>${Math.round(c.def)} kcal/dag</b> • calorie-doel: <b>${c.target} kcal/dag</b>.<br><span class="tiny">Het doel wordt automatisch opnieuw berekend wanneer je je actuele gewicht bijwerkt. De formule is Mifflin-St Jeor + activiteitsfactor. Werkelijke behoefte kan afwijken.</span>`:"Vul je profiel in om je persoonlijke doel te berekenen.";
  renderCustom();renderRecipes()
 }
-function saveCustom(){
- let n=document.getElementById("newName").value.trim().toLowerCase(),k=+document.getElementById("newKcal").value;if(!n||!k){alert("Naam en kcal zijn verplicht.");return}
- data.custom[n]={kcal:k,p:+newP.value||0,c:+newC.value||0,f:+newF.value||0,u:newUnit.value};save();closeModal("foodModal");render();selectProduct(n)
+
+let editingCustomProduct = null;
+let editingRecipeName = null;
+
+function editCustomProduct(n){
+  const v=data.custom[n];
+  if(!v)return;
+  editingCustomProduct=n;
+  document.getElementById("newName").value=n;
+  document.getElementById("newKcal").value=v.kcal;
+  document.getElementById("newUnit").value=v.u||"g";
+  document.getElementById("newP").value=v.p||0;
+  document.getElementById("newC").value=v.c||0;
+  document.getElementById("newF").value=v.f||0;
+  document.querySelector("#foodModal h2").textContent="Eigen product bewerken";
+  document.querySelector("#foodModal .primary").textContent="Wijzigingen opslaan";
+  document.getElementById("foodModal").classList.remove("hidden");
 }
-function renderCustom(){let keys=Object.keys(data.custom);document.getElementById("customList").innerHTML=keys.length?keys.map(n=>`<div class="item"><span>${esc(n)}</span><span>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</span></div>`).join(""):'<p class="muted">Nog geen eigen producten.</p>'}
+
+function resetCustomEditor(){
+  editingCustomProduct=null;
+  document.getElementById("newName").value="";
+  document.getElementById("newKcal").value="";
+  document.getElementById("newUnit").value="g";
+  document.getElementById("newP").value=0;
+  document.getElementById("newC").value=0;
+  document.getElementById("newF").value=0;
+  document.querySelector("#foodModal h2").textContent="Eigen product";
+  document.querySelector("#foodModal .primary").textContent="Opslaan";
+}
+
+function editRecipe(n){
+  const r=data.recipes[n];
+  if(!r)return;
+  editingRecipeName=n;
+  document.getElementById("recipeName").value=n;
+  document.getElementById("recipeServings").value=r.servings||1;
+  recipeLines=(r.ingredients||[]).map(x=>({
+    name:x.name,
+    amount:Number(x.amount)||1,
+    unit:x.unit||"g"
+  }));
+  if(!recipeLines.length)recipeLines=[{name:"",amount:100,unit:"g"}];
+  document.querySelector("#recipeModal h2").textContent="Recept bewerken";
+  document.querySelector("#recipeModal .primary").textContent="Wijzigingen opslaan";
+  document.getElementById("recipeModal").classList.remove("hidden");
+  renderRecipeBuilder();
+  document.getElementById("recipeServings").oninput=updateRecipePreview;
+  updateRecipePreview();
+}
+
+function resetRecipeEditor(){
+  editingRecipeName=null;
+  recipeLines=[];
+  document.getElementById("recipeName").value="";
+  document.getElementById("recipeServings").value=1;
+  document.querySelector("#recipeModal h2").textContent="Recept maken";
+  document.querySelector("#recipeModal .primary").textContent="Recept opslaan";
+}
+
+function saveCustom(){
+ let n=document.getElementById("newName").value.trim().toLowerCase(),k=+document.getElementById("newKcal").value;
+ if(!n||!k){alert("Naam en kcal zijn verplicht.");return}
+ const old=editingCustomProduct;
+ if(old && old!==n){
+   if(data.custom[n] && !confirm("Er bestaat al een eigen product met deze naam. Overschrijven?"))return;
+   // Keep existing day entries and recipes consistent if the product was renamed.
+   for(const d of Object.keys(data.days||{})){
+     for(const item of (data.days[d]||[])) if(item.name===old)item.name=n;
+   }
+   for(const rn of Object.keys(data.recipes||{})){
+     for(const ing of (data.recipes[rn].ingredients||[])) if(ing.name===old)ing.name=n;
+   }
+   delete data.custom[old];
+ }
+ data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value};
+ save();
+ closeModal("foodModal");
+ resetCustomEditor();
+ render();
+ selectProduct(n);
+}
+function renderCustom(){
+ let keys=Object.keys(data.custom).sort();
+ document.getElementById("customList").innerHTML=keys.length?
+ keys.map(n=>`<div class="item"><span><b>${esc(n)}</b><br><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</small></span><span>
+ <button class="secondary" onclick="editCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button>
+ <button class="danger" onclick="deleteCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button>
+ </span></div>`).join("")
+ :'<p class="muted">Nog geen eigen producten.</p>';
+}
+function deleteCustomProduct(n){
+ if(!data.custom[n])return;
+ showConfirm(
+   "Eigen product verwijderen?",
+   "Weet je zeker dat je ‘"+n+"’ wilt verwijderen? Bestaande dagregistraties blijven behouden.",
+   function(){
+     delete data.custom[n];
+     save();
+     render();
+   }
+ );
+}
 let recipeLines=[];let selectedRecipeToday="";
 function addRecipeLine(){recipeLines.push({name:"",amount:100,unit:"g"});renderRecipeBuilder()}
 function recipeProductHits(q){q=(q||"").toLowerCase().trim();let keys=Object.keys(allProducts());if(!q)return keys.slice(0,8);return keys.filter(k=>k.includes(q)).slice(0,8)}
@@ -334,13 +444,26 @@ function updateRecipePreview(){let el=document.getElementById("recipePreview");i
 function saveRecipe(){
  let n=document.getElementById("recipeName").value.trim().toLowerCase(),servings=Math.max(1,+document.getElementById("recipeServings").value||1);
  if(!n||!recipeLines.length){alert("Geef een naam en minimaal één ingrediënt.");return}
- let ingredients=[];for(let x of recipeLines){let p=product(x.name);if(!p||!x.amount){alert("Controleer ingrediënt: "+(x.name||"onbekend"));return}ingredients.push({name:p[0],amount:+x.amount,unit:x.unit||p[1].u,grams:recipeGrams(x)})}
- let sum=recipeTotals();data.recipes[n]={ingredients,servings,total:sum,perServing:{kcal:sum.kcal/servings,p:sum.p/servings,c:sum.c/servings,f:sum.f/servings}};
- save();recipeLines=[];document.getElementById("recipeName").value="";document.getElementById("recipeServings").value=1;closeModal("recipeModal");render();alert("Recept opgeslagen en beschikbaar onder ‘Mijn recepten toevoegen’.")
+ let old=editingRecipeName;
+ if(old && old!==n && data.recipes[n] && !confirm("Er bestaat al een recept met deze naam. Overschrijven?"))return;
+ let ingredients=[];
+ for(let x of recipeLines){
+   let p=product(x.name);
+   if(!p||!x.amount){alert("Controleer ingrediënt: "+(x.name||"onbekend"));return}
+   ingredients.push({name:p[0],amount:+x.amount,unit:x.unit||p[1].u,grams:recipeGrams(x)});
+ }
+ let sum=recipeTotals();
+ data.recipes[n]={ingredients,servings,total:sum,perServing:{kcal:sum.kcal/servings,p:sum.p/servings,c:sum.c/servings,f:sum.f/servings}};
+ if(old && old!==n)delete data.recipes[old];
+ save();
+ closeModal("recipeModal");
+ resetRecipeEditor();
+ render();
+ alert(old ? "Recept gewijzigd." : "Recept opgeslagen en beschikbaar onder ‘Mijn recepten toevoegen’.");
 }
 function renderRecipes(){
  let keys=Object.keys(data.recipes).sort();
- document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="item"><span><b>${esc(n)}</b><br><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></span><span><button class="secondary" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')">Naar Vandaag</button> <button class="danger" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')">×</button></span></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
+ document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="item"><span><b>${esc(n)}</b><br><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></span><span><button class="secondary" onclick="editRecipe('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button> <button class="secondary" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')">Naar Vandaag</button> <button class="danger" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button></span></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
 }
 function prepareRecipe(n){selectedRecipeToday=n;document.getElementById("recipeSearchToday").value=n;document.getElementById("recipePortions").value=1;document.getElementById("recipeAddInfo").innerHTML=`<div class="notice">Geselecteerd: <b>${esc(n)}</b>. Kies eventueel het aantal porties en tik op ‘Recept toevoegen’.</div>`;tab("today",document.querySelectorAll(".tabs button")[0])}
 function suggestRecipesToday(){
@@ -369,7 +492,37 @@ function addRecipeFromToday(){
  document.getElementById("recipeAddInfo").innerHTML=`<div class="notice success">Toegevoegd: <b>${esc(n)}</b> (${Math.round(ps.kcal*portions)} kcal).</div>`;
  document.getElementById("recipeSearchToday").value="";selectedRecipeToday="";render();
 }
-function deleteRecipe(n){if(!confirm("Recept ‘"+n+"’ verwijderen? Bestaande dagregistraties blijven behouden."))return;delete data.recipes[n];save();render()}
+function deleteRecipe(n){
+ if(!data.recipes[n])return;
+ showConfirm(
+   "Recept verwijderen?",
+   "Weet je zeker dat je het recept ‘"+n+"’ wilt verwijderen? Bestaande dagregistraties blijven behouden.",
+   function(){
+     delete data.recipes[n];
+     save();
+     render();
+   }
+ );
+}
+
+let confirmAction=null;
+function showConfirm(title,message,action){
+ confirmAction=action;
+ document.getElementById("confirmTitle").textContent=title;
+ document.getElementById("confirmMessage").textContent=message;
+ document.getElementById("confirmModal").classList.remove("hidden");
+ const btn=document.getElementById("confirmDeleteBtn");
+ btn.onclick=function(){
+   const fn=confirmAction;
+   closeConfirm();
+   if(fn)fn();
+ };
+}
+function closeConfirm(){
+ confirmAction=null;
+ document.getElementById("confirmModal").classList.add("hidden");
+}
+
 function logWeight(){let d=weightDate.value,w=+weightEntry.value;if(!d||!w)return;data.weights=data.weights.filter(x=>x.date!==d);data.weights.push({date:d,weight:w});data.profile.weight=w;save();render();drawChart()}
 function renderHistory(){
  let dates=Object.keys(data.days).sort().reverse(),arr=data.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)),goal=data.profile.goalWeight;
@@ -386,12 +539,20 @@ function drawChart(){
 function exportData(){let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="calorietracker-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={profile:{},days:{},weights:[],custom:{},recipes:{},...JSON.parse(r.result)};save();render();alert("Back-up geïmporteerd.")}catch(x){alert("Dit is geen geldige CalorieTracker-back-up.")}};r.readAsText(f)}
 function tab(id,btn){["today","history","settings"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="history")renderHistory();if(id==="settings")renderSettings()}
-function openModal(id){document.getElementById(id).classList.remove("hidden");if(id==="recipeModal"){recipeLines=[];addRecipeLine();document.getElementById("recipeServings").oninput=updateRecipePreview;updateRecipePreview()}}
-function closeModal(id){document.getElementById(id).classList.add("hidden")}
+function openModal(id){
+ document.getElementById(id).classList.remove("hidden");
+ if(id==="foodModal"){resetCustomEditor()}
+ if(id==="recipeModal"){resetRecipeEditor();addRecipeLine();document.getElementById("recipeServings").oninput=updateRecipePreview;updateRecipePreview()}
+}
+function closeModal(id){
+ document.getElementById(id).classList.add("hidden");
+ if(id==="foodModal")resetCustomEditor();
+ if(id==="recipeModal")resetRecipeEditor();
+}
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 
-/* CalorieTracker 4.2.3 — portion system */
+/* CalorieTracker 4.3.1 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},
@@ -462,7 +623,7 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.2.3';
+const APP_VERSION='4.3.1';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
