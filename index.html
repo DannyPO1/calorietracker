@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CalorieTracker">
+<title>CalorieTracker</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#111827;--muted:#667085;--line:#e5e7eb;--accent:#2563eb;--green:#059669;--red:#dc2626;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;padding-bottom:88px}
+header{background:#111827;color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20}header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#cbd5e1;font-size:12px}
+main{max-width:760px;margin:auto;padding:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 2px 10px #00000009}
+h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:15px 0 8px}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
+.row{display:flex;gap:9px;align-items:center}.between{justify-content:space-between}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}input,select{width:100%;border:1px solid #d0d5dd;border-radius:11px;padding:11px;background:#fff;color:var(--text);font-size:16px}
+button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#eef2ff;color:#1d4ed8}.ghost{background:#f2f4f7;color:#344054}.danger{background:#fee4e2;color:#b42318}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.big{font-size:34px;font-weight:850;letter-spacing:-1px}.right{text-align:right}
+.bar{height:13px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:11px 0}.bar>div{height:100%;background:var(--accent);transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.stat{background:#f8fafc;border-radius:13px;padding:10px}.stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted)}
+.meal{border-top:1px solid var(--line);padding:12px 0}.meal:first-child{border-top:0}.item{display:flex;justify-content:space-between;gap:9px;padding:7px 0;font-size:14px}.item small{color:var(--muted)}
+.chip{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 8px;font-size:11px}
+.notice{padding:11px 12px;border-radius:12px;background:#eff6ff;color:#1e40af;font-size:13px;margin-top:10px}.success{background:#ecfdf3;color:#067647}.warn{background:#fffaeb;color:#92400e}
+.searchbox{position:relative}.suggestions{position:absolute;left:0;right:0;top:72px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 25px #0002;z-index:30;max-height:260px;overflow:auto}.suggestion{padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.suggestion:last-child{border:0}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}.tabs button{flex:1;max-width:180px;background:transparent;color:#667085}.tabs button.active{color:var(--accent)}
+.hidden{display:none!important}.empty{padding:20px 0;text-align:center;color:var(--muted)}
+.chart{width:100%;height:220px;background:#fafafa;border-radius:14px;border:1px solid var(--line)}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(4){grid-column:1/-1}}
+</style>
+<link rel="manifest" href="manifest.webmanifest"></head>
+<body>
+<header><h1>CalorieTracker</h1><p>Privé • lokaal opgeslagen • geen account nodig</p></header>
+<main>
+
+<section id="today">
+ <div class="card">
+  <div class="row between"><div><div class="muted" id="dateLabel"></div><div class="big" id="totalKcal">0 kcal</div></div><div class="right"><span class="chip" id="goalTag">Stel doel in</span></div></div>
+  <div class="bar"><div id="progress"></div></div>
+  <div class="stats">
+   <div class="stat"><b id="targetKcal">—</b><span>dagdoel</span></div>
+   <div class="stat"><b id="remainingKcal">—</b><span>resterend</span></div>
+   <div class="stat"><b id="protein">0 g</b><span>eiwit</span></div>
+   <div class="stat"><b id="macro">0/0/0</b><span>koolhydraten / vet (g)</span></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>Voeding toevoegen</h2>
+  <div class="grid">
+   <div><label>Maaltijd</label><select id="mealType"><option>Ontbijt</option><option>Lunch</option><option>Avondeten</option><option>Snack</option></select></div>
+   <div><label>Datum</label><input id="entryDate" type="date"></div>
+  </div>
+  <label>Product zoeken</label>
+  <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
+  <div class="grid">
+   <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
+   <div><label>Eenheid</label><select id="unit"><option value="g">gram</option><option value="ml">ml</option><option value="stuk">stuk</option></select></div>
+  </div>
+  <div id="selectedInfo" class="notice">Kies een product uit de suggesties of typ een eigen product.</div>
+  <div class="actions"><button class="primary" onclick="addSelected()">Toevoegen</button><button class="secondary" onclick="openModal('foodModal')">Eigen product</button><button class="ghost" onclick="openModal('recipeModal')">Recept</button></div>
+  <div id="addMessage"></div>
+ </div>
+
+ <div class="card"><h2 id="dayTitle">Vandaag</h2><div id="meals"></div></div>
+</section>
+
+<section id="history" class="hidden">
+ <div class="card"><h2>Voortgang</h2><div id="weightSummary"></div><svg id="weightChart" class="chart" viewBox="0 0 700 220" preserveAspectRatio="none"></svg><div class="legend"><span>● Gewicht</span><span>Stippellijn = streefgewicht</span></div></div>
+ <div class="card"><h2>Dagtotalen</h2><div id="historyList"></div></div>
+</section>
+
+<section id="settings" class="hidden">
+ <div class="card">
+  <h2>Profiel & doel</h2>
+  <div class="grid">
+   <div><label>Leeftijd</label><input id="age" type="number" min="15" max="100"></div>
+   <div><label>Geslacht</label><select id="sex"><option value="male">Man</option><option value="female">Vrouw</option></select></div>
+   <div><label>Lengte (cm)</label><input id="height" type="number" min="120" max="230"></div>
+   <div><label>Huidig gewicht (kg)</label><input id="weight" type="number" min="35" max="250" step=".1"></div>
+   <div><label>Streefgewicht (kg)</label><input id="goalWeight" type="number" min="35" max="250" step=".1"></div>
+   <div><label>Activiteitsniveau</label><select id="activity"><option value="1.2">Zittend — weinig beweging</option><option value="1.375">Licht actief — 1–3×/week</option><option value="1.55">Gemiddeld — 3–5×/week</option><option value="1.725">Zeer actief — 6–7×/week</option><option value="1.9">Extreem actief</option></select></div>
+  </div>
+  <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
+  <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
+ </div>
+ <div class="card"><h2>Gewicht loggen</h2><div class="grid"><div><label>Datum</label><input id="weightDate" type="date"></div><div><label>Gewicht (kg)</label><input id="weightEntry" type="number" step=".1" min="35" max="250"></div></div><div class="actions"><button class="primary" onclick="logWeight()">Gewicht opslaan</button></div></div>
+ <div class="card"><h2>Opslag & privacy</h2><p class="muted">De app gebruikt alleen lokale browseropslag. Er worden geen voedings- of profielgegevens naar een server gestuurd. Met een back-up kun je het bestand bewaren in iCloud Drive en later terugzetten.</p><div class="actions"><button class="secondary" onclick="exportData()">Back-up exporteren</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up importeren</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div></div>
+ <div class="card"><h2>Eigen producten</h2><div id="customList"></div></div>
+ <div class="card"><h2>Recepten</h2><div id="recipeList"></div></div>
+</section>
+</main>
+
+<nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('settings',this)">Instellingen</button></nav>
+
+<div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
+
+<div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Recept opslaan</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><p class="muted">Voeg eerst ingrediënten toe via de productzoeker en geef ze hoeveelheden. Je kunt het recept daarna bewaren.</p><div id="recipeBuilder"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">Ingrediënt toevoegen</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="ghost" onclick="closeModal('recipeModal')">Annuleren</button></div></div></div>
+
+<script>
+const BASE={
+"kipfilet":{kcal:110,p:23,c:0,f:1.5,u:"g"},"kipdij":{kcal:177,p:18,c:0,f:11,u:"g"},"rundergehakt":{kcal:250,p:26,c:0,f:16,u:"g"},"mager rundergehakt":{kcal:172,p:21,c:0,f:10,u:"g"},
+"ei":{kcal:143,p:12.6,c:.7,f:9.5,u:"g"},"havermout":{kcal:389,p:16.9,c:66,f:6.9,u:"g"},"banaan":{kcal:89,p:1.1,c:23,f:.3,u:"g"},"appel":{kcal:52,p:.3,c:14,f:.2,u:"g"},
+"rijst gekookt":{kcal:130,p:2.7,c:28,f:.3,u:"g"},"zilvervliesrijst gekookt":{kcal:123,p:2.7,c:25.6,f:1,u:"g"},"rijst ongekookt":{kcal:360,p:7.1,c:79,f:.7,u:"g"},
+"pasta gekookt":{kcal:158,p:5.8,c:30.9,f:.9,u:"g"},"pasta ongekookt":{kcal:350,p:12.5,c:70,f:1.5,u:"g"},"aardappel":{kcal:77,p:2,c:17,f:.1,u:"g"},"zoete aardappel":{kcal:86,p:1.6,c:20,f:.1,u:"g"},
+"brood":{kcal:250,p:9,c:47,f:3.2,u:"g"},"wrap":{kcal:310,p:8,c:52,f:8,u:"g"},"paratha":{kcal:320,p:7,c:44,f:12,u:"g"},
+"magere kwark":{kcal:59,p:10,c:3.5,f:.2,u:"g"},"volle kwark":{kcal:120,p:8,c:4.5,f:8,u:"g"},"griekse yoghurt":{kcal:120,p:6,c:4,f:9,u:"g"},"melk":{kcal:47,p:3.4,c:4.8,f:1.5,u:"ml"},
+"olijfolie":{kcal:884,p:0,c:0,f:100,u:"g"},"boter":{kcal:717,p:.9,c:.1,f:81,u:"g"},"avocado":{kcal:160,p:2,c:8.5,f:14.7,u:"g"},
+"kikkererwten gekookt":{kcal:164,p:8.9,c:27.4,f:2.6,u:"g"},"linzen gekookt":{kcal:116,p:9,c:20,f:.4,u:"g"},"doperwten":{kcal:81,p:5.4,c:14.5,f:.4,u:"g"},
+"broccoli":{kcal:34,p:2.8,c:7,f:.4,u:"g"},"paprika":{kcal:31,p:1,c:6,f:.3,u:"g"},"ui":{kcal:40,p:1.1,c:9.3,f:.1,u:"g"},"tomaat":{kcal:18,p:.9,c:3.9,f:.2,u:"g"},
+"pindakaas":{kcal:588,p:25,c:20,f:50,u:"g"},"kaas 48+":{kcal:356,p:25,c:0,f:29,u:"g"},"amandelen":{kcal:579,p:21,c:22,f:50,u:"g"},"walnoten":{kcal:654,p:15,c:14,f:65,u:"g"},
+"kipfilet plakjes":{kcal:110,p:22,c:1,f:2,u:"g"},"hummus":{kcal:240,p:7,c:14,f:17,u:"g"},"tomatensaus":{kcal:35,p:1.5,c:6,f:.5,u:"g"}
+};
+let data=load();
+function load(){try{let d=JSON.parse(localStorage.getItem("calorieTrackerV2")||"null");if(d)return {...{profile:{},days:{},weights:[],custom:{},recipes:{}},...d}}catch(e){}return {profile:{},days:{},weights:[],custom:{},recipes:{}}}
+function save(){localStorage.setItem("calorieTrackerV2",JSON.stringify(data))}
+function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function activeDate(){return document.getElementById("entryDate").value||today()}
+function allProducts(){return {...BASE,...data.custom}}
+function product(name){let ps=allProducts(),n=name.toLowerCase().trim();if(ps[n])return [n,ps[n]];let keys=Object.keys(ps);let exact=keys.find(k=>k===n);if(exact)return [exact,ps[exact]];let hits=keys.filter(k=>k.includes(n)||n.includes(k));return hits.length?[hits[0],ps[hits[0]]]:null}
+function suggestProducts(){
+ let q=document.getElementById("productSearch").value.toLowerCase().trim(), box=document.getElementById("suggestions"), keys=Object.keys(allProducts());
+ if(!q){box.classList.add("hidden");return}
+ let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${allProducts()[k].kcal} kcal / 100 ${allProducts()[k].u}</div></div>`).join(""):`<div class="suggestion" onclick="openModal('foodModal')">Geen match. Maak een eigen product.</div>`;box.classList.remove("hidden")
+}
+function selectProduct(n){document.getElementById("productSearch").value=n;document.getElementById("unit").value=allProducts()[n].u;document.getElementById("suggestions").classList.add("hidden");showSelected()}
+function showSelected(){let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n);if(!p){document.getElementById("selectedInfo").textContent="Product nog niet herkend. Kies een suggestie of maak een eigen product.";return}let v=p[1],a=+document.getElementById("amount").value||0;document.getElementById("selectedInfo").innerHTML=`<b>${esc(p[0])}</b>: ${Math.round(v.kcal*a/100)} kcal • ${Math.round(v.p*a/100*10)/10} g eiwit • ${Math.round(v.c*a/100*10)/10} g koolhydraten • ${Math.round(v.f*a/100*10)/10} g vet`}
+document.getElementById("amount").addEventListener("input",showSelected)
+document.addEventListener("click",e=>{if(!e.target.closest(".searchbox"))document.getElementById("suggestions").classList.add("hidden")})
+function addSelected(){
+ let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n),a=+document.getElementById("amount").value||0;if(!p||a<=0){msg("Kies eerst een geldig product en hoeveelheid.","warn");return}
+ let v=p[1], factor=a/100, item={name:p[0],amount:a,unit:document.getElementById("unit").value,kcal:v.kcal*factor,p:v.p*factor,c:v.c*factor,f:v.f*factor,meal:document.getElementById("mealType").value};
+ data.days[activeDate()]??=[];data.days[activeDate()].push(item);save();document.getElementById("productSearch").value="";document.getElementById("amount").value=100;showSelected();msg("Toegevoegd aan "+(activeDate()===today()?"vandaag":new Date(activeDate()+"T12:00:00").toLocaleDateString("nl-NL"))+".","success");render()
+}
+function msg(t,kind="success"){document.getElementById("addMessage").innerHTML=`<div class="notice ${kind}">${t}</div>`}
+function removeItem(i){let a=data.days[activeDate()]||[];a.splice(i,1);save();render()}
+function totals(items){return items.reduce((o,x)=>{o.kcal+=x.kcal;o.p+=x.p;o.c+=x.c;o.f+=x.f;return o},{kcal:0,p:0,c:0,f:0})}
+function calc(){
+ let p=data.profile;if(!p.age||!p.height||!p.weight)return null;
+ let bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="female"?-161:5),tdee=bmr*(+p.activity||1.2),def=7700*(+p.rate||.5)/7,target=Math.round(tdee-def);
+ return {bmr,tdee,target:Math.max(1200,target),def}
+}
+function render(){
+ let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
+ document.getElementById("dateLabel").textContent=dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
+ document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";
+ document.getElementById("totalKcal").textContent=Math.round(t.kcal)+" kcal";document.getElementById("protein").textContent=Math.round(t.p)+" g";
+ document.getElementById("macro").textContent=Math.round(t.c)+"/"+Math.round(t.f);
+ document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" kcal":"—";
+ document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";document.getElementById("progress").style.width=c?Math.min(100,t.kcal/c.target*100)+"%":"0%";
+ let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
+ document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${x.unit}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
+ document.getElementById("entryDate").value=d;renderSettings()
+}
+function saveProfile(){
+ let vals={age:+age.value,height:+height.value,weight:+weight.value,goalWeight:+goalWeight.value,sex:sex.value,activity:+activity.value,rate:+rate.value};
+ if(!vals.age||!vals.height||!vals.weight||!vals.goalWeight){alert("Vul leeftijd, lengte, gewicht en streefgewicht in.");return}
+ data.profile=vals;data.weights=data.weights.filter(x=>x.date!==today());data.weights.push({date:today(),weight:vals.weight});save();render();alert("Doel berekend en profiel opgeslagen.")
+}
+function renderSettings(){
+ let p=data.profile;["age","height","weight","goalWeight","sex","activity","rate"].forEach(id=>{if(p[id]!=null)document.getElementById(id).value=p[id]});
+ let c=calc();document.getElementById("goalExplanation").innerHTML=c?`BMR: <b>${Math.round(c.bmr)} kcal</b> • geschat onderhoud: <b>${Math.round(c.tdee)} kcal/dag</b> • rekenkundig tekort: <b>${Math.round(c.def)} kcal/dag</b> • calorie-doel: <b>${c.target} kcal/dag</b>.<br><span class="tiny">Het doel wordt automatisch opnieuw berekend wanneer je je actuele gewicht bijwerkt. De formule is Mifflin-St Jeor + activiteitsfactor. Werkelijke behoefte kan afwijken.</span>`:"Vul je profiel in om je persoonlijke doel te berekenen.";
+ renderCustom();renderRecipes()
+}
+function saveCustom(){
+ let n=document.getElementById("newName").value.trim().toLowerCase(),k=+document.getElementById("newKcal").value;if(!n||!k){alert("Naam en kcal zijn verplicht.");return}
+ data.custom[n]={kcal:k,p:+newP.value||0,c:+newC.value||0,f:+newF.value||0,u:newUnit.value};save();closeModal("foodModal");render();selectProduct(n)
+}
+function renderCustom(){let keys=Object.keys(data.custom);document.getElementById("customList").innerHTML=keys.length?keys.map(n=>`<div class="item"><span>${esc(n)}</span><span>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</span></div>`).join(""):'<p class="muted">Nog geen eigen producten.</p>'}
+let recipeLines=[];
+function addRecipeLine(){recipeLines.push({name:"",amount:100});renderRecipeBuilder()}
+function renderRecipeBuilder(){document.getElementById("recipeBuilder").innerHTML=recipeLines.map((x,i)=>`<div class="grid" style="margin-bottom:7px"><input placeholder="product" value="${esc(x.name)}" oninput="recipeLines[${i}].name=this.value"><input type="number" value="${x.amount}" oninput="recipeLines[${i}].amount=+this.value"></div>`).join("")}
+function saveRecipe(){
+ let n=recipeName.value.trim().toLowerCase();if(!n||!recipeLines.length){alert("Geef een naam en minimaal één ingrediënt.");return}
+ let ingredients=[];for(let x of recipeLines){let p=product(x.name);if(!p){alert("Niet gevonden: "+x.name);return}ingredients.push({name:p[0],amount:+x.amount})}
+ let sum={kcal:0,p:0,c:0,f:0};ingredients.forEach(x=>{let v=allProducts()[x.name],f=x.amount/100;sum.kcal+=v.kcal*f;sum.p+=v.p*f;sum.c+=v.c*f;sum.f+=v.f*f});
+ data.recipes[n]={ingredients,...sum};save();recipeLines=[];renderRecipeBuilder();recipeName.value="";closeModal("recipeModal");render();alert("Recept opgeslagen.")
+}
+function renderRecipes(){let keys=Object.keys(data.recipes);document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n];return `<div class="item"><span><b>${esc(n)}</b><br><small>${Math.round(r.kcal)} kcal totaal • ${Math.round(r.p)} g eiwit</small></span><button class="secondary" onclick="useRecipe('${esc(n).replace(/'/g,"&#39;")}')">Toevoegen</button></div>`}).join(""):'<p class="muted">Nog geen recepten.</p>'}
+function useRecipe(n){let r=data.recipes[n];data.days[activeDate()]??=[];data.days[activeDate()].push({name:n,amount:1,unit:"recept",kcal:r.kcal,p:r.p,c:r.c,f:r.f,meal:document.getElementById("mealType").value});save();tab("today",document.querySelector(".tabs button"));render();alert("Recept toegevoegd.");}
+function logWeight(){let d=weightDate.value,w=+weightEntry.value;if(!d||!w)return;data.weights=data.weights.filter(x=>x.date!==d);data.weights.push({date:d,weight:w});data.profile.weight=w;save();render();drawChart()}
+function renderHistory(){
+ let dates=Object.keys(data.days).sort().reverse(),arr=data.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)),goal=data.profile.goalWeight;
+ document.getElementById("weightSummary").innerHTML=arr.length?`Laatste gewicht: <b>${arr[arr.length-1].weight.toFixed(1)} kg</b>${goal?` • streefgewicht: <b>${goal} kg</b>`:""}`:"Log je gewicht bij Instellingen.";
+ document.getElementById("historyList").innerHTML=dates.length?dates.map(d=>`<div class="item"><span>${new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"})}</span><b>${Math.round(totals(data.days[d]).kcal)} kcal</b></div>`).join(""):'<div class="empty">Nog geen dagen geregistreerd.</div>';
+ drawChart()
+}
+function drawChart(){
+ let svg=document.getElementById("weightChart"),a=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)),w=700,h=220,pad=28;svg.innerHTML="";if(!a.length){svg.innerHTML='<text x="350" y="110" text-anchor="middle" fill="#667085">Nog geen gewichtsmetingen</text>';return}
+ let vals=a.map(x=>x.weight).concat(data.profile.goalWeight?[+data.profile.goalWeight]:[]),min=Math.min(...vals)-1,max=Math.max(...vals)+1, sx=(w-2*pad)/Math.max(1,a.length-1),sy=(h-2*pad)/(max-min);
+ let pts=a.map((x,i)=>[pad+i*sx,h-pad-(x.weight-min)*sy]);if(data.profile.goalWeight){let gy=h-pad-(data.profile.goalWeight-min)*sy;svg.innerHTML+=`<line x1="${pad}" y1="${gy}" x2="${w-pad}" y2="${gy}" stroke="#98a2b3" stroke-dasharray="5 5"/>`}
+ svg.innerHTML+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2563eb" stroke-width="4"/>`;pts.forEach((p,i)=>svg.innerHTML+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#2563eb"/><text x="${p[0]}" y="${h-7}" text-anchor="middle" font-size="10" fill="#667085">${a[i].date.slice(5)}</text>`)
+}
+function exportData(){let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="calorietracker-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={profile:{},days:{},weights:[],custom:{},recipes:{},...JSON.parse(r.result)};save();render();alert("Back-up geïmporteerd.")}catch(x){alert("Dit is geen geldige CalorieTracker-back-up.")}};r.readAsText(f)}
+function tab(id,btn){["today","history","settings"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="history")renderHistory();if(id==="settings")renderSettings()}
+function openModal(id){document.getElementById(id).classList.remove("hidden");if(id==="recipeModal"){recipeLines=[];addRecipeLine()}}
+function closeModal(id){document.getElementById(id).classList.add("hidden")}
+document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
+render();renderSettings();
+</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script></body></html>
