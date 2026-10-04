@@ -38,7 +38,7 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION="4.2.2";
+const APP_VERSION="4.2.3";
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -82,7 +82,29 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.2.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script></head>
+<meta name="app-version" content="4.2.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+function primaryPortion(productName){
+  const p=portionOptions(productName);
+  return p && p.length ? p[0] : null;
+}
+function productSearchCalorieLabel(name){
+  const v=allProducts()[name], p=primaryPortion(name);
+  if(!v) return "";
+  const base=`${v.kcal} kcal / 100 ${v.u}`;
+  if(!p) return base;
+  const kcal=Math.round(v.kcal*Number(p.grams)/100);
+  return `${base} · <b>${kcal} kcal / ${esc(p.label.toLowerCase())}</b> (${p.grams} g)`;
+}
+function updateRecipeLineCalorie(i){
+  const el=document.getElementById("recipeKcal"+i);
+  if(!el)return;
+  const x=recipeLines[i], p=product(x.name);
+  if(!p || !x.amount){el.innerHTML="";return}
+  const grams=recipeGrams(x), kcal=Math.round(p[1].kcal*grams/100);
+  const practical=(x.unit||"").startsWith("portion:") ? ` · ${x.amount} × ${esc(displayUnit(x.name,x.unit))}` : "";
+  el.innerHTML=`<b>${kcal} kcal</b>${practical}`;
+}
+</script></head>
 <body>
 <header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1"></span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
 <main>
@@ -135,7 +157,7 @@ async function checkForUpdate(){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.2.2</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.2.3</b></div>
 
   </div>
 
@@ -190,7 +212,7 @@ function product(name){let ps=allProducts(),n=name.toLowerCase().trim();if(ps[n]
 function suggestProducts(){
  let q=document.getElementById("productSearch").value.toLowerCase().trim(), box=document.getElementById("suggestions"), keys=Object.keys(allProducts());
  if(!q){box.classList.add("hidden");return}
- let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${allProducts()[k].kcal} kcal / 100 ${allProducts()[k].u}</div></div>`).join(""):`<div class="suggestion" onclick="openModal('foodModal')">Geen match. Maak een eigen product.</div>`;box.classList.remove("hidden")
+ let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchCalorieLabel(k)}</div></div>`).join(""):`<div class="suggestion" onclick="openModal('foodModal')">Geen match. Maak een eigen product.</div>`;box.classList.remove("hidden")
 }
 function portionOptions(productName){
  const key=productName.toLowerCase().trim();
@@ -292,7 +314,8 @@ function recipeUnitOptions(name,current){
 function recipeGrams(x){return amountInGrams(x.name,x.amount,x.unit||"g")}
 function renderRecipeBuilder(){
  const box=document.getElementById("recipeBuilder");
- box.innerHTML=recipeLines.length?recipeLines.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:13px;padding:10px;margin:8px 0"><label>Ingrediënt ${i+1}</label><div class="searchbox"><input id="recipeProduct${i}" autocomplete="off" placeholder="Zoek product..." value="${esc(x.name)}" oninput="recipeLineInput(${i},this.value)" onfocus="recipeLineInput(${i},this.value)"><div id="recipeSug${i}" class="suggestions hidden"></div></div><div class="grid" style="margin-top:8px"><div><label>Hoeveelheid</label><input type="number" min="0.1" step="0.1" value="${x.amount}" oninput="recipeLines[${i}].amount=+this.value;updateRecipePreview()"></div><div><label>Eenheid / portie</label><select onchange="recipeLines[${i}].unit=this.value;updateRecipePreview()">${recipeUnitOptions(x.name,x.unit)}</select></div></div><div class="actions"><button class="danger" style="width:100%" onclick="removeRecipeLine(${i})">Ingrediënt verwijderen</button></div></div>`).join(""):'<div class="empty">Nog geen ingrediënten. Tik op + Ingrediënt.</div>';
+ box.innerHTML=recipeLines.length?recipeLines.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:13px;padding:10px;margin:8px 0"><label>Ingrediënt ${i+1}</label><div class="searchbox"><input id="recipeProduct${i}" autocomplete="off" placeholder="Zoek product..." value="${esc(x.name)}" oninput="recipeLineInput(${i},this.value)" onfocus="recipeLineInput(${i},this.value)"><div id="recipeSug${i}" class="suggestions hidden"></div></div><div class="grid" style="margin-top:8px"><div><label>Hoeveelheid</label><input type="number" min="0.1" step="0.1" value="${x.amount}" oninput="recipeLines[${i}].amount=+this.value;updateRecipeLineCalorie(${i});updateRecipePreview()"></div><div><label>Eenheid / portie</label><select onchange="recipeLines[${i}].unit=this.value;updateRecipeLineCalorie(${i});updateRecipePreview()">${recipeUnitOptions(x.name,x.unit)}</select></div></div><div id="recipeKcal${i}" class="notice" style="margin-top:8px"></div><div class="actions"><button class="danger" style="width:100%" onclick="removeRecipeLine(${i})">Ingrediënt verwijderen</button></div></div>`).join(""):'<div class="empty">Nog geen ingrediënten. Tik op + Ingrediënt.</div>';
+ recipeLines.forEach((_,i)=>updateRecipeLineCalorie(i));
  updateRecipePreview();
 }
 function recipeLineInput(i,value){
@@ -300,7 +323,7 @@ function recipeLineInput(i,value){
  const box=document.getElementById("recipeSug"+i);
  if(!box)return;
  const hits=recipeProductHits(value);
- box.innerHTML=hits.length ? hits.map(k=>`<div class="suggestion" onclick="selectRecipeProduct(${i},'${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${allProducts()[k].kcal} kcal / 100 ${allProducts()[k].u}</div></div>`).join("") : '<div class="suggestion">Geen product gevonden. Maak het eerst als eigen product.</div>';
+ box.innerHTML=hits.length ? hits.map(k=>`<div class="suggestion" onclick="selectRecipeProduct(${i},'${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${productSearchCalorieLabel(k)}</div></div>`).join("") : '<div class="suggestion">Geen product gevonden. Maak het eerst als eigen product.</div>';
  box.classList.remove("hidden");
  updateRecipePreview();
 }
@@ -368,7 +391,7 @@ function closeModal(id){document.getElementById(id).classList.add("hidden")}
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 
-/* CalorieTracker 4.2.2 — portion system */
+/* CalorieTracker 4.2.3 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},
@@ -439,7 +462,7 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.2.2';
+const APP_VERSION='4.2.3';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
