@@ -52,6 +52,20 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .dashboardBar{position:relative;z-index:1;height:8px;background:rgba(35,107,69,.10);margin:0 20px 17px;border-radius:99px;overflow:hidden}.dashboardBar>div{height:100%;width:0;background:linear-gradient(90deg,#236b45,#5d9d75);border-radius:99px;transition:width .3s ease}
 @media(max-width:560px){.calorieDashboard .calorieHero{grid-template-columns:145px 1fr;gap:14px;padding:17px 14px 14px}.calorieDashboard .calorieRing{width:142px;height:142px}.calorieDashboard .ringKcal{font-size:24px}.calorieDashboard .goalSummary .goalValue{font-size:21px}.dashboardStats{grid-template-columns:1fr 1fr}.dashStat{padding:12px 11px}.dashStat:nth-child(2){border-right:0}.dashStat:nth-child(-n+2){border-bottom:1px solid rgba(35,107,69,.10)}.dashboardFooter{padding-top:11px}}
 
+/* 4.5.2: functional colour + consistent line icons */
+.dashIcon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:0 0 34px}
+.dashIcon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.proteinIcon{background:#dcefe3;color:#1f7a4f}.macroIcon{background:#fff0df;color:#c46d22}.progressIcon{background:#e3edf9;color:#3e73a4}.mealIcon{background:#eee7f8;color:#7255a1}
+.dashStat{background:rgba(255,255,255,.18)}
+.foodItem{display:grid;grid-template-columns:minmax(0,1fr) 146px;gap:16px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.foodItem:first-child{border-top:0}
+.foodItemInfo{min-width:0;padding-top:2px}
+.foodItemInfo b{display:block;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.foodItemInfo small{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
+.foodItemActions{width:146px;display:flex;flex-direction:column;gap:7px;align-items:stretch}
+.foodItemActions button{width:146px;min-height:44px;padding:10px 8px;white-space:nowrap}
+@media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) 132px;gap:12px}.foodItemActions,.foodItemActions button{width:132px}.foodItemActions button{min-height:42px;padding:9px 6px;font-size:14px}}
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <script>
@@ -61,7 +75,7 @@ Object.assign(DB, DB_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.5.1';
+const APP_VERSION='4.5.2';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -105,7 +119,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.5.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.5.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -149,10 +163,10 @@ function updateRecipeLineCalorie(i){
    </div>
   </div>
   <div class="dashboardStats">
-   <div class="dashStat"><span class="dashIcon proteinIcon">P</span><div><b id="protein">0 g</b><span>eiwit</span></div></div>
-   <div class="dashStat"><span class="dashIcon carbIcon">K</span><div><b id="macro">0/0</b><span>koolhydraten / vet</span></div></div>
-   <div class="dashStat"><span class="dashIcon progressIcon">%</span><div><b id="dayProgress">0%</b><span>van dagdoel</span></div></div>
-   <div class="dashStat"><span class="dashIcon mealIcon">+</span><div><b id="mealCount">0</b><span>registraties</span></div></div>
+   <div class="dashStat"><span class="dashIcon proteinIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5c1.5 0 2.7 1.1 3 2.5C12.1 6.1 13.4 5 15 5c2.2 0 4 1.8 4 4 0 4.7-4.6 8.1-7 9.5C9.6 17.1 5 13.7 5 9c0-2.2 1.8-4 4-4Z"/></svg></span><div><b id="protein">0 g</b><span>eiwit</span></div></div>
+   <div class="dashStat"><span class="dashIcon macroIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17c2.5-5.5 4.5-8.5 7-10 2.5 1.5 4.5 4.5 7 10"/><path d="M9 13c1.5-1 4.5-1 6 0"/></svg></span><div><b id="macro">0/0</b><span>koolhydraten / vet</span></div></div>
+   <div class="dashStat"><span class="dashIcon progressIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span><div><b id="dayProgress">0%</b><span>van dagdoel</span></div></div>
+   <div class="dashStat"><span class="dashIcon mealIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 5h10M7 9h10M7 13h6"/><path d="m16 15 2 2 4-4"/><path d="M4 4v16h16"/></svg></span><div><b id="mealCount">0</b><span>registraties</span></div></div>
   </div>
   <div class="dashboardFooter"><span>Dagvoortgang</span><strong id="dashboardFooterText">0%</strong></div>
   <div class="dashboardBar"><div id="progress"></div></div>
@@ -700,10 +714,10 @@ function saveCustom(){
 function renderCustom(){
  let keys=Object.keys(data.custom).sort();
  document.getElementById("customList").innerHTML=keys.length?
- keys.map(n=>`<div class="item"><span><b>${esc(n)}</b><br><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</small></span><span>
+ keys.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</small></div><div class="foodItemActions">
  <button class="secondary" onclick="editCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button>
  <button class="danger" onclick="deleteCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button>
- </span></div>`).join("")
+ </div></div>`).join("")
  :'<p class="muted">Nog geen eigen producten.</p>';
 }
 function deleteCustomProduct(n){
@@ -770,7 +784,7 @@ function saveRecipe(){
 }
 function renderRecipes(){
  let keys=Object.keys(data.recipes).sort();
- document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="item"><span><b>${esc(n)}</b><br><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></span><span><button class="secondary" onclick="editRecipe('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button> <button class="secondary" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')">Naar Vandaag</button> <button class="danger" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button></span></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
+ document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></div><div class="foodItemActions"><button class="secondary" onclick="editRecipe('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button><button class="secondary" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')">Naar Vandaag</button><button class="danger" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button></div></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
 }
 function prepareRecipe(n){selectedRecipeToday=n;document.getElementById("recipeSearchToday").value=n;document.getElementById("recipePortions").value=1;document.getElementById("recipeAddInfo").innerHTML=`<div class="notice">Geselecteerd: <b>${esc(n)}</b>. Kies eventueel het aantal porties en tik op ‘Recept toevoegen’.</div>`;tab("today",document.querySelectorAll(".tabs button")[0])}
 function suggestRecipesToday(){
