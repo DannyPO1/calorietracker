@@ -58,7 +58,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .chip{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:750}
 .notice{padding:12px 13px;border-radius:15px;background:#eef6f0;color:#245b3d;font-size:13px;margin-top:10px}.success{background:#e9f6ed;color:#176b3e}.warn{background:#fff5e6;color:#8a5a19}
 .searchbox{position:relative}.suggestions{position:absolute;left:0;right:0;top:72px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 25px #0002;z-index:30;max-height:260px;overflow:auto}.suggestion{padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.suggestion:last-child{border:0}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 18px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px rgba(24,59,43,.05);gap:2px}.tabs button{flex:1;max-width:180px;background:transparent;color:#6b776f}.tabs button.active{color:var(--accent)}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));z-index:40;padding:8px 16px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px rgba(24,59,43,.05);gap:4px}.tabs button{width:100%;min-width:0;padding:8px 1px;background:transparent;color:#6b776f;font-size:15px;letter-spacing:-.15px;white-space:nowrap}.tabs button.active{color:var(--accent)}
 .hidden{display:none!important}.empty{padding:20px 0;text-align:center;color:var(--muted)}
 .chart{width:100%;height:220px;background:#fafbf8;border-radius:16px;border:1px solid var(--line)}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(4){grid-column:1/-1}}
@@ -127,7 +127,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='4.5.3';
+const APP_VERSION='4.5.4';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -171,7 +171,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.5.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.5.4"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
