@@ -31,7 +31,7 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
 </style>
 <link rel="manifest" href="manifest.webmanifest"></head>
 <body>
-<header><h1>CalorieTracker</h1><p>Privé • lokaal opgeslagen • geen account nodig</p></header>
+<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1">v4.0.0</span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
 <main>
 
 <section id="today">
@@ -73,6 +73,13 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
 </section>
 
 <section id="settings" class="hidden">
+  <div class="card" id="aboutApp">
+    <h2>Over CalorieTracker</h2>
+    <div class="item"><span>Versie</span><b id="appVersion">4.0.0</b></div>
+    <div class="item"><span>Uitgebracht</span><span>4 oktober 2026</span></div>
+    <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p>
+  </div>
+
  <div class="card">
   <h2>Profiel & doel</h2>
   <div class="grid">
@@ -251,4 +258,24 @@ function closeModal(id){document.getElementById(id).classList.add("hidden")}
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 </script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script></body></html>
+<script>
+const APP_VERSION='4.0.0';
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./sw.js?v=4',{updateViaCache:'none'});
+      await reg.update();
+      if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
+      reg.addEventListener('updatefound',()=>{
+        const w=reg.installing;
+        if(!w)return;
+        w.addEventListener('statechange',()=>{
+          if(w.state==='installed' && navigator.serviceWorker.controller){
+            w.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+    }catch(e){console.warn('Service worker update failed',e)}
+  });
+}
+</script></body></html>
