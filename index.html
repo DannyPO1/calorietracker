@@ -119,13 +119,27 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 @media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) 132px;gap:12px}.foodItemActions,.foodItemActions button{width:132px}.foodItemActions button{min-height:42px;padding:9px 6px;font-size:14px}}
 
 
-/* v5.0.0 meal tiles + four-week dashboard */
+/* v5.0.4 premium meal tiles — based on the approved visual design */
 .mealTileGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:2px 0 15px}
-.mealTile{position:relative;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:16px;min-height:132px;text-align:left;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.mealTile{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:22px;min-height:188px;aspect-ratio:1.66/1;padding:17px 15px 14px;text-align:left;color:#fff;background-color:#1d2922;background-repeat:no-repeat;background-position:right center;background-size:auto 100%;box-shadow:0 10px 30px rgba(0,0,0,.22);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+.mealTile::before{content:"";position:absolute;inset:0 40% 0 0;background:linear-gradient(90deg,rgba(24,35,29,.99) 0%,rgba(24,35,29,.98) 68%,rgba(24,35,29,.55) 92%,rgba(24,35,29,0) 100%);z-index:0;pointer-events:none}
+.mealTile--ontbijt{background-color:#1d2922;background-image:url('./meal-breakfast-food.png')}
+.mealTile--lunch{background-color:#15251e;background-image:url('./meal-lunch-food.png')}
+.mealTile--avondeten{background-color:#322219;background-image:url('./meal-dinner-food.png')}
+.mealTile--snacks{background-color:#242133;background-image:url('./meal-snacks-food.png')}
+.mealTile--avondeten::before{background:linear-gradient(90deg,rgba(50,34,25,.99) 0%,rgba(50,34,25,.98) 68%,rgba(50,34,25,.58) 92%,rgba(50,34,25,0) 100%)}
+.mealTile--snacks::before{background:linear-gradient(90deg,rgba(36,33,51,.99) 0%,rgba(36,33,51,.98) 68%,rgba(36,33,51,.58) 92%,rgba(36,33,51,0) 100%)}
 .mealTile:active{transform:scale(.985)}
-.mealTile:hover{border-color:#c8d9ce;box-shadow:0 9px 28px rgba(24,59,43,.11)}
-.mealTileIcon{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:20px;margin-bottom:12px}
-.mealTileTitle{font-size:16px;font-weight:800}.mealTileMeta{margin-top:5px;color:var(--muted);font-size:12px}.mealTileKcal{position:absolute;right:14px;top:15px;font-size:12px;font-weight:800;color:var(--accent)}
+.mealTile:hover{filter:brightness(1.06);box-shadow:0 12px 34px rgba(0,0,0,.28)}
+.mealTileIcon{position:relative;z-index:2;width:47px;height:47px;border-radius:50%;display:block;margin:0 0 9px;background-size:cover;background-position:center;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.mealTile--ontbijt .mealTileIcon{background-image:url('./meal-breakfast-icon.png')}
+.mealTile--lunch .mealTileIcon{background-image:url('./meal-lunch-icon.png')}
+.mealTile--avondeten .mealTileIcon{background-image:url('./meal-dinner-icon.png')}
+.mealTile--snacks .mealTileIcon{background-image:url('./meal-snacks-icon.png')}
+.mealTileTitle{position:relative;z-index:2;font-size:21px;line-height:1.05;font-weight:850;letter-spacing:-.3px;color:#fff}.mealTileMeta{position:relative;z-index:2;margin-top:7px;color:rgba(255,255,255,.68);font-size:13px;font-weight:650}.mealTileKcal{position:absolute;z-index:2;left:15px;bottom:45px;font-size:22px;font-weight:850;color:#fff;letter-spacing:-.4px}.mealTileKcal:not(:empty){}
+.mealTile::after{content:"";position:absolute;z-index:1;left:15px;right:39%;bottom:15px;height:7px;border-radius:999px;background:rgba(255,255,255,.15);box-shadow:inset 0 1px 1px rgba(0,0,0,.15)}
+.mealTileProgress{position:absolute;z-index:2;left:15px;bottom:15px;height:7px;border-radius:999px;max-width:61%;background:#f8c33d}.mealTile--lunch .mealTileProgress{background:#77cf80}.mealTile--avondeten .mealTileProgress{background:#ff9d59}.mealTile--snacks .mealTileProgress{background:#b991ff}
+.mealTileAdd{position:absolute;z-index:3;right:14px;top:14px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;color:#fff;font-size:32px;font-weight:300;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.12);pointer-events:none}
 .mealModal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}.mealModalBackdrop{position:absolute;inset:0;background:rgba(0,0,0,.58);backdrop-filter:blur(3px)}
 .mealModalPanel{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -12px 45px rgba(0,0,0,.24);animation:mealUp .2s ease}
 @keyframes mealUp{from{transform:translateY(20px);opacity:.7}to{transform:translateY(0);opacity:1}}
@@ -133,7 +147,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .mealEntrySection{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
 .fourWeekDashboard .foodRank{margin-top:10px}.foodRankRow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.foodRankRow:first-child{border-top:0}.rankNum{width:28px;height:28px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:850;font-size:12px}.rankName{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rankMeta{font-size:11px;color:var(--muted);margin-top:2px}.rankKcal{text-align:right;font-weight:800;font-size:13px}.rankBar{height:5px;background:#e6ebe6;border-radius:99px;overflow:hidden;margin-top:5px}.rankBar>div{height:100%;background:var(--accent);border-radius:99px}.adviceBox{padding:14px;border-radius:16px;background:var(--accent-soft);border:1px solid #d5e6da}.adviceBox.warnAdvice{background:#fff5e6;border-color:#f0d8ae}.adviceTitle{font-weight:850;margin-bottom:5px}.adviceText{font-size:13px;line-height:1.45}.adviceBullets{margin:9px 0 0;padding-left:18px;font-size:13px;line-height:1.55}.adviceTag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:5px}
 html[data-theme="dark"] .mealTile:hover{border-color:#3c5b49;box-shadow:0 10px 30px rgba(0,0,0,.28)}html[data-theme="dark"] .mealTileKcal{color:var(--accent)}html[data-theme="dark"] .mealModalPanel{box-shadow:0 -12px 45px rgba(0,0,0,.55)}html[data-theme="dark"] .mealCurrent .item{background:#1c2b23}html[data-theme="dark"] .rankBar{background:#293a31}html[data-theme="dark"] .adviceBox{background:#20372b;border-color:#315541}html[data-theme="dark"] .adviceBox.warnAdvice{background:#3b2e1e;border-color:#624b2d}
-@media(max-width:560px){.mealTileGrid{gap:10px}.mealTile{min-height:125px;padding:14px}.mealTileIcon{width:36px;height:36px;font-size:18px}.mealModalPanel{max-height:94vh;padding-left:14px;padding-right:14px}.foodRankRow{grid-template-columns:28px minmax(0,1fr) auto}}
+@media(max-width:560px){.mealTileGrid{gap:10px}.mealTile{min-height:165px;padding:13px 12px 12px;border-radius:20px}.mealTileIcon{width:38px;height:38px;margin-bottom:8px}.mealTileTitle{font-size:17px}.mealTileMeta{font-size:11px}.mealTileKcal{left:12px;bottom:39px;font-size:17px}.mealTile::after{left:12px;right:34%;bottom:12px;height:6px}.mealTileProgress{left:12px;bottom:12px;height:6px}.mealTileAdd{right:10px;top:10px;width:40px;height:40px;font-size:27px}.mealModalPanel{max-height:94vh;padding-left:14px;padding-right:14px}.foodRankRow{grid-template-columns:28px minmax(0,1fr) auto}}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -163,7 +177,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.0.3';
+const APP_VERSION='5.0.4';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -207,7 +221,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="5.0.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="5.0.4"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -883,10 +897,10 @@ function calc(){
 }
 function mealTileConfig(){
  return [
-  {key:"Ontbijt",icon:"☀️",label:"Ontbijt"},
-  {key:"Lunch",icon:"🥗",label:"Lunch"},
-  {key:"Avondeten",icon:"🍽️",label:"Avondeten"},
-  {key:"Snack",icon:"🍎",label:"Snacks"}
+  {key:"Ontbijt",label:"Ontbijt",className:"mealTile--ontbijt"},
+  {key:"Lunch",label:"Lunch",className:"mealTile--lunch"},
+  {key:"Avondeten",label:"Avondeten",className:"mealTile--avondeten"},
+  {key:"Snack",label:"Snacks",className:"mealTile--snacks"}
  ];
 }
 function openMealEntry(meal){
@@ -921,7 +935,8 @@ function renderMealTiles(){
  const d=document.getElementById("entryDate")?.value||today(), items=data.days[d]||[], box=document.getElementById("mealTiles"); if(!box)return;
  box.innerHTML=mealTileConfig().map(m=>{
   const a=items.filter(x=>x.meal===m.key), kcal=Math.round(a.reduce((s,x)=>s+(+x.kcal||0),0));
-  return `<button class="mealTile" type="button" onclick="openMealEntry('${m.key}')"><span class="mealTileIcon" aria-hidden="true">${m.icon}</span><span class="mealTileKcal">${kcal?kcal+' kcal':'—'}</span><div class="mealTileTitle">${m.label}</div><div class="mealTileMeta">${a.length?a.length+' registratie'+(a.length===1?'':'s'):'Nog niets geregistreerd'}</div></button>`;
+  const progress=Math.min(100,Math.round((kcal/600)*100));
+  return `<button class="mealTile ${m.className}" type="button" onclick="openMealEntry('${m.key}')"><span class="mealTileIcon" aria-hidden="true"></span><span class="mealTileAdd" aria-hidden="true">+</span><span class="mealTileKcal">${kcal?kcal+' kcal':'—'}</span><div class="mealTileTitle">${m.label}</div><div class="mealTileMeta">${a.length?a.length+' registratie'+(a.length===1?'':'s'):'Nog niets geregistreerd'}</div><span class="mealTileProgress" style="width:${progress}%"></span></button>`;
  }).join("");
 }
 function renderMealCurrent(){
