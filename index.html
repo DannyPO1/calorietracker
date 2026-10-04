@@ -38,7 +38,7 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.4.0';
+const APP_VERSION='4.4.1';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -82,7 +82,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.4.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.4.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -202,7 +202,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.0</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.1</b></div>
 
   </div>
 
@@ -329,7 +329,9 @@ function calc(){
 function render(){
  let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
  document.getElementById("dateLabel").textContent=dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
- document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";\n let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";\n document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
+ document.getElementById("dayTitle").textContent=d===today()?"Vandaag":"Dagoverzicht";
+ let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";
+ document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
  document.getElementById("totalKcal").textContent=Math.round(t.kcal)+" kcal";document.getElementById("protein").textContent=Math.round(t.p)+" g";
  document.getElementById("macro").textContent=Math.round(t.c)+"/"+Math.round(t.f);
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" kcal":"—";
@@ -611,7 +613,7 @@ function closeModal(id){
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 
-/* CalorieTracker 4.4.0 — portion system */
+/* CalorieTracker 4.4.1 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},
@@ -682,7 +684,6 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.4.0';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
