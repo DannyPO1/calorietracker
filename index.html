@@ -56,7 +56,7 @@ button{border:0;border-radius:11px;padding:11px 14px;font:inherit;font-weight:70
   <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
   <div class="grid">
    <div><label>Hoeveelheid</label><input id="amount" type="number" min="0.1" step="0.1" value="100"></div>
-   <div><label>Eenheid</label><select id="unit"><option value="g">gram</option><option value="ml">ml</option><option value="stuk">stuk</option></select></div>
+   <div><label>Eenheid / portie</label><select id="unit" onchange="showSelected()"><option value="g">gram</option><option value="ml">ml</option></select></div>
   </div>
   <div id="selectedInfo" class="notice">Kies een product uit de suggesties of typ een eigen product.</div>
   <div class="actions"><button class="primary" onclick="addSelected()">Toevoegen</button><button class="secondary" onclick="openModal('foodModal')">Eigen product</button><button class="ghost" onclick="openModal('recipeModal')">Recept</button></div>
@@ -134,14 +134,57 @@ function suggestProducts(){
  if(!q){box.classList.add("hidden");return}
  let hits=keys.filter(k=>k.includes(q)).slice(0,10);box.innerHTML=hits.length?hits.map(k=>`<div class="suggestion" onclick="selectProduct('${esc(k).replace(/'/g,"&#39;")}')"><b>${esc(k)}</b><div class="tiny">${allProducts()[k].kcal} kcal / 100 ${allProducts()[k].u}</div></div>`).join(""):`<div class="suggestion" onclick="openModal('foodModal')">Geen match. Maak een eigen product.</div>`;box.classList.remove("hidden")
 }
-function selectProduct(n){document.getElementById("productSearch").value=n;document.getElementById("unit").value=allProducts()[n].u;document.getElementById("suggestions").classList.add("hidden");showSelected()}
-function showSelected(){let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n);if(!p){document.getElementById("selectedInfo").textContent="Product nog niet herkend. Kies een suggestie of maak een eigen product.";return}let v=p[1],a=+document.getElementById("amount").value||0;document.getElementById("selectedInfo").innerHTML=`<b>${esc(p[0])}</b>: ${Math.round(v.kcal*a/100)} kcal • ${Math.round(v.p*a/100*10)/10} g eiwit • ${Math.round(v.c*a/100*10)/10} g koolhydraten • ${Math.round(v.f*a/100*10)/10} g vet`}
-document.getElementById("amount").addEventListener("input",showSelected)
-document.addEventListener("click",e=>{if(!e.target.closest(".searchbox"))document.getElementById("suggestions").classList.add("hidden")})
+function portionOptions(productName){
+ const key=productName.toLowerCase().trim();
+ return (PORTIONS && PORTIONS[key]) ? PORTIONS[key] : [];
+}
+function populateUnits(productName, keepValue){
+ const sel=document.getElementById("unit"), p=portionOptions(productName), base=allProducts()[productName];
+ if(!sel)return;
+ const opts=[];
+ if(base && base.u==="ml") opts.push(`<option value="ml">ml</option>`);
+ else opts.push(`<option value="g">gram</option>`);
+ p.forEach((x,i)=>opts.push(`<option value="portion:${x.grams}">${x.label}</option>`));
+ sel.innerHTML=opts.join("");
+ if(keepValue && [...sel.options].some(o=>o.value===keepValue)) sel.value=keepValue;
+ else if(p.length) sel.value=`portion:${p[0].grams}`;
+ else sel.value=base&&base.u==="ml"?"ml":"g";
+}
+function amountInGrams(productName, amount, unitValue){
+ if(unitValue && unitValue.startsWith("portion:")) return Number(amount)*Number(unitValue.split(":")[1]);
+ return Number(amount);
+}
+function displayUnit(productName, unitValue){
+ if(unitValue && unitValue.startsWith("portion:")){
+   const grams=Number(unitValue.split(":")[1]), p=portionOptions(productName).find(x=>Number(x.grams)===grams);
+   return p ? p.label : `${grams} g`;
+ }
+ return unitValue||"g";
+}
+function selectProduct(n){
+ document.getElementById("productSearch").value=n;
+ document.getElementById("suggestions").classList.add("hidden");
+ populateUnits(n);
+ const p=portionOptions(n);
+ document.getElementById("amount").value=p.length?1:100;
+ showSelected();
+}
+function showSelected(){
+ let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n);
+ if(!p){document.getElementById("selectedInfo").textContent="Product nog niet herkend. Kies een suggestie of maak een eigen product.";return}
+ populateUnits(p[0], document.getElementById("unit").value);
+ let v=p[1],a=+document.getElementById("amount").value||0,u=document.getElementById("unit").value,g=amountInGrams(p[0],a,u);
+ document.getElementById("selectedInfo").innerHTML=`<b>${esc(p[0])}</b>: ${Math.round(v.kcal*g/100)} kcal • ${Math.round(v.p*g/100*10)/10} g eiwit • ${Math.round(v.c*g/100*10)/10} g koolhydraten • ${Math.round(v.f*g/100*10)/10} g vet${u.startsWith("portion:")?`<br><span class="muted">${a} × ${esc(displayUnit(p[0],u))} = ${Math.round(g)} g</span>`:""}`;
+}
 function addSelected(){
- let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n),a=+document.getElementById("amount").value||0;if(!p||a<=0){msg("Kies eerst een geldig product en hoeveelheid.","warn");return}
- let v=p[1], factor=a/100, item={name:p[0],amount:a,unit:document.getElementById("unit").value,kcal:v.kcal*factor,p:v.p*factor,c:v.c*factor,f:v.f*factor,meal:document.getElementById("mealType").value};
- data.days[activeDate()]??=[];data.days[activeDate()].push(item);save();document.getElementById("productSearch").value="";document.getElementById("amount").value=100;showSelected();msg("Toegevoegd aan "+(activeDate()===today()?"vandaag":new Date(activeDate()+"T12:00:00").toLocaleDateString("nl-NL"))+".","success");render()
+ let n=document.getElementById("productSearch").value.trim().toLowerCase(),p=product(n),a=+document.getElementById("amount").value||0,u=document.getElementById("unit").value;
+ if(!p||a<=0){msg("Kies eerst een geldig product en hoeveelheid.","warn");return}
+ let v=p[1],g=amountInGrams(p[0],a,u),factor=g/100;
+ let item={name:p[0],amount:a,unit:displayUnit(p[0],u),grams:g,kcal:v.kcal*factor,p:v.p*factor,c:v.c*factor,f:v.f*factor,meal:document.getElementById("mealType").value};
+ data.days[activeDate()]??=[];data.days[activeDate()].push(item);save();
+ document.getElementById("productSearch").value="";document.getElementById("amount").value=100;document.getElementById("unit").innerHTML='<option value="g">gram</option><option value="ml">ml</option>';
+ document.getElementById("selectedInfo").textContent="Kies een product uit de suggesties.";
+ msg("Toegevoegd aan "+(activeDate()===today()?"vandaag":new Date(activeDate()+"T12:00:00").toLocaleDateString("nl-NL"))+".","success");render();
 }
 function msg(t,kind="success"){document.getElementById("addMessage").innerHTML=`<div class="notice ${kind}">${t}</div>`}
 function removeItem(i){let a=data.days[activeDate()]||[];a.splice(i,1);save();render()}
@@ -160,7 +203,7 @@ function render(){
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" kcal":"—";
  document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";document.getElementById("progress").style.width=c?Math.min(100,t.kcal/c.target*100)+"%":"0%";
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
- document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${x.unit}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
+ document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
  document.getElementById("entryDate").value=d;renderSettings()
 }
 function saveProfile(){
@@ -179,11 +222,19 @@ function saveCustom(){
 }
 function renderCustom(){let keys=Object.keys(data.custom);document.getElementById("customList").innerHTML=keys.length?keys.map(n=>`<div class="item"><span>${esc(n)}</span><span>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}</span></div>`).join(""):'<p class="muted">Nog geen eigen producten.</p>'}
 let recipeLines=[];let selectedRecipeToday="";
-function addRecipeLine(){recipeLines.push({name:"",amount:100});renderRecipeBuilder()}
+function addRecipeLine(){recipeLines.push({name:"",amount:100,unit:"g"});renderRecipeBuilder()}
 function recipeProductHits(q){q=(q||"").toLowerCase().trim();let keys=Object.keys(allProducts());if(!q)return keys.slice(0,8);return keys.filter(k=>k.includes(q)).slice(0,8)}
+function recipeUnitOptions(name,current){
+ const p=portionOptions(name||""); let opts='<option value="g">gram</option>';
+ p.forEach(x=>opts+=`<option value="portion:${x.grams}" ${current===`portion:${x.grams}`?"selected":""}>${x.label}</option>`);
+ if(current==="ml")opts='<option value="ml" selected>ml</option>'+opts;
+ else if(current==="g")opts=opts.replace('value="g"','value="g" selected');
+ return opts;
+}
+function recipeGrams(x){return amountInGrams(x.name,x.amount,x.unit||"g")}
 function renderRecipeBuilder(){
  const box=document.getElementById("recipeBuilder");
- box.innerHTML=recipeLines.length?recipeLines.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:13px;padding:10px;margin:8px 0"><label>Ingrediënt ${i+1}</label><div class="searchbox"><input id="recipeProduct${i}" autocomplete="off" placeholder="Zoek product..." value="${esc(x.name)}" oninput="recipeLineInput(${i},this.value)" onfocus="recipeLineInput(${i},this.value)"><div id="recipeSug${i}" class="suggestions hidden"></div></div><div class="grid" style="margin-top:8px"><div><label>Hoeveelheid</label><input type="number" min="0.1" step="0.1" value="${x.amount}" oninput="recipeLines[${i}].amount=+this.value;updateRecipePreview()"></div><div style="display:flex;align-items:end"><button class="danger" style="width:100%" onclick="removeRecipeLine(${i})">Ingrediënt verwijderen</button></div></div></div>`).join(""):'<div class="empty">Nog geen ingrediënten. Tik op + Ingrediënt.</div>';
+ box.innerHTML=recipeLines.length?recipeLines.map((x,i)=>`<div style="border:1px solid var(--line);border-radius:13px;padding:10px;margin:8px 0"><label>Ingrediënt ${i+1}</label><div class="searchbox"><input id="recipeProduct${i}" autocomplete="off" placeholder="Zoek product..." value="${esc(x.name)}" oninput="recipeLineInput(${i},this.value)" onfocus="recipeLineInput(${i},this.value)"><div id="recipeSug${i}" class="suggestions hidden"></div></div><div class="grid" style="margin-top:8px"><div><label>Hoeveelheid</label><input type="number" min="0.1" step="0.1" value="${x.amount}" oninput="recipeLines[${i}].amount=+this.value;updateRecipePreview()"></div><div><label>Eenheid / portie</label><select onchange="recipeLines[${i}].unit=this.value;updateRecipePreview()">${recipeUnitOptions(x.name,x.unit)}</select></div></div><div class="actions"><button class="danger" style="width:100%" onclick="removeRecipeLine(${i})">Ingrediënt verwijderen</button></div></div>`).join(""):'<div class="empty">Nog geen ingrediënten. Tik op + Ingrediënt.</div>';
  updateRecipePreview();
 }
 function recipeLineInput(i,value){
@@ -195,14 +246,14 @@ function recipeLineInput(i,value){
  box.classList.remove("hidden");
  updateRecipePreview();
 }
-function selectRecipeProduct(i,name){recipeLines[i].name=name;document.getElementById("recipeProduct"+i).value=name;document.getElementById("recipeSug"+i).classList.add("hidden");updateRecipePreview()}
+function selectRecipeProduct(i,name){recipeLines[i].name=name;let p=portionOptions(name);recipeLines[i].unit=p.length?`portion:${p[0].grams}`:"g";recipeLines[i].amount=p.length?1:100;document.getElementById("recipeProduct"+i).value=name;document.getElementById("recipeSug"+i).classList.add("hidden");renderRecipeBuilder()}
 function removeRecipeLine(i){recipeLines.splice(i,1);renderRecipeBuilder()}
-function recipeTotals(){let sum={kcal:0,p:0,c:0,f:0};for(const x of recipeLines){let p=product(x.name);if(!p||!x.amount)continue;let v=p[1],f=+x.amount/100;sum.kcal+=v.kcal*f;sum.p+=v.p*f;sum.c+=v.c*f;sum.f+=v.f*f}return sum}
+function recipeTotals(){let sum={kcal:0,p:0,c:0,f:0};for(const x of recipeLines){let p=product(x.name);if(!p||!x.amount)continue;let v=p[1],f=recipeGrams(x)/100;sum.kcal+=v.kcal*f;sum.p+=v.p*f;sum.c+=v.c*f;sum.f+=v.f*f}return sum}
 function updateRecipePreview(){let el=document.getElementById("recipePreview");if(!el)return;let t=recipeTotals(),s=Math.max(1,+document.getElementById("recipeServings").value||1);el.innerHTML=`Totaal: <b>${Math.round(t.kcal)} kcal</b> • ${Math.round(t.p)} g eiwit. Per portie: <b>${Math.round(t.kcal/s)} kcal</b>`}
 function saveRecipe(){
  let n=document.getElementById("recipeName").value.trim().toLowerCase(),servings=Math.max(1,+document.getElementById("recipeServings").value||1);
  if(!n||!recipeLines.length){alert("Geef een naam en minimaal één ingrediënt.");return}
- let ingredients=[];for(let x of recipeLines){let p=product(x.name);if(!p||!x.amount){alert("Controleer ingrediënt: "+(x.name||"onbekend"));return}ingredients.push({name:p[0],amount:+x.amount,unit:p[1].u})}
+ let ingredients=[];for(let x of recipeLines){let p=product(x.name);if(!p||!x.amount){alert("Controleer ingrediënt: "+(x.name||"onbekend"));return}ingredients.push({name:p[0],amount:+x.amount,unit:x.unit||p[1].u,grams:recipeGrams(x)})}
  let sum=recipeTotals();data.recipes[n]={ingredients,servings,total:sum,perServing:{kcal:sum.kcal/servings,p:sum.p/servings,c:sum.c/servings,f:sum.f/servings}};
  save();recipeLines=[];document.getElementById("recipeName").value="";document.getElementById("recipeServings").value=1;closeModal("recipeModal");render();alert("Recept opgeslagen en beschikbaar onder ‘Mijn recepten toevoegen’.")
 }
@@ -330,7 +381,7 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.0.0';
+const APP_VERSION='4.1.1';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
