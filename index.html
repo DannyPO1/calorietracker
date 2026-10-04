@@ -38,6 +38,20 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .motivation{padding:11px 13px;background:#e8f2eb;border-radius:15px;color:#245b3d;font-size:13px;font-weight:650}
 .sectionKicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:800;margin-bottom:5px}
 @media(max-width:560px){.calorieHero{grid-template-columns:150px 1fr;gap:14px;padding:15px}.calorieRing{width:146px;height:146px}.ringKcal{font-size:24px}.goalSummary .goalValue{font-size:21px}}
+.calorieDashboard{position:relative;overflow:hidden;background:linear-gradient(145deg,#fffdf8 0%,#f4f8f1 58%,#edf5ef 100%);border:1px solid #d9e5db;border-radius:28px;margin-bottom:15px;box-shadow:0 12px 34px rgba(24,59,43,.10)}
+.calorieDashboard:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-85px;top:-90px;background:rgba(221,239,226,.65);pointer-events:none}
+.calorieDashboard .calorieHero{position:relative;z-index:1;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;padding:20px 20px 16px}
+.goalMeta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dashboardStats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(35,107,69,.12);background:rgba(255,255,255,.34)}
+.dashStat{display:flex;align-items:center;gap:9px;padding:13px 12px;border-right:1px solid rgba(35,107,69,.10);min-width:0}
+.dashStat:last-child{border-right:0}
+.dashIcon{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:850;flex:0 0 auto}
+.proteinIcon{background:#e3f1e7;color:#236b45}.carbIcon{background:#f8eadb;color:#ad6a26}.progressIcon{background:#e5edf7;color:#356b9d}.mealIcon{background:#ece8f4;color:#73579b}
+.dashStat b{display:block;font-size:15px;letter-spacing:-.2px}.dashStat span{display:block;font-size:9px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dashboardFooter{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:12px 20px 5px;color:var(--muted);font-size:11px;font-weight:650}.dashboardFooter strong{color:var(--accent);font-size:12px}
+.dashboardBar{position:relative;z-index:1;height:8px;background:rgba(35,107,69,.10);margin:0 20px 17px;border-radius:99px;overflow:hidden}.dashboardBar>div{height:100%;width:0;background:linear-gradient(90deg,#236b45,#5d9d75);border-radius:99px;transition:width .3s ease}
+@media(max-width:560px){.calorieDashboard .calorieHero{grid-template-columns:145px 1fr;gap:14px;padding:17px 14px 14px}.calorieDashboard .calorieRing{width:142px;height:142px}.calorieDashboard .ringKcal{font-size:24px}.calorieDashboard .goalSummary .goalValue{font-size:21px}.dashboardStats{grid-template-columns:1fr 1fr}.dashStat{padding:12px 11px}.dashStat:nth-child(2){border-right:0}.dashStat:nth-child(-n+2){border-bottom:1px solid rgba(35,107,69,.10)}.dashboardFooter{padding-top:11px}}
+
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <script>
@@ -47,7 +61,7 @@ Object.assign(DB, DB_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.5.0';
+const APP_VERSION='4.5.1';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -91,7 +105,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.5.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.5.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -119,27 +133,30 @@ function updateRecipeLineCalorie(i){
 <main>
 
 <section id="today">
- <div class="calorieHero">
-  <div class="calorieRing" id="calorieRing" style="--pct:0%">
-   <div class="ringInner">
-    <div class="ringLabel">vandaag gegeten</div>
-    <div class="ringKcal" id="totalKcal">0</div>
-    <div class="ringRemaining" id="remainingKcal">— over</div>
+ <div class="calorieDashboard">
+  <div class="calorieHero">
+   <div class="calorieRing" id="calorieRing" style="--pct:0%">
+    <div class="ringInner">
+     <div class="ringLabel">vandaag gegeten</div>
+     <div class="ringKcal" id="totalKcal">0</div>
+     <div class="ringRemaining" id="remainingKcal">— over</div>
+    </div>
+   </div>
+   <div class="goalSummary">
+    <div><div class="sectionKicker" id="dateLabel"></div><div class="goalCaption">Dagbudget</div><div class="goalValue" id="targetKcal">—</div></div>
+    <div class="goalMeta"><span class="goalCaption">Streefgewicht</span><span class="chip" id="goalTag">Stel doel in</span></div>
+    <div class="motivation" id="dailyMessage">Rustig opbouwen. Elke registratie telt.</div>
    </div>
   </div>
-  <div class="goalSummary">
-   <div><div class="sectionKicker" id="dateLabel"></div><div class="goalCaption">Dagdoel</div><div class="goalValue" id="targetKcal">—</div></div>
-   <div class="goalLine"><span class="goalCaption">Streefgewicht</span><span class="chip" id="goalTag">Stel doel in</span></div>
-   <div class="motivation" id="dailyMessage">Rustig opbouwen. Elke registratie telt.</div>
+  <div class="dashboardStats">
+   <div class="dashStat"><span class="dashIcon proteinIcon">P</span><div><b id="protein">0 g</b><span>eiwit</span></div></div>
+   <div class="dashStat"><span class="dashIcon carbIcon">K</span><div><b id="macro">0/0</b><span>koolhydraten / vet</span></div></div>
+   <div class="dashStat"><span class="dashIcon progressIcon">%</span><div><b id="dayProgress">0%</b><span>van dagdoel</span></div></div>
+   <div class="dashStat"><span class="dashIcon mealIcon">+</span><div><b id="mealCount">0</b><span>registraties</span></div></div>
   </div>
+  <div class="dashboardFooter"><span>Dagvoortgang</span><strong id="dashboardFooterText">0%</strong></div>
+  <div class="dashboardBar"><div id="progress"></div></div>
  </div>
- <div class="stats">
-  <div class="stat"><b id="protein">0 g</b><span>eiwit</span></div>
-  <div class="stat"><b id="macro">0/0</b><span>koolhydraten / vet</span></div>
-  <div class="stat"><b id="dayProgress">0%</b><span>van dagdoel</span></div>
-  <div class="stat"><b id="mealCount">0</b><span>registraties</span></div>
- </div>
- <div class="bar" style="display:none"><div id="progress"></div></div>
 
  <div class="card">
   <h2>Voeding vandaag</h2>
@@ -222,7 +239,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.4.2</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.5.1</b></div>
 
   </div>
 
@@ -571,7 +588,7 @@ function render(){
  document.getElementById("totalKcal").textContent=Math.round(t.kcal);document.getElementById("protein").textContent=Math.round(t.p)+" g";
  document.getElementById("macro").textContent=Math.round(t.c)+" / "+Math.round(t.f);
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" over":"—";
- document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
+ document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const dft=document.getElementById("dashboardFooterText");if(dft)dft.textContent=Math.round(pct)+"% van dagdoel";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
  document.getElementById("meals").innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
  document.getElementById("entryDate").value=d;renderSettings()
