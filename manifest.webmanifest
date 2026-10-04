@@ -1,11 +1,1 @@
-{
-  "name": "CalorieTracker",
-  "short_name": "CalorieTracker",
-  "description": "Persoonlijke calorie- en gewichtsregistratie",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f4f6f8",
-  "theme_color": "#111827",
-  "lang": "nl-NL",
-  "icons": []
-}
+{"name":"CalorieTracker","short_name":"CalorieTracker","description":"Persoonlijke calorie- en gewichtsregistratie","start_url":"./","display":"standalone","background_color":"#f4f6f8","theme_color":"#111827","lang":"nl-NL","icons":[]}
