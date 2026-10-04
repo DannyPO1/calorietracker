@@ -145,7 +145,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='4.6.2';
+const APP_VERSION='4.6.3';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -691,23 +691,23 @@ async function lookupBarcode(code){
   setBarcodeStatus('Productgegevens ophalen uit Open Food Facts…');
   try{
     const fields='code,product_name,product_name_nl,generic_name,generic_name_nl,brands,nutriments,image_front_small_url';
-    const ua=encodeURIComponent('CalorieTracker/4.6.2 (barcode lookup)');
     const urls=[
-      'https://world.openfoodfacts.org/api/v3/product/'+encodeURIComponent(code)+'.json?lc=nl&cc=nl&product_type=food&fields='+encodeURIComponent(fields),
-      'https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?lc=nl&cc=nl&fields='+encodeURIComponent(fields)+'&user_agent='+ua
+      'https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?lc=nl&cc=nl&fields='+encodeURIComponent(fields),
+      'https://world.openfoodfacts.org/api/v3/product/'+encodeURIComponent(code)+'.json?lc=nl&cc=nl&product_type=food&fields='+encodeURIComponent(fields)
     ];
     let json=null,lastError=null;
     for(const url of urls){
       try{
-        const res=await fetch(url,{cache:'no-store'});
+        const res=await fetch(url,{cache:'no-store',headers:{'Accept':'application/json','User-Agent':'CalorieTracker/4.6.3'}});
         if(!res.ok)throw new Error('HTTP '+res.status);
         const candidate=await res.json();
-        if(candidate && (Number(candidate.status)===1 || candidate.product)){json=candidate;break;}
-        json=candidate;
+        const found = candidate && (Number(candidate.status)===1 || (candidate.product && Object.keys(candidate.product).length>0));
+        if(found){json=candidate;break;}
+        lastError=new Error(candidate?.status_verbose||'Product niet gevonden');
       }catch(err){lastError=err;}
     }
     if(!json)throw lastError||new Error('Geen API-respons');
-    if(Number(json.status)!==1 || !json.product){
+    if(!json.product){
       scannedBarcodeProduct=null;
       document.getElementById('barcodeResult').innerHTML='<div class="notice warn"><b>Product niet gevonden.</b><br>Dit barcodeproduct staat niet in Open Food Facts. Je kunt het hieronder handmatig als eigen product aanmaken.</div><div class="actions"><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Handmatig eigen product maken</button></div>';
       setBarcodeStatus('Geen product gevonden voor deze barcode.','warn');
