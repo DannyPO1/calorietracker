@@ -38,7 +38,18 @@ Object.assign(PORTIONS, PORTIONS_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION="4.2.1";
+const APP_VERSION="4.2.2";
+function syncVersionUI(){
+  const h=document.getElementById("headerVersion");
+  const a=document.getElementById("appVersion");
+  if(h) h.textContent="v"+APP_VERSION;
+  if(a) a.textContent=APP_VERSION;
+}
+function compareVersions(a,b){
+  const pa=String(a).split(".").map(Number), pb=String(b).split(".").map(Number);
+  for(let i=0;i<3;i++){const x=pa[i]||0,y=pb[i]||0;if(x!==y)return x-y;}
+  return 0;
+}
 async function checkForUpdate(){
   const btn=document.getElementById("checkUpdateBtn");
   const status=document.getElementById("updateStatus");
@@ -49,9 +60,12 @@ async function checkForUpdate(){
     const response=await fetch(url,{cache:"no-store"});
     if(!response.ok)throw new Error("HTTP "+response.status);
     const text=await response.text();
-    const m=text.match(/id=["']appVersion["'][^>]*>([^<]+)</i)||text.match(/v(\d+\.\d+\.\d+)/i);
+    const meta=text.match(/<meta[^>]+name=["']app-version["'][^>]+content=["']([^"']+)["']/i);
+    const ui=text.match(/id=["']appVersion["'][^>]*>([^<]+)/i);
+    const header=text.match(/id=["']headerVersion["'][^>]*>\s*v?([^<]+)/i);
+    const m=meta||ui||header;
     const remote=m?m[1].replace(/^v/,"").trim():null;
-    if(remote && remote!==APP_VERSION){
+    if(remote && compareVersions(remote,APP_VERSION)>0){
       if(status)status.innerHTML=`Nieuwe versie gevonden: <b>${remote}</b>. De pagina wordt vernieuwd.`;
       if("serviceWorker" in navigator){
         const reg=await navigator.serviceWorker.getRegistration();
@@ -59,7 +73,7 @@ async function checkForUpdate(){
       }
       setTimeout(()=>location.reload(),1200);
     }else{
-      if(status)status.innerHTML=`Je gebruikt de nieuwste versie: <b>${APP_VERSION}</b>.`;
+      if(status)status.innerHTML=remote && compareVersions(remote,APP_VERSION)<0 ? `De gepubliceerde versie is <b>${remote}</b>, maar je gebruikt al een nieuwere versie: <b>${APP_VERSION}</b>.` : `Je gebruikt de nieuwste versie: <b>${APP_VERSION}</b>.`;
     }
   }catch(e){
     if(status)status.innerHTML=`Kan de nieuwste versie nu niet controleren. Je gebruikt <b>${APP_VERSION}</b>.`;
@@ -68,9 +82,9 @@ async function checkForUpdate(){
   }
 }
 </script>
-</head>
+<meta name="app-version" content="4.2.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script></head>
 <body>
-<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1">v4.1.0</span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
+<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#cbd5e1"></span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#94a3b8">v4</span></header>
 <main>
 
 <section id="today">
@@ -115,13 +129,13 @@ async function checkForUpdate(){
 <section id="settings" class="hidden">
   <div class="card" id="aboutApp">
     <h2>Over CalorieTracker</h2>
-    <div class="item"><span>Versie</span><b id="appVersion">4.1.0</b></div>
+    <div class="item"><span>Versie</span><b id="appVersion"></b></div>
     <div class="item"><span>Uitgebracht</span><span>4 oktober 2026</span></div>
     <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p><p class="muted"><b>Voedingsdatabase:</b> 118 standaardproducten met gangbare porties.</p>
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.2.1</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b>4.2.2</b></div>
 
   </div>
 
@@ -354,7 +368,7 @@ function closeModal(id){document.getElementById(id).classList.add("hidden")}
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();
 
-/* CalorieTracker 4.1.0 — portion system */
+/* CalorieTracker 4.2.2 — portion system */
 const PORTIONS = {
   "banaan": [
     {label:"1 stuk (eetbaar)", grams:120},
@@ -425,7 +439,7 @@ function buildAmountOptions(productName) {
 
 </script>
 <script>
-const APP_VERSION='4.2.1';
+const APP_VERSION='4.2.2';
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
