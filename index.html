@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#183b2b">
+<meta name="theme-color" content="#183b2b" id="themeColorMeta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CalorieTracker">
@@ -12,7 +12,40 @@
 :root{--bg:#f6f5ef;--card:#fffdf8;--text:#17231c;--muted:#68746d;--line:#e3e7df;--accent:#236b45;--accent-dark:#183b2b;--accent-soft:#e8f2eb;--green:#2f855a;--red:#c2413b;--amber:#c77a22;--cream:#f4f0e4;--shadow:0 6px 24px rgba(24,59,43,.07)}
 
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7f5ee 0%,var(--bg) 35%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;padding-bottom:92px}
-header{background:linear-gradient(135deg,#183b2b 0%,#24563b 100%);color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(24,59,43,.18)}header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#d7e5dc;font-size:12px}
+header{background:linear-gradient(135deg,#183b2b 0%,#24563b 100%);color:#fff;padding:20px 17px 16px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(24,59,43,.18)}
+.themeSwitch{position:relative;width:54px;height:30px;padding:0;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 2px rgba(0,0,0,.12);flex:0 0 auto}
+.themeSwitch .trackIcon{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;line-height:1;color:#fff;transition:opacity .2s}.themeSwitch .moon{left:8px}.themeSwitch .sun{right:8px}
+.themeSwitch .knob{position:absolute;left:4px;top:4px;width:20px;height:20px;border-radius:50%;background:#fffdf8;box-shadow:0 2px 7px rgba(0,0,0,.22);transition:transform .22s ease,background .22s ease}
+.headerMeta{display:flex;align-items:center;gap:9px}.headerMeta .versionStack{text-align:right}.headerMeta .versionStack .major{display:block;font-size:10px;color:#b8cbbf}.headerMeta .versionStack .full{display:block;font-size:11px;color:#d7e5dc}
+header h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#d7e5dc;font-size:12px}
+
+/* Premium dark theme */
+html[data-theme="dark"]{color-scheme:dark;--bg:#0f1713;--card:#17211b;--text:#edf4ef;--muted:#a8b7ae;--line:#2a3931;--accent:#56b87d;--accent-dark:#0b2016;--accent-soft:#20372b;--green:#63c98c;--red:#f07870;--amber:#e8a64d;--cream:#18241d;--shadow:0 8px 28px rgba(0,0,0,.28)}
+html[data-theme="dark"] body{background:linear-gradient(180deg,#0c120f 0%,var(--bg) 38%)}
+html[data-theme="dark"] header{background:linear-gradient(135deg,#0a2116 0%,#123a26 100%);box-shadow:0 5px 22px rgba(0,0,0,.28)}
+html[data-theme="dark"] input,html[data-theme="dark"] select{background:#111a15;border-color:#34453b;color:var(--text)}
+html[data-theme="dark"] .calorieHero{background:linear-gradient(145deg,#17211b,#1c2d23);border-color:#304239}
+html[data-theme="dark"] .calorieRing{background:conic-gradient(var(--accent) var(--pct,0%),#2b3c32 0);box-shadow:inset 0 0 0 1px rgba(86,184,125,.12)}
+html[data-theme="dark"] .calorieRing:before{background:#17211b}
+html[data-theme="dark"] .motivation{background:#20372b;color:#bde5cc}
+html[data-theme="dark"] .dashboardStats{background:#142019!important;border-color:#2d4035!important}
+html[data-theme="dark"] .stat{background:#1d2a23}
+html[data-theme="dark"] .tabs{background:rgba(15,23,19,.94);box-shadow:0 -6px 22px rgba(0,0,0,.25)}
+html[data-theme="dark"] .tabs button{color:#9cac a3}
+html[data-theme="dark"] .tabs button{color:#a8b7ae}
+html[data-theme="dark"] .tabs button.active{color:var(--accent)}
+html[data-theme="dark"] .ghost{background:#223129;color:#dce8e1}
+html[data-theme="dark"] .suggestions{background:#17211b}
+html[data-theme="dark"] .suggestion{border-color:#2a3931}
+html[data-theme="dark"] .chart{background:#121a16}
+html[data-theme="dark"] .notice{background:#1d3427;color:#bde5cc}
+html[data-theme="dark"] .warn{background:#3b2e1e;color:#f0c77f}
+html[data-theme="dark"] .success{background:#1d3427;color:#bde5cc}
+html[data-theme="dark"] .themeSwitch{background:#274638;border-color:#3b5b4a}
+html[data-theme="dark"] .themeSwitch .knob{transform:translateX(22px);background:#f5d98b}
+html[data-theme="dark"] .themeSwitch .sun{opacity:1}.themeSwitch .moon{opacity:0}
+html[data-theme="dark"] .themeSwitch .moon{opacity:1}.themeSwitch .sun{opacity:0}
+
 main{max-width:760px;margin:auto;padding:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
 h2{font-size:18px;margin:0 0 13px;letter-spacing:-.2px}h3{font-size:14px;margin:15px 0 8px}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
 .row{display:flex;gap:9px;align-items:center}.between{justify-content:space-between}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -25,7 +58,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .chip{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:750}
 .notice{padding:12px 13px;border-radius:15px;background:#eef6f0;color:#245b3d;font-size:13px;margin-top:10px}.success{background:#e9f6ed;color:#176b3e}.warn{background:#fff5e6;color:#8a5a19}
 .searchbox{position:relative}.suggestions{position:absolute;left:0;right:0;top:72px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 25px #0002;z-index:30;max-height:260px;overflow:auto}.suggestion{padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.suggestion:last-child{border:0}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 6px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px rgba(24,59,43,.05)}.tabs button{flex:1;max-width:180px;background:transparent;color:#6b776f}.tabs button.active{color:var(--accent)}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:40;padding:8px 18px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px rgba(24,59,43,.05);gap:2px}.tabs button{flex:1;max-width:180px;background:transparent;color:#6b776f}.tabs button.active{color:var(--accent)}
 .hidden{display:none!important}.empty{padding:20px 0;text-align:center;color:var(--muted)}
 .chart{width:100%;height:220px;background:#fafbf8;border-radius:16px;border:1px solid var(--line)}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(4){grid-column:1/-1}}
@@ -75,7 +108,26 @@ Object.assign(DB, DB_EXPANDED);
 </script>
 
 <script>
-const APP_VERSION='4.5.2';
+
+const THEME_STORAGE_KEY='calorieTrackerTheme';
+function applyTheme(theme){
+  const dark=theme==='dark';
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  try{localStorage.setItem(THEME_STORAGE_KEY,dark?'dark':'light')}catch(e){}
+  const btn=document.getElementById('themeToggle');
+  if(btn){btn.setAttribute('aria-pressed',dark?'true':'false');btn.setAttribute('aria-label',dark?'Licht thema inschakelen':'Donker thema inschakelen');}
+  const meta=document.getElementById('themeColorMeta');
+  if(meta)meta.content=dark?'#0a2116':'#183b2b';
+}
+function toggleTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');}
+function initTheme(){
+  let theme='light';
+  try{theme=localStorage.getItem(THEME_STORAGE_KEY)||'light'}catch(e){}
+  applyTheme(theme==='dark'?'dark':'light');
+}
+initTheme();
+
+const APP_VERSION='4.5.3';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -119,7 +171,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="4.5.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="4.5.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -143,7 +195,7 @@ function updateRecipeLineCalorie(i){
 }
 </script></head>
 <body>
-<header><div class="row between"><h1>CalorieTracker</h1><span id="headerVersion" style="font-size:11px;color:#d7e5dc"></span></div><p>Privé • lokaal opgeslagen • geen account nodig</p><span style="position:absolute;right:14px;top:10px;font-size:10px;color:#b8cbbf">v4</span></header>
+<header><div class="row between"><h1>CalorieTracker</h1><div class="headerMeta"><button id="themeToggle" class="themeSwitch" type="button" aria-label="Donker thema inschakelen" aria-pressed="false" onclick="toggleTheme()"><span class="trackIcon moon">☾</span><span class="trackIcon sun">☼</span><span class="knob"></span></button><span class="versionStack"><span class="major">v4</span><span id="headerVersion" class="full"></span></span></div></div><p>Privé • lokaal opgeslagen • geen account nodig</p></header>
 <main>
 
 <section id="today">
@@ -1282,7 +1334,7 @@ render();renderSettings();inspectStorage();refreshStorageContext();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=4',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=5',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
       reg.addEventListener('updatefound',()=>{
