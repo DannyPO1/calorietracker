@@ -1,7 +1,7 @@
 {
   "name": "CalorieTracker",
   "short_name": "CalorieTracker",
-  "description": "Persoonlijke calorie- en gewichtsregistratie — versie 4.6.1",
+  "description": "Persoonlijke calorie- en gewichtsregistratie — versie 4.6.2",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f6f5ef",
