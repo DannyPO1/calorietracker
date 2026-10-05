@@ -186,7 +186,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.2.1';
+const APP_VERSION='5.2.2';
 const RELEASE_DATE='5 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -235,7 +235,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="5.2.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="5.2.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -1776,11 +1776,16 @@ if('serviceWorker' in navigator){
     window.__ctReloadingForUpdate=true;
     location.reload();
   });
+
   window.addEventListener('load', async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(APP_VERSION),{updateViaCache:'none'});
+      // v5.2.2 uses a new service-worker filename so an older sw.js
+      // cannot keep the app pinned to an old cached index.html.
+      const workerUrl='./sw-5.2.2.js';
+      const reg=await navigator.serviceWorker.register(workerUrl,{updateViaCache:'none'});
       await reg.update();
-      if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
+      if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+
       reg.addEventListener('updatefound',()=>{
         const w=reg.installing;
         if(!w)return;
@@ -1790,7 +1795,9 @@ if('serviceWorker' in navigator){
           }
         });
       });
-    }catch(e){console.warn('Service worker update failed',e)}
+    }catch(e){
+      console.warn('Service worker update failed',e);
+    }
   });
 }
 </script></body></html>
