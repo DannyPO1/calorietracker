@@ -186,7 +186,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.1.0';
+const APP_VERSION='5.1.1';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -378,7 +378,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.1.0</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.1.1</b></div>
 
   </div>
 
@@ -440,7 +440,7 @@ function updateRecipeLineCalorie(i){
   </div>
 </div>
 
-<div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:650px;margin:20px auto"><h2>Recept maken</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><div class="grid"><div><label>Aantal porties uit dit recept</label><input id="recipeServings" type="number" min="1" step="1" value="1"></div><div><label>Gebruik</label><div class="notice" style="margin-top:0">De app berekent totaal én per portie.</div></div></div><p class="muted">Zoek per ingrediënt een product, kies de suggestie en vul de hoeveelheid in. Eigen producten staan ook in de zoekresultaten.</p><div id="recipeBuilder"></div><div id="recipePreview" class="notice"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">+ Ingrediënt</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="ghost" onclick="closeModal('recipeModal')">Annuleren</button></div></div></div>
+<div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:100;padding:20px;overflow:auto"><div class="card" style="max-width:650px;margin:20px auto"><h2>Recept maken</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><div class="grid"><div><label>Aantal porties uit dit recept</label><input id="recipeServings" type="number" min="1" step="1" value="1"></div><div><label>Gebruik</label><div class="notice" style="margin-top:0">De app berekent totaal én per portie.</div></div></div><p class="muted">Zoek per ingrediënt een product, kies de suggestie en vul de hoeveelheid in. Eigen producten staan ook in de zoekresultaten.</p><div id="recipeBuilder"></div><div id="recipePreview" class="notice"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">+ Ingrediënt</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="ghost" onclick="closeRecipeModal()">Annuleren</button></div></div></div>
 
 <script>
 const BASE={
@@ -975,6 +975,8 @@ function createRecipeFromMeal(){
  if(names.length===3 && recipeLines.length>3)suggested+=" e.a.";
  editingRecipeName=null;
  recipeReturnMeal={meal,date:d};
+ // Hide the meal modal while the recipe editor is open. The meal context is restored after save/cancel.
+ document.getElementById("foodEntryModal")?.classList.add("hidden");
  document.getElementById("recipeName").value=suggested;
  document.getElementById("recipeServings").value=1;
  document.querySelector("#recipeModal h2").textContent=`Recept maken van ${mealLabelForRecipe(meal)}`;
@@ -1468,6 +1470,19 @@ function openModal(id){
  if(id==="foodModal"){resetCustomEditor()}
  if(id==="recipeModal"){resetRecipeEditor();addRecipeLine();document.getElementById("recipeServings").oninput=updateRecipePreview;updateRecipePreview()}
 }
+function closeRecipeModal(){
+ const returnMeal=recipeReturnMeal;
+ document.getElementById("recipeModal")?.classList.add("hidden");
+ resetRecipeEditor();
+ recipeReturnMeal=null;
+ if(returnMeal){
+   setTimeout(()=>{
+     openMealEntry(returnMeal.meal);
+     document.getElementById("entryDate").value=returnMeal.date;
+     updateMealModalHeader();
+   },50);
+ }
+}
 function closeModal(id){
  document.getElementById(id).classList.add("hidden");
  if(id==="foodModal")resetCustomEditor();
@@ -1713,7 +1728,7 @@ render();renderSettings();inspectStorage();refreshStorageContext();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=5.1.0',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=5.1.1',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
       reg.addEventListener('updatefound',()=>{
