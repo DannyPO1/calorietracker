@@ -186,12 +186,19 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.1.1';
+const APP_VERSION='5.1.2';
+const RELEASE_DATE='5 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
+  const i=document.getElementById("settingsVersionInline");
+  const d=document.getElementById("releaseDate");
+  const meta=document.querySelector('meta[name="app-version"]');
   if(h) h.textContent="v"+APP_VERSION;
   if(a) a.textContent=APP_VERSION;
+  if(i) i.textContent=APP_VERSION;
+  if(d) d.textContent=RELEASE_DATE;
+  if(meta) meta.setAttribute("content",APP_VERSION);
 }
 function compareVersions(a,b){
   const pa=String(a).split(".").map(Number), pb=String(b).split(".").map(Number);
@@ -208,11 +215,9 @@ async function checkForUpdate(){
     const response=await fetch(url,{cache:"no-store"});
     if(!response.ok)throw new Error("HTTP "+response.status);
     const text=await response.text();
-    const meta=text.match(/<meta[^>]+name=["']app-version["'][^>]+content=["']([^"']+)["']/i);
-    const ui=text.match(/id=["']appVersion["'][^>]*>([^<]+)/i);
-    const header=text.match(/id=["']headerVersion["'][^>]*>\s*v?([^<]+)/i);
-    const m=meta||ui||header;
-    const remote=m?m[1].replace(/^v/,"").trim():null;
+    // APP_VERSION is the single authoritative version source in index.html.
+    const source=text.match(/const\s+APP_VERSION\s*=\s*["']([^"']+)["']/i);
+    const remote=source?source[1].trim():null;
     if(remote && compareVersions(remote,APP_VERSION)>0){
       if(status)status.innerHTML=`Nieuwe versie gevonden: <b>${remote}</b>. De pagina wordt vernieuwd.`;
       if("serviceWorker" in navigator){
@@ -230,7 +235,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="5.0.11"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="5.1.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -373,12 +378,12 @@ function updateRecipeLineCalorie(i){
   <div class="card" id="aboutApp">
     <h2>Over CalorieTracker</h2>
     <div class="item"><span>Versie</span><b id="appVersion"></b></div>
-    <div class="item"><span>Uitgebracht</span><span>4 oktober 2026</span></div>
+    <div class="item"><span>Uitgebracht</span><span id="releaseDate"></span></div>
     <p class="muted" style="margin-top:10px">Je gegevens worden lokaal op dit apparaat opgeslagen.</p><p class="muted"><b>Voedingsdatabase:</b> standaardproducten + je eigen producten. Een gescand product wordt na bevestiging automatisch toegevoegd aan je eigen database.</p>
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.1.1</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline"></b></div>
 
   </div>
 
@@ -1362,7 +1367,7 @@ function exportStorageSnapshot(){
 async function clearAppCaches(){
   const status=document.getElementById('storageActionStatus');
   if(!('caches' in window)){if(status)status.textContent='Cachebeheer wordt door deze browser niet beschikbaar gesteld.';return}
-  const keys=await caches.keys(); const old=keys.filter(k=>k.startsWith('calorietracker-')&&k!==`calorietracker-${APP_VERSION}`);
+  const keys=await caches.keys(); const old=keys.filter(k=>k.startsWith('calorietracker-')&&k!=='calorietracker-current');
   await Promise.all(old.map(k=>caches.delete(k)));
   if(status)status.textContent=old.length?`${old.length} oude app-cache${old.length===1?'':'s'} verwijderd. Je voedingsgegevens zijn hierbij niet verwijderd.`:'Er waren geen oude CalorieTracker-caches om te verwijderen.';
 }
@@ -1728,7 +1733,7 @@ render();renderSettings();inspectStorage();refreshStorageContext();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=5.1.1',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(APP_VERSION),{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
       reg.addEventListener('updatefound',()=>{
