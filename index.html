@@ -144,7 +144,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .mealModalPanel{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -12px 45px rgba(0,0,0,.24);animation:mealUp .2s ease}
 @keyframes mealUp{from{transform:translateY(20px);opacity:.7}to{transform:translateY(0);opacity:1}}
 .mealModalHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.mealModalHeader h2{margin:2px 0 0;font-size:22px}.closeCircle{width:42px;height:42px;padding:0;border-radius:50%;font-size:26px;line-height:1}
-.mealEntrySection{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
+.mealEntrySection{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealRecipeFromItems{width:100%;margin-top:12px;border-color:var(--accent);color:var(--accent);font-weight:750}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
 .fourWeekDashboard .foodRank{margin-top:10px}.foodRankRow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.foodRankRow:first-child{border-top:0}.rankNum{width:28px;height:28px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:850;font-size:12px}.rankName{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rankMeta{font-size:11px;color:var(--muted);margin-top:2px}.rankKcal{text-align:right;font-weight:800;font-size:13px}.rankBar{height:5px;background:#e6ebe6;border-radius:99px;overflow:hidden;margin-top:5px}.rankBar>div{height:100%;background:var(--accent);border-radius:99px}.adviceBox{padding:14px;border-radius:16px;background:var(--accent-soft);border:1px solid #d5e6da}.adviceBox.warnAdvice{background:#fff5e6;border-color:#f0d8ae}.adviceTitle{font-weight:850;margin-bottom:5px}.adviceText{font-size:13px;line-height:1.45}.adviceBullets{margin:9px 0 0;padding-left:18px;font-size:13px;line-height:1.55}.adviceTag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:5px}
 html[data-theme="dark"] .mealTile:hover{border-color:#3c5b49;box-shadow:0 10px 30px rgba(0,0,0,.28)}html[data-theme="dark"] .mealTileKcal{color:var(--accent)}html[data-theme="dark"] .mealModalPanel{box-shadow:0 -12px 45px rgba(0,0,0,.55)}html[data-theme="dark"] .mealCurrent .item{background:#1c2b23}html[data-theme="dark"] .rankBar{background:#293a31}html[data-theme="dark"] .adviceBox{background:#20372b;border-color:#315541}html[data-theme="dark"] .adviceBox.warnAdvice{background:#3b2e1e;border-color:#624b2d}
 @media(max-width:560px){.mealTileGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.mealTile{width:100%;min-width:0;min-height:165px;padding:13px 12px 12px;border-radius:20px}.mealTileIcon{width:38px;height:38px;min-width:38px;min-height:38px;flex:0 0 38px;margin-bottom:8px;border-radius:50%;overflow:hidden;clip-path:none;background-size:100% 100%}.mealTileTitle{left:12px;top:74px;font-size:17px}.mealTileMeta{left:12px;top:129px;font-size:11px}.mealTileKcal{left:12px;top:103px;bottom:auto;font-size:17px}.mealTile::after{left:12px;right:34%;bottom:12px;height:6px}.mealTileProgress{left:12px;bottom:12px;height:6px}.mealTileAdd{right:10px;top:10px;width:40px;height:40px;font-size:27px}.mealModalPanel{max-height:94vh;padding-left:14px;padding-right:14px}.foodRankRow{grid-template-columns:28px minmax(0,1fr) auto}}
@@ -186,7 +186,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.0.11';
+const APP_VERSION='5.1.0';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -378,7 +378,7 @@ function updateRecipeLineCalorie(i){
 <div class="actions" style="margin-top:12px">
   <button class="secondary" id="checkUpdateBtn" onclick="checkForUpdate()">Controleer op nieuwe versie</button>
 </div>
-<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.0.0</b></div>
+<div id="updateStatus" class="notice" style="margin-top:10px">Huidige versie: <b id="settingsVersionInline">5.1.0</b></div>
 
   </div>
 
@@ -948,12 +948,43 @@ function renderMealTiles(){
   return `<button class="mealTile ${m.className}" type="button" onclick="openMealEntry('${m.key}')"><span class="mealTileIcon" aria-hidden="true"></span><span class="mealTileKcal">${kcal?kcal+' kcal':'—'}</span><div class="mealTileTitle">${m.label}</div><div class="mealTileMeta">${a.length?a.length+' registratie'+(a.length===1?'':'s'):'Nog niets geregistreerd'}</div><span class="mealTileProgress" style="width:${progress}%"></span></button>`;
  }).join("");
 }
+let recipeReturnMeal=null;
 function renderMealCurrent(){
  const box=document.getElementById("mealCurrentItems"); if(!box)return;
  const meal=document.getElementById("mealType")?.value||"Ontbijt", d=document.getElementById("entryDate")?.value||activeDate(), items=(data.days[d]||[]).map((x,i)=>({...x,i})).filter(x=>x.meal===meal);
  const kcal=Math.round(items.reduce((s,x)=>s+(+x.kcal||0),0));
- box.innerHTML=`<div class="mealCurrentTitle"><b>Toegevoegd aan deze maaltijd</b><span class="chip">${kcal} kcal</span></div>`+(items.length?items.map(x=>`<div class="item"><span>${esc(x.name)} <small>${esc(x.amount)} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join(""):'<div class="empty" style="padding:12px 0">Nog geen voeding toegevoegd.</div>');
+ const mealLabel={Ontbijt:"Ontbijt",Lunch:"Lunch",Avondeten:"Avondeten",Snack:"Snacks"}[meal]||meal;
+ const action=items.length?`<button class="secondary mealRecipeFromItems" type="button" onclick="createRecipeFromMeal()">📖 Van deze maaltijd een recept maken</button>`:"";
+ box.innerHTML=`<div class="mealCurrentTitle"><b>Toegevoegd aan deze maaltijd</b><span class="chip">${kcal} kcal</span></div>`+(items.length?items.map(x=>`<div class="item"><span>${esc(x.name)} <small>${esc(x.amount)} ${esc(x.unit)}</small></span><span>${Math.round(x.kcal)} kcal <button class="danger" style="padding:3px 7px" onclick="removeItem(${x.i})">×</button></span></div>`).join(""):'<div class="empty" style="padding:12px 0">Nog geen voeding toegevoegd.</div>')+action;
 }
+function createRecipeFromMeal(){
+ const meal=document.getElementById("mealType")?.value||"Ontbijt", d=document.getElementById("entryDate")?.value||activeDate();
+ const items=(data.days[d]||[]).filter(x=>x.meal===meal);
+ if(!items.length){alert("Voeg eerst minimaal één product toe aan deze maaltijd.");return;}
+ const grouped=new Map();
+ for(const x of items){
+   const name=String(x.name||"").trim().toLowerCase(); if(!name)continue;
+   const grams=Number(x.grams)||Number(x.amount)||0;
+   const cur=grouped.get(name);
+   if(cur)cur.amount+=grams; else grouped.set(name,{name,amount:grams,unit:"g"});
+ }
+ recipeLines=[...grouped.values()].filter(x=>x.amount>0);
+ if(!recipeLines.length){alert("De maaltijd bevat geen bruikbare ingrediënten.");return;}
+ const names=recipeLines.map(x=>x.name).slice(0,3);
+ let suggested=names.length===1?`${names[0]} recept`:names.length===2?`${names[0]} & ${names[1]}`:`${names[0]}, ${names[1]} & ${names[2]}`;
+ if(names.length===3 && recipeLines.length>3)suggested+=" e.a.";
+ editingRecipeName=null;
+ recipeReturnMeal={meal,date:d};
+ document.getElementById("recipeName").value=suggested;
+ document.getElementById("recipeServings").value=1;
+ document.querySelector("#recipeModal h2").textContent=`Recept maken van ${mealLabelForRecipe(meal)}`;
+ document.querySelector("#recipeModal .primary").textContent="Recept opslaan";
+ document.getElementById("recipeModal").classList.remove("hidden");
+ renderRecipeBuilder();
+ document.getElementById("recipeServings").oninput=updateRecipePreview;
+ updateRecipePreview();
+}
+function mealLabelForRecipe(meal){return {Ontbijt:"Ontbijt",Lunch:"Lunch",Avondeten:"Avondeten",Snack:"Snacks"}[meal]||meal;}
 function removeItem(i){let d=activeDate(),a=data.days[d]||[];a.splice(i,1);save();render();renderMealCurrent();}
 function foodAnalytics28(){
  const end=new Date((activeDate()||today())+"T12:00:00"), start=new Date(end); start.setDate(start.getDate()-27);
@@ -1161,6 +1192,7 @@ function saveRecipe(){
  let n=document.getElementById("recipeName").value.trim().toLowerCase(),servings=Math.max(1,+document.getElementById("recipeServings").value||1);
  if(!n||!recipeLines.length){alert("Geef een naam en minimaal één ingrediënt.");return}
  let old=editingRecipeName;
+ const returnMeal=recipeReturnMeal;
  if(old && old!==n && data.recipes[n] && !confirm("Er bestaat al een recept met deze naam. Overschrijven?"))return;
  let ingredients=[];
  for(let x of recipeLines){
@@ -1174,7 +1206,11 @@ function saveRecipe(){
  save();
  closeModal("recipeModal");
  resetRecipeEditor();
+ recipeReturnMeal=null;
  render();
+ if(returnMeal){
+   setTimeout(()=>{openMealEntry(returnMeal.meal); document.getElementById("entryDate").value=returnMeal.date; updateMealModalHeader();},80);
+ }
  alert(old ? "Recept gewijzigd." : "Recept opgeslagen en beschikbaar onder ‘Mijn recepten toevoegen’.");
 }
 function renderRecipes(){
@@ -1677,7 +1713,7 @@ render();renderSettings();inspectStorage();refreshStorageContext();
 if('serviceWorker' in navigator){
   window.addEventListener('load', async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=5',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=5.1.0',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting){reg.waiting.postMessage('SKIP_WAITING');}
       reg.addEventListener('updatefound',()=>{
