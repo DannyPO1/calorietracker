@@ -1,7 +1,9 @@
 const PRIMARY_MODEL = 'gemini-3.8-flash';
 const FALLBACK_MODEL = 'gemini-3.7-flash';
-const PRIMARY_ATTEMPTS = 2;
-const FALLBACK_ATTEMPTS = 2;
+const FINAL_FALLBACK_MODEL = 'gemini-3.1-flash-lite';
+const PRIMARY_ATTEMPTS = 1;
+const FALLBACK_ATTEMPTS = 1;
+const FINAL_FALLBACK_ATTEMPTS = 1;
 
 function requestId() {
   try { return crypto.randomUUID(); } catch (_) { return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
@@ -168,16 +170,22 @@ export default async function handler(req, res) {
       return false;
     }
 
-    // Try the primary model first. If Gemini is temporarily overloaded, use a
-    // second stable Flash model before giving up. Both models support image
-    // input and structured output, and both are currently available on the
-    // Gemini API free tier.
+    // Use a short fallback chain so temporary Gemini capacity problems do not
+    // make the photo scan fail unnecessarily. Each model is attempted once to
+    // keep the response time reasonable. The final fallback is the lightweight
+    // Flash-Lite model, which also supports image input and structured output.
     let ok = await callGemini(PRIMARY_MODEL, PRIMARY_ATTEMPTS);
     if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
       console.warn('Primary Gemini model unavailable; trying fallback model', {
         id, primaryModel: PRIMARY_MODEL, fallbackModel: FALLBACK_MODEL, status: lastStatus
       });
       ok = await callGemini(FALLBACK_MODEL, FALLBACK_ATTEMPTS);
+    }
+    if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
+      console.warn('Secondary Gemini model unavailable; trying final lightweight fallback', {
+        id, fallbackModel: FALLBACK_MODEL, finalFallbackModel: FINAL_FALLBACK_MODEL, status: lastStatus
+      });
+      ok = await callGemini(FINAL_FALLBACK_MODEL, FINAL_FALLBACK_ATTEMPTS);
     }
 
     if (!ok) {
