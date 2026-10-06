@@ -186,8 +186,8 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.2.2';
-const RELEASE_DATE='5 oktober 2026';
+const APP_VERSION='5.3.0';
+const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -1290,49 +1290,88 @@ function renderHistory(){
  drawChart();renderFourWeekDashboard()
 }
 function weightForecastData(){
- const weights=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date));
- if(!weights.length || !data.profile.age || !data.profile.height || !data.profile.activity) return null;
- const analytics=foodAnalytics28();
- if(!analytics.loggedDays || !Number.isFinite(analytics.avg)) return null;
- const p=data.profile, latest=weights[weights.length-1], avg=analytics.avg, horizon=56;
- let weight=+latest.weight;
- const points=[];
- for(let day=1;day<=horizon;day++){
-   const bmr=10*weight+6.25*(+p.height)-5*(+p.age)+(p.sex==="female"?-161:5);
-   const tdee=bmr*(+p.activity||1.2);
-   weight -= (avg-tdee)/7700;
-   if(day%7===0) points.push({date:addDays(latest.date,day),weight});
+ const allWeights=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)).filter(x=>Number.isFinite(+x.weight)&&x.date);
+ // A forecast based on two measurements is too sensitive to normal day-to-day fluctuations.
+ // Require at least 7 measurements spanning at least 7 days before showing a trend forecast.
+ if(allWeights.length<7 || !data.profile.age || !data.profile.height) return null;
+ const lastDate=new Date(allWeights[allWeights.length-1].date+"T12:00:00");
+ const firstDate=new Date(allWeights[0].date+"T12:00:00");
+ const spanDays=Math.round((lastDate-firstDate)/86400000);
+ if(spanDays<7) return null;
+
+ // Base the forecast on the actual weight trend, not on reported calorie intake.
+ // Prefer the last 28 days when there are enough measurements; otherwise use all measurements.
+ const recentStart=new Date(lastDate); recentStart.setDate(recentStart.getDate()-27);
+ let points=allWeights.filter(x=>new Date(x.date+"T12:00:00")>=recentStart);
+ if(points.length<7) points=allWeights;
+ const baseDate=new Date(points[0].date+"T12:00:00");
+ const xs=points.map(x=>(new Date(x.date+"T12:00:00")-baseDate)/86400000);
+ const ys=points.map(x=>+x.weight);
+ const meanX=xs.reduce((a,b)=>a+b,0)/xs.length, meanY=ys.reduce((a,b)=>a+b,0)/ys.length;
+ const denom=xs.reduce((sum,x)=>sum+(x-meanX)*(x-meanX),0);
+ const slope=denom>0 ? xs.reduce((sum,x,i)=>sum+(x-meanX)*(ys[i]-meanY),0)/denom : 0;
+ // Cap the projected trend at 1.0 kg/week in either direction so a short-lived outlier
+ // cannot create an implausible long-range forecast.
+ const slopePerDay=Math.max(-1/7,Math.min(1/7,slope));
+ const latest=allWeights[allWeights.length-1], horizon=56, weight=+latest.weight;
+ const forecastPoints=[];
+ for(let day=7;day<=horizon;day+=7){
+   forecastPoints.push({date:addDays(latest.date,day),weight:weight+slopePerDay*day});
  }
- return {start:latest,avg,tdeeNow:calc().tdee,loggedDays:analytics.loggedDays,points};
+ return {
+   start:latest,
+   points:forecastPoints,
+   measurements:points.length,
+   spanDays:Math.max(1,Math.round((new Date(points[points.length-1].date+"T12:00:00")-baseDate)/86400000)),
+   slopePerWeek:slopePerDay*7
+ };
 }
 function addDays(dateString,days){const d=new Date(dateString+"T12:00:00");d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)}
+function formatChartDate(date){return new Date(date+"T12:00:00").toLocaleDateString("nl-NL",{day:"numeric",month:"short"}).replace('.','')}
 function drawChart(){
- let svg=document.getElementById("weightChart"),a=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)),w=700,h=220,padX=28,padY=28;svg.innerHTML="";
+ let svg=document.getElementById("weightChart"),a=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)).filter(x=>Number.isFinite(+x.weight)&&x.date),w=700,h=220,padL=52,padR=16,padT=24,padB=30;svg.innerHTML="";
  const info=document.getElementById("weightForecastInfo");
  if(!a.length){svg.innerHTML='<text x="350" y="110" text-anchor="middle" fill="#667085">Nog geen gewichtsmetingen</text>';if(info)info.innerHTML="";return}
  const forecast=weightForecastData();
  const endDate=forecast?forecast.points[forecast.points.length-1].date:a[a.length-1].date;
  const startMs=new Date(a[0].date+"T12:00:00").getTime(),endMs=new Date(endDate+"T12:00:00").getTime();
  const allWeights=a.map(x=>+x.weight).concat(data.profile.goalWeight?[+data.profile.goalWeight]:[]).concat(forecast?forecast.points.map(x=>x.weight):[]);
- let min=Math.min(...allWeights)-1,max=Math.max(...allWeights)+1;
- if(max-min<3){const mid=(max+min)/2;min=mid-1.5;max=mid+1.5}
- const xFor=date=>padX+(new Date(date+"T12:00:00").getTime()-startMs)/Math.max(1,endMs-startMs)*(w-2*padX);
- const yFor=weight=>h-padY-(weight-min)/(max-min)*(h-2*padY);
- if(data.profile.goalWeight){let gy=yFor(+data.profile.goalWeight);svg.innerHTML+=`<line x1="${padX}" y1="${gy}" x2="${w-padX}" y2="${gy}" stroke="#98a2b3" stroke-dasharray="5 5"/>`}
+ let min=Math.floor(Math.min(...allWeights)-1),max=Math.ceil(Math.max(...allWeights)+1);
+ if(max-min<4){const mid=(max+min)/2;min=Math.floor(mid-2);max=Math.ceil(mid+2)}
+ const xFor=date=>padL+(new Date(date+"T12:00:00").getTime()-startMs)/Math.max(1,endMs-startMs)*(w-padL-padR);
+ const yFor=weight=>h-padB-(weight-min)/(max-min)*(h-padT-padB);
+ // Y-axis: five readable kg ticks plus subtle horizontal grid lines.
+ const yStep=(max-min)/4;
+ for(let i=0;i<=4;i++){
+   const value=min+yStep*i, y=yFor(value);
+   svg.innerHTML+=`<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#d8dfd9" stroke-width="1"/>`;
+   svg.innerHTML+=`<text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#667085">${value.toFixed(1)}</text>`;
+ }
+ svg.innerHTML+=`<text x="10" y="14" font-size="10" font-weight="700" fill="#667085">kg</text>`;
+ // X-axis: five evenly spaced date ticks over the full visible period.
+ for(let i=0;i<=4;i++){
+   const ms=startMs+(endMs-startMs)*(i/4), date=new Date(ms); const label=date.toLocaleDateString("nl-NL",{day:"numeric",month:"short"}).replace('.','');
+   const x=padL+(w-padL-padR)*(i/4);
+   svg.innerHTML+=`<line x1="${x}" y1="${h-padB}" x2="${x}" y2="${h-padB+4}" stroke="#98a2b3" stroke-width="1"/>`;
+   svg.innerHTML+=`<text x="${x}" y="${h-8}" text-anchor="middle" font-size="10" fill="#667085">${label}</text>`;
+ }
+ if(data.profile.goalWeight){let gy=yFor(+data.profile.goalWeight);svg.innerHTML+=`<line x1="${padL}" y1="${gy}" x2="${w-padR}" y2="${gy}" stroke="#98a2b3" stroke-dasharray="5 5"/>`;}
  const pts=a.map(x=>[xFor(x.date),yFor(+x.weight)]);
  svg.innerHTML+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
- pts.forEach((p,i)=>svg.innerHTML+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#2563eb"/><text x="${p[0]}" y="${h-7}" text-anchor="middle" font-size="10" fill="#667085">${a[i].date.slice(5)}</text>`);
+ pts.forEach(p=>svg.innerHTML+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#2563eb"/>`);
  if(forecast){
    const fp=[[xFor(forecast.start.date),yFor(+forecast.start.weight)],...forecast.points.map(x=>[xFor(x.date),yFor(x.weight)])];
-   svg.innerHTML+=`<polyline points="${fp.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round" stroke-linejoin="round"/>`;
-   forecast.points.forEach((p,i)=>{if(i===forecast.points.length-1||i===3)svg.innerHTML+=`<circle cx="${xFor(p.date)}" cy="${yFor(p.weight)}" r="4" fill="#fff" stroke="#d97706" stroke-width="2"/>`});
+   svg.innerHTML+=`<polyline points="${fp.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/>`;
+   forecast.points.forEach((p,i)=>{if(i===forecast.points.length-1)svg.innerHTML+=`<circle cx="${xFor(p.date)}" cy="${yFor(p.weight)}" r="4" fill="#fff" stroke="#d97706" stroke-width="2"/>`});
    if(info){
-     const delta=forecast.points[forecast.points.length-1].weight-forecast.start.weight;
-     const direction=delta<0?"daling":delta>0?"stijging":"vrijwel gelijk";
-     info.innerHTML=`<b>Prognose voor 8 weken:</b> ${forecast.start.weight.toFixed(1)} kg → <b>${forecast.points[forecast.points.length-1].weight.toFixed(1)} kg</b>. Gebaseerd op gemiddeld <b>${Math.round(forecast.avg)} kcal/dag</b> over ${forecast.loggedDays} geregistreerde dag${forecast.loggedDays===1?'':'en'} en je geschatte energieverbruik. Dit is een rekenkundige schatting; je werkelijke gewichtsverloop kan afwijken.`;
+     const endWeight=forecast.points[forecast.points.length-1].weight;
+     const delta=endWeight-forecast.start.weight;
+     const direction=delta<-.05?"daling":delta>.05?"stijging":"vrijwel gelijk";
+     const trendText=Math.abs(forecast.slopePerWeek)<0.05?"vrijwel stabiel":`${Math.abs(forecast.slopePerWeek).toFixed(1)} kg/week ${direction}`;
+     info.innerHTML=`<b>Prognose voor 8 weken:</b> ${forecast.start.weight.toFixed(1)} kg → <b>${endWeight.toFixed(1)} kg</b>. Gebaseerd op je werkelijke gewichtsontwikkeling over ${forecast.measurements} meetpunten. De huidige trend is ongeveer <b>${trendText}</b>. Dit is een rekenkundige schatting; dagelijkse schommelingen kunnen afwijken.`;
    }
  }else if(info){
-   info.innerHTML='Voor een gewichtsprognose zijn je profielgegevens en geregistreerde voeding nodig. Zodra er voedingsregistraties zijn, verschijnt hier een prognoselijn.';
+   info.innerHTML=`<b>Nog onvoldoende gegevens voor een gewichtsprognose.</b><br>Registreer minimaal <b>7 gewichtsmetingen verspreid over minstens 7 dagen</b>. Daarna baseert CalorieTracker de prognose op je werkelijke gewichtsontwikkeling.`;
  }
 }
 function appDataShape(d){
@@ -1781,7 +1820,7 @@ if('serviceWorker' in navigator){
     try{
       // v5.2.2 uses a new service-worker filename so an older sw.js
       // cannot keep the app pinned to an old cached index.html.
-      const workerUrl='./sw-5.2.2.js';
+      const workerUrl='./sw-5.3.0.js';
       const reg=await navigator.serviceWorker.register(workerUrl,{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
