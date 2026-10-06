@@ -144,7 +144,15 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .mealModalPanel{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -12px 45px rgba(0,0,0,.24);animation:mealUp .2s ease}
 @keyframes mealUp{from{transform:translateY(20px);opacity:.7}to{transform:translateY(0);opacity:1}}
 .mealModalHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.mealModalHeader h2{margin:2px 0 0;font-size:22px}.closeCircle{width:42px;height:42px;padding:0;border-radius:50%;font-size:26px;line-height:1}
-.mealEntrySection{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealRecipeFromItems{width:100%;margin-top:12px;border-color:var(--accent);color:var(--accent);font-weight:750}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
+/* v6.0.9 — clearer product/recipe sections in meal entry */
+.mealEntrySection{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035)}
+.mealEntrySectionHeader{margin-bottom:12px}
+.mealEntrySectionHeader .sectionKicker{margin-bottom:3px}
+.mealEntrySectionHeader h3{margin:0;font-size:18px;line-height:1.15}
+.mealEntrySectionHeader p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+html[data-theme="dark"] .mealEntrySection{background:rgba(255,255,255,.025)}
+.aiFoodRetry{margin-top:10px;width:100%}
+.mealCurrent{margin-top:18px;padding-top:8px}.mealCurrentTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.mealCurrent .item{background:var(--cream);border-radius:12px;padding:10px 11px;margin:6px 0;border:1px solid var(--line)}.mealRecipeFromItems{width:100%;margin-top:12px;border-color:var(--accent);color:var(--accent);font-weight:750}.mealModalFooter{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:14px;margin-top:8px}.mealModalFooter .primary{width:100%}
 .fourWeekDashboard .foodRank{margin-top:10px}.foodRankRow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.foodRankRow:first-child{border-top:0}.rankNum{width:28px;height:28px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:850;font-size:12px}.rankName{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rankMeta{font-size:11px;color:var(--muted);margin-top:2px}.rankKcal{text-align:right;font-weight:800;font-size:13px}.rankBar{height:5px;background:#e6ebe6;border-radius:99px;overflow:hidden;margin-top:5px}.rankBar>div{height:100%;background:var(--accent);border-radius:99px}.adviceBox{padding:14px;border-radius:16px;background:var(--accent-soft);border:1px solid #d5e6da}.adviceBox.warnAdvice{background:#fff5e6;border-color:#f0d8ae}.adviceTitle{font-weight:850;margin-bottom:5px}.adviceText{font-size:13px;line-height:1.45}.adviceBullets{margin:9px 0 0;padding-left:18px;font-size:13px;line-height:1.55}.adviceTag{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:5px}
 html[data-theme="dark"] .mealTile:hover{border-color:#3c5b49;box-shadow:0 10px 30px rgba(0,0,0,.28)}html[data-theme="dark"] .mealTileKcal{color:var(--accent)}html[data-theme="dark"] .mealModalPanel{box-shadow:0 -12px 45px rgba(0,0,0,.55)}html[data-theme="dark"] .mealCurrent .item{background:#1c2b23}html[data-theme="dark"] .rankBar{background:#293a31}html[data-theme="dark"] .adviceBox{background:#20372b;border-color:#315541}html[data-theme="dark"] .adviceBox.warnAdvice{background:#3b2e1e;border-color:#624b2d}
 @media(max-width:560px){.mealTileGrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.mealTile{width:100%;min-width:0;min-height:165px;padding:13px 12px 12px;border-radius:20px}.mealTileIcon{width:38px;height:38px;min-width:38px;min-height:38px;flex:0 0 38px;margin-bottom:8px;border-radius:50%;overflow:hidden;clip-path:none;background-size:100% 100%}.mealTileTitle{left:12px;top:74px;font-size:17px}.mealTileMeta{left:12px;top:129px;font-size:11px}.mealTileKcal{left:12px;top:103px;bottom:auto;font-size:17px}.mealTile::after{left:12px;right:34%;bottom:12px;height:6px}.mealTileProgress{left:12px;bottom:12px;height:6px}.mealTileAdd{right:10px;top:10px;width:40px;height:40px;font-size:27px}.mealModalPanel{max-height:94vh;padding-left:14px;padding-right:14px}.foodRankRow{grid-template-columns:28px minmax(0,1fr) auto}}
@@ -224,7 +232,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.7';
+const APP_VERSION='6.0.9';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -347,7 +355,11 @@ function updateRecipeLineCalorie(i){
    </div>
 
    <div class="mealEntrySection">
-    <label>Bestaand product toevoegen</label>
+    <div class="mealEntrySectionHeader">
+     <div class="sectionKicker">PRODUCT</div>
+     <h3>Product toevoegen</h3>
+     <p>Zoek een product in je voedingsdatabase of scan een barcode.</p>
+    </div>
     <div class="searchbox"><input id="productSearch" autocomplete="off" placeholder="Bijv. kipfilet, rijst, banaan..." oninput="suggestProducts()" onfocus="suggestProducts()"><div id="suggestions" class="suggestions hidden"></div></div>
     <button class="secondary barcodeButton" type="button" onclick="openBarcodeScanner()"><span class="barcodeIcon">▦</span> Barcode scannen</button>
     <div class="grid">
@@ -359,7 +371,11 @@ function updateRecipeLineCalorie(i){
    </div>
 
    <div class="mealEntrySection">
-    <label>Bestaand recept toevoegen</label>
+    <div class="mealEntrySectionHeader">
+     <div class="sectionKicker">RECEPT</div>
+     <h3>Recept toevoegen</h3>
+     <p>Kies een recept uit je eigen recepten.</p>
+    </div>
     <div class="searchbox"><input id="recipeSearchToday" autocomplete="off" placeholder="Bijv. kip-kerrie, pasta..." oninput="suggestRecipesToday()" onfocus="suggestRecipesToday()"><div id="recipeSuggestionsToday" class="suggestions hidden"></div></div>
     <div class="grid">
      <div><label>Porties</label><input id="recipePortions" type="number" min="0.1" step="0.1" value="1"></div>
@@ -599,7 +615,7 @@ const BASE={
 "cracker volkoren":{kcal:350,p:10,c:65,f:6,u:"g"},
 "beschuit volkoren":{kcal:350,p:10,c:70,f:4,u:"g"},
 "maiswafel":{kcal:380,p:8,c:82,f:2,u:"g"},
-"muesli":{kcal:360,p:10,c:65,f:7,u:"g"},
+"muesli":{kcal:360,p:10,c:65,f:7,u:"g"},"AH Oatmeal cookie":{kcal:427,p:5.2,c:62,f:17,u:"g"},
 "granola":{kcal:450,p:9,c:55,f:20,u:"g"},
 "cornflakes":{kcal:360,p:7,c:80,f:1,u:"g"},
 "brinta":{kcal:350,p:12,c:68,f:4,u:"g"},
@@ -1730,6 +1746,7 @@ const PORTIONS = {
     {label:"1 eetlepel", grams:10},
     {label:"1 theelepel", grams:5}
   ],
+  "AH Oatmeal cookie": [{label:"1 stuk", grams:110}],
   "pindakaas": [
     {label:"1 eetlepel", grams:15},
     {label:"1 theelepel", grams:5}
@@ -1931,7 +1948,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.0.7 — improved AI recognition and safer database matching */
+/* v6.0.9 — retry the same AI photo and clarify meal-entry sections */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -1939,6 +1956,7 @@ const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
 let aiDetectedItems=[];
 let aiPreviewUrl=null;
 let aiBusy=false;
+let aiLastFile=null;
 
 function openAIFoodModal(){
   const modal=document.getElementById('aiFoodModal');
@@ -1953,6 +1971,7 @@ function openAIFoodModal(){
   const p=document.getElementById('aiFoodPreview');p.style.display='none';p.removeAttribute('src');
   aiDetectedItems=[];
   aiBusy=false;
+  aiLastFile=null;
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
 
@@ -1963,6 +1982,7 @@ function closeAIFoodModal(){
   if(p){p.style.display='none';p.removeAttribute('src');}
   document.getElementById('aiPhotoInput').value='';
   aiDetectedItems=[];
+  aiLastFile=null;
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
 
@@ -1980,28 +2000,39 @@ function aiTokenScore(query,key){
   qt.forEach(t=>{if(kt.includes(t))score+=100;else if(kt.some(x=>x.includes(t)||t.includes(x)))score+=45;});
   return score;
 }
+const AI_PRODUCT_ALIASES={
+  'kipfilet':'kipfilet','chicken breast':'kipfilet','chicken':'kipfilet',
+  'rijst':'rijst gekookt','rice':'rijst gekookt','pasta':'pasta gekookt',
+  'aardappel':'aardappel','potato':'aardappel','broccoli':'broccoli',
+  'banaan':'banaan','banana':'banaan','appel':'appel','apple':'appel',
+  'ei':'ei','egg':'ei','avocado':'avocado','hummus':'hummus',
+  'kikkererwten':'kikkererwten gekookt','chickpeas':'kikkererwten gekookt',
+  'kip shoarma':'kipshoarma','chicken shawarma':'kipshoarma',
+  'gehakt':'rundergehakt','beef mince':'rundergehakt',
+  'oatmeal cookie':'AH Oatmeal cookie',
+  'oatmeal koek':'AH Oatmeal cookie',
+  'havermoutkoek':'AH Oatmeal cookie',
+  'havermout koek':'AH Oatmeal cookie',
+  'haverkoek':'AH Oatmeal cookie',
+  'ah oatmeal cookie':'AH Oatmeal cookie'
+};
 function aiFindProducts(name){
-  const aliases={
-    'kipfilet':'kipfilet','chicken breast':'kipfilet','chicken':'kipfilet',
-    'rijst':'rijst gekookt','rice':'rijst gekookt','pasta':'pasta gekookt',
-    'aardappel':'aardappel','potato':'aardappel','broccoli':'broccoli',
-    'banaan':'banaan','banana':'banaan','appel':'appel','apple':'appel',
-    'ei':'ei','egg':'ei','avocado':'avocado','hummus':'hummus',
-    'kikkererwten':'kikkererwten gekookt','chickpeas':'kikkererwten gekookt',
-    'kip shoarma':'kipshoarma','chicken shawarma':'kipshoarma',
-    'gehakt':'rundergehakt','beef mince':'rundergehakt'
-  };
   const n=aiNormalize(name);
   const keys=Object.keys(allProducts());
-  const alias=aliases[n];
+  const alias=AI_PRODUCT_ALIASES[n];
   if(alias && allProducts()[alias]) return [alias,...keys.filter(k=>k!==alias).sort((a,b)=>aiTokenScore(n,b)-aiTokenScore(n,a)).slice(0,5)];
   return keys.map(k=>({k,score:aiTokenScore(name,k)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl')).slice(0,8).map(x=>x.k);
 }
 function aiBestProduct(name){
+  const n=aiNormalize(name);
+  const alias=AI_PRODUCT_ALIASES[n];
+  if(alias && allProducts()[alias]) return alias;
   const hits=aiFindProducts(name);
   if(!hits.length)return null;
   const best=hits[0], score=aiTokenScore(name,best);
-  if(score<100 && !allProducts()[aiNormalize(name)])return null;
+  // Generic terms such as 'koek', 'brood' or 'vlees' must never silently
+  // become a specific branded/product entry. Only exact/strong matches auto-link.
+  if(score<100 && !allProducts()[name])return null;
   return best;
 }
 function aiPopulateDatalist(){
@@ -2028,6 +2059,14 @@ function aiSetName(index,value){
 function aiSetGrams(index,value){
   const item=aiDetectedItems[index]; if(!item)return;
   item.grams=Math.max(1,Number(value)||0);
+  renderAIFoodResults(false);
+}
+function aiUseProductPortion(index){
+  const item=aiDetectedItems[index];
+  if(!item||!item.productName)return;
+  const p=portionOptions(item.productName)[0];
+  if(!p)return;
+  item.grams=p.grams;
   renderAIFoodResults(false);
 }
 function aiRemoveItem(index){
@@ -2061,7 +2100,7 @@ function renderAIFoodResults(focusFirst=true){
       <div class="aiFoodResultTop"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}<button class="danger aiFoodResultRemove" type="button" onclick="aiRemoveItem(${i})">Verwijder</button></div>
       <div class="aiFoodResultGrid">
        <div><label>Productnaam / databasekoppeling</label><input list="aiProductsList" value="${esc(item.productName||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
-       <div><label>Geschat gewicht</label><input type="number" min="1" max="3000" step="1" value="${Math.round(item.grams||100)}" onchange="aiSetGrams(${i},this.value)"></div>
+       <div><label>Gewicht</label><input type="number" min="1" max="3000" step="1" value="${Math.round(item.grams||100)}" onchange="aiSetGrams(${i},this.value)">${item.productName&&portionOptions(item.productName).length?`<button type="button" class="ghost tiny" style="margin-top:6px;width:100%" onclick="aiUseProductPortion(${i})">1 stuk = ${portionOptions(item.productName)[0].grams} g</button>`:''}</div>
       </div>
       <div class="aiFoodMatch">${n?`<span class="aiFoodMatched">✓ ${esc(item.productName)} gekoppeld</span>`:`<span class="aiFoodUnmatched">⚠ Niet gekoppeld aan je voedingsdatabase</span>`}</div>
       ${n?`<div class="aiFoodNutrition">${Math.round(n.kcal)} kcal • ${Math.round(n.p*10)/10} g eiwit • ${Math.round(n.c*10)/10} g koolhydraten • ${Math.round(n.f*10)/10} g vet</div>`:`<div class="aiFoodNutrition">Kies een product uit de lijst om de voedingswaarde te berekenen. De AI-kcal worden bewust niet gebruikt.</div>`}
@@ -2093,11 +2132,8 @@ async function resizeAIFoodImage(file){
   }finally{URL.revokeObjectURL(objectUrl);}
 }
 
-async function handleAIFoodFile(event){
-  const file=event.target.files?.[0];
-  event.target.value='';
+async function analyzeAIFoodFile(file){
   if(!file)return;
-  if(!file.type.startsWith('image/')){document.getElementById('aiFoodStatus').innerHTML='<div class="notice warn">Selecteer een foto.</div>';return;}
   aiBusy=true;aiDetectedItems=[];
   document.getElementById('aiFoodConfirmBtn').disabled=true;
   document.getElementById('aiFoodResults').classList.add('hidden');
@@ -2145,18 +2181,37 @@ async function handleAIFoodFile(event){
     let message=error?.message||'Onbekende fout.';
     if(code==='CONFIG_MISSING'){title='AI-fotoscan niet geconfigureerd.';message='De AI-fotoscan is niet correct geconfigureerd. Controleer de Vercel Production-configuratie.';}
     else if(code==='GEMINI_AUTH'){title='AI-configuratie geweigerd.';message='De AI-service accepteert de ingestelde API-sleutel niet. Controleer de Gemini API-key in Vercel.';}
-    else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='Gemini is tijdelijk overbelast of niet bereikbaar. De app heeft het automatisch opnieuw geprobeerd. Probeer het over een moment opnieuw.';}
-    else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De Gemini-capaciteit is tijdelijk bereikt. Probeer het later opnieuw.';}
+    else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='Gemini is tijdelijk overbelast of niet bereikbaar. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De Gemini-capaciteit is tijdelijk bereikt. Probeer het met dezelfde foto later opnieuw.';}
     else if(code==='GEMINI_BAD_REQUEST'){title='Foto kon niet worden verwerkt.';message='Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.';}
     else if(code==='IMAGE_TOO_LARGE'){title='Foto is te groot.';}
     else if(code==='INVALID_IMAGE_TYPE'){title='Ongeldig fotoformaat.';}
-    else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='Gemini heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het opnieuw.';}
-    else if(code==='INVALID_AI_OUTPUT'){title='Ongeldig AI-resultaat.';message='Gemini heeft een onbruikbaar resultaat teruggegeven. Probeer het opnieuw.';}
-    else if(!navigator.onLine){title='Geen internetverbinding.';message='Controleer je internetverbinding en probeer het opnieuw.';}
+    else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='Gemini heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='INVALID_AI_OUTPUT'){title='Ongeldig AI-resultaat.';message='Gemini heeft een onbruikbaar resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
+    else if(!navigator.onLine){title='Geen internetverbinding.';message='Controleer je internetverbinding en probeer het met dezelfde foto opnieuw.';}
     const ref=error?.requestId?`<span class="tiny">Referentie: ${esc(error.requestId)}</span>`:'';
-    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice warn"><b>${esc(title)}</b><br>${esc(message)}${ref?`<br>${ref}`:''}</div>`;
+    const retry=aiLastFile?'<button class="secondary aiFoodRetry" type="button" onclick="retryAIFood()">↻ Opnieuw proberen met deze foto</button>':'';
+    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice warn"><b>${esc(title)}</b><br>${esc(message)}${ref?`<br>${ref}`:''}${retry}</div>`;
     document.getElementById('aiFoodResults').classList.add('hidden');
-  }finally{aiBusy=false;renderAIFoodResults(false);document.getElementById('aiFoodConfirmBtn').disabled=true;}
+  }finally{
+    aiBusy=false;
+    if(aiDetectedItems.length)renderAIFoodResults(false);
+    document.getElementById('aiFoodConfirmBtn').disabled=true;
+  }
+}
+
+async function handleAIFoodFile(event){
+  const file=event.target.files?.[0];
+  event.target.value='';
+  if(!file)return;
+  if(!file.type.startsWith('image/')){document.getElementById('aiFoodStatus').innerHTML='<div class="notice warn">Selecteer een foto.</div>';return;}
+  aiLastFile=file;
+  await analyzeAIFoodFile(file);
+}
+
+async function retryAIFood(){
+  if(aiBusy||!aiLastFile)return;
+  await analyzeAIFoodFile(aiLastFile);
 }
 
 function confirmAIFood(){
