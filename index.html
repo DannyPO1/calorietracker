@@ -224,7 +224,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.0';
+const APP_VERSION='6.0.1';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -273,7 +273,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.0.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.0.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -1933,11 +1933,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-
-
-</script>
-
-/* v6.0.0 — AI food photo analysis via private Vercel function + Gemini */
+/* v6.0.1 — AI food photo analysis via private Vercel function + Gemini */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -2174,6 +2170,9 @@ function confirmAIFood(){
   setTimeout(()=>alert(`${valid.length} voedingsmiddel${valid.length===1?'':'en'} toegevoegd aan ${meal}.`),40);
 }
 
+
+
+</script>
 
 <script>
 if('serviceWorker' in navigator){
