@@ -186,7 +186,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.3.0';
+const APP_VERSION='5.3.1';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1333,8 +1333,18 @@ function drawChart(){
  const info=document.getElementById("weightForecastInfo");
  if(!a.length){svg.innerHTML='<text x="350" y="110" text-anchor="middle" fill="#667085">Nog geen gewichtsmetingen</text>';if(info)info.innerHTML="";return}
  const forecast=weightForecastData();
- const endDate=forecast?forecast.points[forecast.points.length-1].date:a[a.length-1].date;
- const startMs=new Date(a[0].date+"T12:00:00").getTime(),endMs=new Date(endDate+"T12:00:00").getTime();
+ const actualStartMs=new Date(a[0].date+"T12:00:00").getTime();
+ const actualEndMs=new Date(a[a.length-1].date+"T12:00:00").getTime();
+ // Keep the x-axis readable even when there are too few measurements for a forecast.
+ // With a single measurement (or a very short measurement window), show a minimum
+ // 7-day time window so the five tick labels cannot all collapse onto the same date.
+ let startMs=actualStartMs, endMs=forecast?new Date(forecast.points[forecast.points.length-1].date+"T12:00:00").getTime():actualEndMs;
+ const minAxisSpan=7*86400000;
+ if(endMs-startMs<minAxisSpan){
+   const center=(actualStartMs+actualEndMs)/2;
+   startMs=center-minAxisSpan/2;
+   endMs=center+minAxisSpan/2;
+ }
  const allWeights=a.map(x=>+x.weight).concat(data.profile.goalWeight?[+data.profile.goalWeight]:[]).concat(forecast?forecast.points.map(x=>x.weight):[]);
  let min=Math.floor(Math.min(...allWeights)-1),max=Math.ceil(Math.max(...allWeights)+1);
  if(max-min<4){const mid=(max+min)/2;min=Math.floor(mid-2);max=Math.ceil(mid+2)}
@@ -1349,6 +1359,7 @@ function drawChart(){
  }
  svg.innerHTML+=`<text x="10" y="14" font-size="10" font-weight="700" fill="#667085">kg</text>`;
  // X-axis: five evenly spaced date ticks over the full visible period.
+ // The visible period is never shorter than 7 days, preventing repeated date labels.
  for(let i=0;i<=4;i++){
    const ms=startMs+(endMs-startMs)*(i/4), date=new Date(ms); const label=date.toLocaleDateString("nl-NL",{day:"numeric",month:"short"}).replace('.','');
    const x=padL+(w-padL-padR)*(i/4);
@@ -1820,7 +1831,7 @@ if('serviceWorker' in navigator){
     try{
       // v5.2.2 uses a new service-worker filename so an older sw.js
       // cannot keep the app pinned to an old cached index.html.
-      const workerUrl='./sw-5.3.0.js';
+      const workerUrl='./sw.js';
       const reg=await navigator.serviceWorker.register(workerUrl,{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
