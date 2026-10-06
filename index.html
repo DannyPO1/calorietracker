@@ -224,7 +224,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.1';
+const APP_VERSION='6.0.3';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -273,7 +273,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.0.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.0.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -1933,7 +1933,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.0.1 — AI food photo analysis via private Vercel function + Gemini */
+/* v6.0.3 — AI food photo analysis via private Vercel function + Gemini; clearer error handling */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -2122,7 +2122,13 @@ async function handleAIFoodFile(event){
       body:JSON.stringify({image:base64,mimeType:'image/jpeg'})
     });
     let payload=null;try{payload=await response.json();}catch(e){}
-    if(!response.ok)throw new Error(payload?.error||`Analyse mislukt (${response.status}).`);
+    if(!response.ok){
+      const err=new Error(payload?.error||`Analyse mislukt (${response.status}).`);
+      err.code=payload?.code||'';
+      err.status=response.status;
+      err.requestId=payload?.requestId||'';
+      throw err;
+    }
     const items=Array.isArray(payload?.items)?payload.items:[];
     aiDetectedItems=items.map(x=>({
       name:String(x.name||'Voedingsmiddel'),
@@ -2137,8 +2143,22 @@ async function handleAIFoodFile(event){
     document.getElementById('aiFoodStatus').innerHTML='<div class="notice success"><b>Analyse klaar.</b> Controleer de herkenning en gewichten. De AI-voedingswaarden worden niet gebruikt.</div>';
     renderAIFoodResults();
   }catch(error){
-    console.error(error);
-    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice warn"><b>Analyse mislukt.</b><br>${esc(error?.message||'Onbekende fout')}<br><span class="tiny">Controleer of Vercel actief is en of GEMINI_API_KEY als Production Secret is ingesteld.</span></div>`;
+    console.error('AI food analysis failed',error);
+    const code=error?.code||'';
+    let title='Analyse mislukt.';
+    let message=error?.message||'Onbekende fout.';
+    if(code==='CONFIG_MISSING'){title='AI-fotoscan niet geconfigureerd.';message='De AI-fotoscan is niet correct geconfigureerd. Controleer de Vercel Production-configuratie.';}
+    else if(code==='GEMINI_AUTH'){title='AI-configuratie geweigerd.';message='De AI-service accepteert de ingestelde API-sleutel niet. Controleer de Gemini API-key in Vercel.';}
+    else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='Gemini is tijdelijk overbelast of niet bereikbaar. De app heeft het automatisch opnieuw geprobeerd. Probeer het over een moment opnieuw.';}
+    else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De Gemini-capaciteit is tijdelijk bereikt. Probeer het later opnieuw.';}
+    else if(code==='GEMINI_BAD_REQUEST'){title='Foto kon niet worden verwerkt.';message='Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.';}
+    else if(code==='IMAGE_TOO_LARGE'){title='Foto is te groot.';}
+    else if(code==='INVALID_IMAGE_TYPE'){title='Ongeldig fotoformaat.';}
+    else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='Gemini heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het opnieuw.';}
+    else if(code==='INVALID_AI_OUTPUT'){title='Ongeldig AI-resultaat.';message='Gemini heeft een onbruikbaar resultaat teruggegeven. Probeer het opnieuw.';}
+    else if(!navigator.onLine){title='Geen internetverbinding.';message='Controleer je internetverbinding en probeer het opnieuw.';}
+    const ref=error?.requestId?`<span class="tiny">Referentie: ${esc(error.requestId)}</span>`:'';
+    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice warn"><b>${esc(title)}</b><br>${esc(message)}${ref?`<br>${ref}`:''}</div>`;
     document.getElementById('aiFoodResults').classList.add('hidden');
   }finally{aiBusy=false;renderAIFoodResults(false);document.getElementById('aiFoodConfirmBtn').disabled=true;}
 }
