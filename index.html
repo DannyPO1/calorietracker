@@ -224,7 +224,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.6';
+const APP_VERSION='6.0.7';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -273,7 +273,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.0.6"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.0.7"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -1931,7 +1931,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.0.6 — AI food photo scan fix + simplified iOS photo picker */
+/* v6.0.7 — improved AI recognition and safer database matching */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';

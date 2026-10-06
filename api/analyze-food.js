@@ -96,9 +96,11 @@ export default async function handler(req, res) {
 
     const prompt = [
       'Analyseer de bijgevoegde foto uitsluitend op zichtbare voeding en drank.',
+      'Wees conservatief: herken een voedingsmiddel niet alleen op basis van de ronde of platte vorm. Gebruik ook oppervlak, textuur, kleur, verpakking en zichtbare context.',
+      'Noem iets alleen hamburger of broodje als er daadwerkelijk duidelijke kenmerken van een hamburger/patty of broodje zichtbaar zijn. Een ronde koek, pannenkoek, omelet of andere ronde voeding is niet automatisch een hamburger.',
       'Maak een lijst van afzonderlijke, duidelijk zichtbare voedingsmiddelen of dranken.',
       'Gebruik Nederlandse, concrete productnamen die geschikt zijn voor een voedingsdatabase.',
-      'Schat per item het zichtbare eetbare gewicht in gram. Voor vloeistoffen mag je milliliter benaderen als gram.',
+      'Schat per item het zichtbare eetbare gewicht in gram. Voor vloeistoffen mag je milliliter benaderen als gram. Gebruik geen standaardwaarde van 100 g alleen omdat het gewicht onbekend is; kies een realistische schatting op basis van het zichtbare formaat.',
       'Als een gerecht uit meerdere duidelijk zichtbare onderdelen bestaat, splits die onderdelen op wanneer dat redelijk kan.',
       'Neem geen bord, bestek, verpakking of decoratie op als voedingsmiddel.',
       'Verzin geen verborgen ingrediënten die je niet kunt zien.',

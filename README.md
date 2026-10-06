@@ -1,4 +1,4 @@
-# CalorieTracker v6.0.6
+# CalorieTracker v6.0.7
 
 AI-fotoscan toegevoegd via Google Gemini.
 
@@ -14,7 +14,7 @@ The existing GitHub Pages frontend remains supported.
 The photo is sent to Google Gemini for analysis. CalorieTracker does not store the photo locally. Nutrition values are calculated from the app's own food database after the user reviews and confirms the detected products.
 
 ## Version
-6.0.6 — 6 October 2026
+6.0.7 — 6 October 2026
 
 ## AI fallback
 - Primary: `gemini-3.8-flash`
