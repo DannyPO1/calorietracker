@@ -157,6 +157,44 @@ html[data-theme="dark"] .mealTile:hover{border-color:#3c5b49;box-shadow:0 10px 3
 .mealTileMeta{left:12px!important;top:116px!important;max-width:calc(100% - 24px)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px!important;}
 .mealTileProgress{left:12px!important;bottom:12px!important;}
 .mealTileAdd{display:none!important;}
+
+/* v6.0.0 AI food photo analysis */
+.aiFoodLauncher{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:2px 0 15px;padding:14px 16px;border:1px solid #d7e6dc;border-radius:18px;background:linear-gradient(135deg,#eef7f1,#e3f0e8);color:#1f6844;font-size:15px;font-weight:800;box-shadow:0 7px 20px rgba(24,59,43,.08)}
+.aiFoodLauncher svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372b,#1b2c22);border-color:#355044;color:#79d29c}
+.aiFoodModal{position:fixed;inset:0;z-index:120;display:flex;align-items:flex-end;justify-content:center}
+.aiFoodModal.hidden{display:none!important}
+.aiFoodBackdrop{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px)}
+.aiFoodPanel{position:relative;width:min(760px,100%);max-height:94vh;overflow:auto;background:var(--card);border-radius:27px 27px 0 0;padding:18px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 48px rgba(0,0,0,.28)}
+.aiFoodHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.aiFoodHeader h2{margin:2px 0 3px;font-size:22px}
+.aiFoodPrivacy{margin:13px 0;padding:12px 13px;border-radius:15px;background:var(--accent-soft);color:var(--text);font-size:12px;line-height:1.5}
+.aiFoodSourceGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.aiFoodSource{min-height:74px;display:flex;align-items:center;justify-content:center;gap:9px}
+.aiFoodPreview{width:100%;max-height:230px;object-fit:contain;border-radius:18px;background:#101713;margin-top:13px;display:none}
+.aiFoodStatus{margin-top:12px}
+.aiFoodResults{margin-top:14px}
+.aiFoodResult{border:1px solid var(--line);border-radius:18px;padding:13px;margin-top:10px;background:rgba(255,255,255,.18)}
+.aiFoodResultTop{display:flex;align-items:center;gap:9px}
+.aiFoodResultTop b{font-size:14px}
+.aiFoodResultRemove{margin-left:auto;padding:6px 9px;border-radius:10px}
+.aiFoodResultGrid{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:9px;margin-top:9px}
+.aiFoodResult label{margin:0 0 4px}
+.aiFoodResult input,.aiFoodResult select{padding:10px;font-size:15px}
+.aiFoodMatch{margin-top:8px;font-size:12px}
+.aiFoodMatched{color:var(--green);font-weight:700}
+.aiFoodUnmatched{color:var(--red);font-weight:700}
+.aiFoodNutrition{margin-top:8px;padding:9px 10px;border-radius:12px;background:var(--cream);font-size:12px;color:var(--muted)}
+.aiFoodConfidence{font-size:11px;color:var(--muted);margin-left:4px}
+.aiFoodSummary{margin-top:14px;padding:13px;border-radius:16px;background:var(--accent-soft);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.aiFoodSummary strong{font-size:19px}
+.aiFoodMealChoice{margin-top:14px}
+.aiFoodMealChoice select{margin-top:5px}
+.aiFoodFooter{display:flex;gap:8px;margin-top:16px}
+.aiFoodFooter button{flex:1}
+.aiFoodSpinner{width:17px;height:17px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:aiSpin .7s linear infinite}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+@media(max-width:560px){.aiFoodPanel{padding-left:14px;padding-right:14px}.aiFoodSourceGrid{grid-template-columns:1fr}.aiFoodResultGrid{grid-template-columns:minmax(0,1fr) 105px}.aiFoodFooter{position:sticky;bottom:0;background:var(--card);padding-top:9px}}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -186,7 +224,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='5.3.3';
+const APP_VERSION='6.0.0';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -235,7 +273,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="5.2.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.0.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -289,6 +327,12 @@ function updateRecipeLineCalorie(i){
  </div>
 
  <div class="mealTileGrid" id="mealTiles"></div>
+
+ <button class="aiFoodLauncher" type="button" onclick="openAIFoodModal()">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7.5 8.4 5h7.2L17 7.5h2.2A1.8 1.8 0 0 1 21 9.3v8.9a1.8 1.8 0 0 1-1.8 1.8H4.8A1.8 1.8 0 0 1 3 18.2V9.3a1.8 1.8 0 0 1 1.8-1.8H7Z"/><circle cx="12" cy="13.5" r="3.6"/><path d="M17.5 11h.01"/></svg>
+  Voeding toevoegen met foto
+ </button>
+
 
  <div id="foodEntryModal" class="mealModal hidden" role="dialog" aria-modal="true" aria-labelledby="foodEntryTitle">
   <div class="mealModalBackdrop" onclick="closeMealEntry()"></div>
@@ -399,10 +443,46 @@ function updateRecipeLineCalorie(i){
   </div>
   <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
   <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
- </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt je geregistreerde voedingsgegevens niet naar een server. Bij een barcode-scan wordt alleen de barcode naar Open Food Facts gestuurd om productgegevens op te halen. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
+ </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt je geregistreerde voedingsgegevens niet naar een server. Bij een barcode-scan wordt alleen de barcode naar Open Food Facts gestuurd om productgegevens op te halen. Bij de optionele AI-fotoscan wordt de gekozen foto eenmalig naar Google Gemini gestuurd voor analyse; de foto wordt niet door CalorieTracker opgeslagen. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
 </main>
 
 <nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('food',this)">Voeding</button><button onclick="tab('settings',this)">Instellingen</button></nav>
+
+
+<div id="aiFoodModal" class="aiFoodModal hidden" role="dialog" aria-modal="true" aria-labelledby="aiFoodTitle">
+ <div class="aiFoodBackdrop" onclick="closeAIFoodModal()"></div>
+ <div class="aiFoodPanel">
+  <div class="aiFoodHeader">
+   <div><div class="sectionKicker">AI VOEDINGSSCAN</div><h2 id="aiFoodTitle">Voeding herkennen met een foto</h2><p class="muted" style="margin:0">Maak een foto van je maaltijd en controleer daarna zelf wat er wordt geregistreerd.</p></div>
+   <button class="ghost closeCircle" type="button" onclick="closeAIFoodModal()" aria-label="Sluiten">×</button>
+  </div>
+  <div class="aiFoodPrivacy"><b>Privacy:</b> de foto wordt eenmalig naar Google Gemini gestuurd voor analyse. CalorieTracker slaat de foto niet op. Je bevestigt altijd zelf welke producten en hoeveelheden worden geregistreerd.</div>
+  <div class="aiFoodSourceGrid">
+   <button class="primary aiFoodSource" type="button" onclick="document.getElementById('aiCameraInput').click()">📷 Maak foto</button>
+   <button class="secondary aiFoodSource" type="button" onclick="document.getElementById('aiGalleryInput').click()">🖼️ Kies foto</button>
+  </div>
+  <input id="aiCameraInput" type="file" accept="image/*" capture="environment" hidden onchange="handleAIFoodFile(event)">
+  <input id="aiGalleryInput" type="file" accept="image/*" hidden onchange="handleAIFoodFile(event)">
+  <img id="aiFoodPreview" class="aiFoodPreview" alt="Geselecteerde maaltijd">
+  <div id="aiFoodStatus" class="aiFoodStatus"></div>
+  <div id="aiFoodResults" class="aiFoodResults hidden"></div>
+  <div id="aiFoodMealChoice" class="aiFoodMealChoice hidden">
+   <label for="aiMealType">Toevoegen aan maaltijd</label>
+   <select id="aiMealType">
+    <option value="Ontbijt">Ontbijt</option>
+    <option value="Lunch">Lunch</option>
+    <option value="Avondeten">Avondeten</option>
+    <option value="Snack">Snacks</option>
+   </select>
+  </div>
+  <div id="aiFoodSummary" class="aiFoodSummary hidden"></div>
+  <div class="aiFoodFooter">
+   <button class="ghost" type="button" onclick="closeAIFoodModal()">Annuleren</button>
+   <button class="primary" id="aiFoodConfirmBtn" type="button" onclick="confirmAIFood()" disabled>Registreren</button>
+  </div>
+  <datalist id="aiProductsList"></datalist>
+ </div>
+</div>
 
 <div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
 
@@ -1856,6 +1936,245 @@ render();renderSettings();inspectStorage();refreshStorageContext();
 
 
 </script>
+
+/* v6.0.0 — AI food photo analysis via private Vercel function + Gemini */
+const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
+  ? '/api/analyze-food'
+  : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
+
+let aiDetectedItems=[];
+let aiPreviewUrl=null;
+let aiBusy=false;
+
+function openAIFoodModal(){
+  const modal=document.getElementById('aiFoodModal');
+  modal.classList.remove('hidden');
+  document.getElementById('aiFoodStatus').innerHTML='<div class="notice">Maak een duidelijke foto van je maaltijd. Het helpt als de hele maaltijd goed zichtbaar is.</div>';
+  document.getElementById('aiFoodResults').classList.add('hidden');
+  document.getElementById('aiFoodResults').innerHTML='';
+  document.getElementById('aiFoodMealChoice').classList.add('hidden');
+  document.getElementById('aiFoodSummary').classList.add('hidden');
+  document.getElementById('aiFoodConfirmBtn').disabled=true;
+  document.getElementById('aiCameraInput').value='';
+  document.getElementById('aiGalleryInput').value='';
+  const p=document.getElementById('aiFoodPreview');p.style.display='none';p.removeAttribute('src');
+  aiDetectedItems=[];
+  aiBusy=false;
+  if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
+}
+
+function closeAIFoodModal(){
+  if(aiBusy)return;
+  document.getElementById('aiFoodModal')?.classList.add('hidden');
+  const p=document.getElementById('aiFoodPreview');
+  if(p){p.style.display='none';p.removeAttribute('src');}
+  document.getElementById('aiCameraInput').value='';
+  document.getElementById('aiGalleryInput').value='';
+  aiDetectedItems=[];
+  if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
+}
+
+function aiNormalize(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+function aiTokenScore(query,key){
+  const q=aiNormalize(query),k=aiNormalize(key);
+  if(!q||!k)return 0;
+  if(q===k)return 1000;
+  if(k.includes(q))return 800-q.length;
+  if(q.includes(k))return 700-k.length;
+  const qt=q.split(/\s+/).filter(Boolean),kt=k.split(/\s+/).filter(Boolean);
+  let score=0;
+  qt.forEach(t=>{if(kt.includes(t))score+=100;else if(kt.some(x=>x.includes(t)||t.includes(x)))score+=45;});
+  return score;
+}
+function aiFindProducts(name){
+  const aliases={
+    'kipfilet':'kipfilet','chicken breast':'kipfilet','chicken':'kipfilet',
+    'rijst':'rijst gekookt','rice':'rijst gekookt','pasta':'pasta gekookt',
+    'aardappel':'aardappel','potato':'aardappel','broccoli':'broccoli',
+    'banaan':'banaan','banana':'banaan','appel':'appel','apple':'appel',
+    'ei':'ei','egg':'ei','avocado':'avocado','hummus':'hummus',
+    'kikkererwten':'kikkererwten gekookt','chickpeas':'kikkererwten gekookt',
+    'kip shoarma':'kipshoarma','chicken shawarma':'kipshoarma',
+    'gehakt':'rundergehakt','beef mince':'rundergehakt'
+  };
+  const n=aiNormalize(name);
+  const keys=Object.keys(allProducts());
+  const alias=aliases[n];
+  if(alias && allProducts()[alias]) return [alias,...keys.filter(k=>k!==alias).sort((a,b)=>aiTokenScore(n,b)-aiTokenScore(n,a)).slice(0,5)];
+  return keys.map(k=>({k,score:aiTokenScore(name,k)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl')).slice(0,8).map(x=>x.k);
+}
+function aiBestProduct(name){
+  const hits=aiFindProducts(name);
+  if(!hits.length)return null;
+  const best=hits[0], score=aiTokenScore(name,best);
+  if(score<100 && !allProducts()[aiNormalize(name)])return null;
+  return best;
+}
+function aiPopulateDatalist(){
+  const dl=document.getElementById('aiProductsList');
+  if(!dl)return;
+  dl.innerHTML=Object.keys(allProducts()).sort((a,b)=>a.localeCompare(b,'nl')).map(k=>`<option value="${esc(k)}"></option>`).join('');
+}
+function aiSetProduct(index,value){
+  const item=aiDetectedItems[index];
+  if(!item)return;
+  const exact=Object.keys(allProducts()).find(k=>aiNormalize(k)===aiNormalize(value));
+  item.productName=exact||null;
+  item.productInput=exact||value;
+  renderAIFoodResults();
+}
+function aiSetName(index,value){
+  const item=aiDetectedItems[index]; if(!item)return;
+  item.name=value;
+  const best=aiBestProduct(value);
+  if(best)item.productName=best;
+  else item.productName=null;
+  renderAIFoodResults(false);
+}
+function aiSetGrams(index,value){
+  const item=aiDetectedItems[index]; if(!item)return;
+  item.grams=Math.max(1,Number(value)||0);
+  renderAIFoodResults(false);
+}
+function aiRemoveItem(index){
+  aiDetectedItems.splice(index,1);
+  renderAIFoodResults();
+}
+function aiNutrition(item){
+  const p=item.productName?allProducts()[item.productName]:null;
+  if(!p)return null;
+  const grams=Number(item.grams)||0, factor=grams/100;
+  return {kcal:p.kcal*factor,p:p.p*factor,c:p.c*factor,f:p.f*factor};
+}
+function renderAIFoodResults(focusFirst=true){
+  const box=document.getElementById('aiFoodResults');
+  if(!box)return;
+  aiPopulateDatalist();
+  box.classList.remove('hidden');
+  if(!aiDetectedItems.length){
+    box.innerHTML='<div class="empty">Geen voedingsmiddelen herkend. Maak een nieuwe foto.</div>';
+    document.getElementById('aiFoodMealChoice').classList.add('hidden');
+    document.getElementById('aiFoodSummary').classList.add('hidden');
+    document.getElementById('aiFoodConfirmBtn').disabled=true;
+    return;
+  }
+  box.innerHTML=aiDetectedItems.map((item,i)=>{
+    const n=aiNutrition(item);
+    const matches=aiFindProducts(item.name);
+    const conf=Number(item.confidence);
+    const confidence=Number.isFinite(conf)?`<span class="aiFoodConfidence">AI ${Math.round(conf*100)}%</span>`:'';
+    return `<div class="aiFoodResult">
+      <div class="aiFoodResultTop"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}<button class="danger aiFoodResultRemove" type="button" onclick="aiRemoveItem(${i})">Verwijder</button></div>
+      <div class="aiFoodResultGrid">
+       <div><label>Productnaam / databasekoppeling</label><input list="aiProductsList" value="${esc(item.productName||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
+       <div><label>Geschat gewicht</label><input type="number" min="1" max="3000" step="1" value="${Math.round(item.grams||100)}" onchange="aiSetGrams(${i},this.value)"></div>
+      </div>
+      <div class="aiFoodMatch">${n?`<span class="aiFoodMatched">✓ ${esc(item.productName)} gekoppeld</span>`:`<span class="aiFoodUnmatched">⚠ Niet gekoppeld aan je voedingsdatabase</span>`}</div>
+      ${n?`<div class="aiFoodNutrition">${Math.round(n.kcal)} kcal • ${Math.round(n.p*10)/10} g eiwit • ${Math.round(n.c*10)/10} g koolhydraten • ${Math.round(n.f*10)/10} g vet</div>`:`<div class="aiFoodNutrition">Kies een product uit de lijst om de voedingswaarde te berekenen. De AI-kcal worden bewust niet gebruikt.</div>`}
+      ${matches.length>1?`<div class="tiny" style="margin-top:6px">Suggesties: ${matches.slice(0,4).map(x=>esc(x)).join(' · ')}</div>`:''}
+    </div>`;
+  }).join('');
+  const meal=document.getElementById('aiMealType');
+  document.getElementById('aiFoodMealChoice').classList.remove('hidden');
+  document.getElementById('aiFoodSummary').classList.remove('hidden');
+  const valid=aiDetectedItems.filter(x=>aiNutrition(x));
+  const t=valid.reduce((o,x)=>{const n=aiNutrition(x);o.kcal+=n.kcal;o.p+=n.p;o.c+=n.c;o.f+=n.f;return o},{kcal:0,p:0,c:0,f:0});
+  document.getElementById('aiFoodSummary').innerHTML=`<span><b>${valid.length}/${aiDetectedItems.length}</b> gekoppeld aan je database<br><span class="tiny">Alleen gekoppelde producten kunnen worden geregistreerd.</span></span><strong>${Math.round(t.kcal)} kcal</strong>`;
+  document.getElementById('aiFoodConfirmBtn').disabled=valid.length!==aiDetectedItems.length || valid.length===0 || aiBusy;
+}
+
+async function resizeAIFoodImage(file){
+  const objectUrl=URL.createObjectURL(file);
+  try{
+    const img=new Image();
+    img.decoding='async';
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=objectUrl;});
+    const max=1280,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d',{alpha:false});ctx.drawImage(img,0,0,w,h);
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.78));
+    if(!blob)throw new Error('Kon de foto niet voorbereiden.');
+    return blob;
+  }finally{URL.revokeObjectURL(objectUrl);}
+}
+
+async function handleAIFoodFile(event){
+  const file=event.target.files?.[0];
+  event.target.value='';
+  if(!file)return;
+  if(!file.type.startsWith('image/')){document.getElementById('aiFoodStatus').innerHTML='<div class="notice warn">Selecteer een foto.</div>';return;}
+  aiBusy=true;aiDetectedItems=[];
+  document.getElementById('aiFoodConfirmBtn').disabled=true;
+  document.getElementById('aiFoodResults').classList.add('hidden');
+  document.getElementById('aiFoodMealChoice').classList.add('hidden');
+  document.getElementById('aiFoodSummary').classList.add('hidden');
+  const preview=document.getElementById('aiFoodPreview');
+  if(aiPreviewUrl)URL.revokeObjectURL(aiPreviewUrl);
+  aiPreviewUrl=URL.createObjectURL(file);
+  preview.src=aiPreviewUrl;preview.style.display='block';
+  document.getElementById('aiFoodStatus').innerHTML='<div class="notice"><span class="aiFoodSpinner"></span> Foto voorbereiden en analyseren…</div>';
+  try{
+    const blob=await resizeAIFoodImage(file);
+    const base64=await new Promise((resolve,reject)=>{
+      const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(blob);
+    });
+    const response=await fetch(AI_FOOD_API_URL,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:base64,mimeType:'image/jpeg'})
+    });
+    let payload=null;try{payload=await response.json();}catch(e){}
+    if(!response.ok)throw new Error(payload?.error||`Analyse mislukt (${response.status}).`);
+    const items=Array.isArray(payload?.items)?payload.items:[];
+    aiDetectedItems=items.map(x=>({
+      name:String(x.name||'Voedingsmiddel'),
+      grams:Math.max(1,Number(x.grams)||100),
+      confidence:Number(x.confidence),
+      notes:String(x.notes||''),
+      productName:aiBestProduct(String(x.name||''))||null
+    }));
+    if(!aiDetectedItems.length)throw new Error('Gemini kon geen duidelijke voedingsmiddelen in de foto herkennen.');
+    const currentMeal=document.getElementById('mealType')?.value;
+    if(currentMeal)document.getElementById('aiMealType').value=currentMeal;
+    document.getElementById('aiFoodStatus').innerHTML='<div class="notice success"><b>Analyse klaar.</b> Controleer de herkenning en gewichten. De AI-voedingswaarden worden niet gebruikt.</div>';
+    renderAIFoodResults();
+  }catch(error){
+    console.error(error);
+    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice warn"><b>Analyse mislukt.</b><br>${esc(error?.message||'Onbekende fout')}<br><span class="tiny">Controleer of Vercel actief is en of GEMINI_API_KEY als Production Secret is ingesteld.</span></div>`;
+    document.getElementById('aiFoodResults').classList.add('hidden');
+  }finally{aiBusy=false;renderAIFoodResults(false);document.getElementById('aiFoodConfirmBtn').disabled=true;}
+}
+
+function confirmAIFood(){
+  if(aiBusy||!aiDetectedItems.length)return;
+  const meal=document.getElementById('aiMealType').value||'Ontbijt',d=today();
+  const valid=aiDetectedItems.map(item=>({item,n:aiNutrition(item)}));
+  if(valid.some(x=>!x.n)){msg('Koppel eerst alle herkende producten aan je voedingsdatabase.','warn');return;}
+  data.days[d]??=[];
+  valid.forEach(({item,n})=>{
+    const p=allProducts()[item.productName];
+    const grams=Number(item.grams)||0;
+    data.days[d].push({
+      name:item.productName,
+      amount:grams,
+      unit:'g',
+      grams,
+      kcal:n.kcal,
+      p:n.p,
+      c:n.c,
+      f:n.f,
+      meal
+    });
+  });
+  save();render();
+  closeAIFoodModal();
+  // Give the user an explicit confirmation without changing the existing meal modal.
+  setTimeout(()=>alert(`${valid.length} voedingsmiddel${valid.length===1?'':'en'} toegevoegd aan ${meal}.`),40);
+}
+
+
 <script>
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
