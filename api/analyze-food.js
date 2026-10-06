@@ -1,5 +1,7 @@
-const MODEL = 'gemini-3.8-flash';
-const MAX_GEMINI_ATTEMPTS = 3;
+const PRIMARY_MODEL = 'gemini-3.8-flash';
+const FALLBACK_MODEL = 'gemini-3.7-flash';
+const PRIMARY_ATTEMPTS = 2;
+const FALLBACK_ATTEMPTS = 2;
 
 function requestId() {
   try { return crypto.randomUUID(); } catch (_) { return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
@@ -67,12 +69,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return send(res, 405, { error: 'Alleen POST is toegestaan.' });
 
+  const id = requestId();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return errorResponse(res, 500, 'CONFIG_MISSING', 'De AI-fotoscan is niet correct geconfigureerd.', id);
   }
-
-  const id = requestId();
   console.info('AI food request', id);
 
   try {
@@ -120,55 +121,82 @@ export default async function handler(req, res) {
     let response = null;
     let raw = '';
     let result = null;
+    let lastStatus = null;
+    let lastModel = PRIMARY_MODEL;
 
-    for (let attempt = 1; attempt <= MAX_GEMINI_ATTEMPTS; attempt++) {
-      response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
-        },
-        body: JSON.stringify(geminiPayload)
-      });
+    async function callGemini(model, maxAttempts) {
+      const payload = { ...geminiPayload, model };
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
+          body: JSON.stringify(payload)
+        });
 
-      raw = await response.text();
-      result = null;
-      try { result = JSON.parse(raw); } catch (_) {}
+        const text = await r.text();
+        let parsed = null;
+        try { parsed = JSON.parse(text); } catch (_) {}
 
-      if (response.ok) break;
+        lastStatus = r.status;
+        lastModel = model;
+        response = r;
+        raw = text;
+        result = parsed;
 
-      // Gemini can temporarily return 503 during demand spikes. Retry a few
-      // times before surfacing the error to the app.
-      const retryable = [429, 502, 503, 504].includes(response.status);
-      if (retryable && attempt < MAX_GEMINI_ATTEMPTS) {
-        console.warn('Gemini temporary/quota error; retrying', { id, status: response.status, attempt });
-        const retryAfter = Number(response.headers.get('retry-after'));
-        const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
-          ? Math.min(retryAfter * 1000, 5000)
-          : attempt * 1500;
-        await new Promise(resolve => setTimeout(resolve, waitMs));
-        continue;
-      }
+        if (r.ok) {
+          console.info('Gemini request succeeded', { id, model, attempt });
+          return true;
+        }
 
-      console.error('Gemini API error', id, response.status, raw.slice(0, 1500));
-      if (response.status === 401 || response.status === 403) {
-        return errorResponse(res, 502, 'GEMINI_AUTH', 'De AI-service accepteert de ingestelde API-sleutel niet.', id);
+        const retryable = [429, 502, 503, 504].includes(r.status);
+        if (retryable && attempt < maxAttempts) {
+          console.warn('Gemini temporary/quota error; retrying', { id, model, status: r.status, attempt });
+          const retryAfter = Number(r.headers.get('retry-after'));
+          const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter * 1000, 6000)
+            : Math.min(2000 * (2 ** (attempt - 1)), 6000);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+          continue;
+        }
+
+        console.warn('Gemini model attempt failed', { id, model, status: r.status, attempt });
+        return false;
       }
-      if (response.status === 429) {
-        return errorResponse(res, 429, 'GEMINI_QUOTA', 'De AI-service heeft tijdelijk geen capaciteit meer. Probeer het later opnieuw.', id);
-      }
-      if (response.status === 503) {
-        return errorResponse(res, 503, 'GEMINI_UNAVAILABLE', 'Gemini is tijdelijk overbelast. Probeer het over een moment opnieuw.', id);
-      }
-      if (response.status === 400) {
-        return errorResponse(res, 502, 'GEMINI_BAD_REQUEST', 'Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.', id);
-      }
-      return errorResponse(res, response.status >= 500 ? 502 : response.status, 'GEMINI_ERROR', 'De AI-service kon de foto niet analyseren. Probeer het opnieuw.', id);
+      return false;
     }
 
-    if (!response?.ok) {
-      console.error('Gemini API failed after retries', response?.status, raw.slice(0, 1500));
-      return errorResponse(res, 503, 'GEMINI_UNAVAILABLE', 'Gemini is tijdelijk niet beschikbaar. Probeer het over een moment opnieuw.', id);
+    // Try the primary model first. If Gemini is temporarily overloaded, use a
+    // second stable Flash model before giving up. Both models support image
+    // input and structured output, and both are currently available on the
+    // Gemini API free tier.
+    let ok = await callGemini(PRIMARY_MODEL, PRIMARY_ATTEMPTS);
+    if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
+      console.warn('Primary Gemini model unavailable; trying fallback model', {
+        id, primaryModel: PRIMARY_MODEL, fallbackModel: FALLBACK_MODEL, status: lastStatus
+      });
+      ok = await callGemini(FALLBACK_MODEL, FALLBACK_ATTEMPTS);
+    }
+
+    if (!ok) {
+      console.error('Gemini API failed after retries/fallback', {
+        id, model: lastModel, status: lastStatus, response: raw.slice(0, 1500)
+      });
+      if (lastStatus === 401 || lastStatus === 403) {
+        return errorResponse(res, 502, 'GEMINI_AUTH', 'De AI-service accepteert de ingestelde API-sleutel niet.', id);
+      }
+      if (lastStatus === 429) {
+        return errorResponse(res, 429, 'GEMINI_QUOTA', 'De AI-service heeft tijdelijk geen capaciteit meer. Probeer het later opnieuw.', id);
+      }
+      if (lastStatus === 503 || lastStatus === 502 || lastStatus === 504) {
+        return errorResponse(res, 503, 'GEMINI_UNAVAILABLE', 'De AI-service is tijdelijk overbelast. De app heeft meerdere modellen geprobeerd. Probeer het over een moment opnieuw.', id);
+      }
+      if (lastStatus === 400) {
+        return errorResponse(res, 502, 'GEMINI_BAD_REQUEST', 'Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.', id);
+      }
+      return errorResponse(res, 502, 'GEMINI_ERROR', 'De AI-service kon de foto niet analyseren. Probeer het opnieuw.', id);
     }
 
     // The Interactions REST response can expose the generated text inside a
