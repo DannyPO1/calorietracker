@@ -1,4 +1,4 @@
-# CalorieTracker v6.0.4
+# CalorieTracker v6.0.5
 
 AI-fotoscan toegevoegd via Google Gemini.
 

@@ -106,7 +106,7 @@ export default async function handler(req, res) {
     ].join('\n');
 
     const geminiPayload = {
-      model: MODEL,
+      model: PRIMARY_MODEL,
       input: [
         { type: 'text', text: prompt },
         { type: 'image', data: image, mime_type: mimeType, resolution: 'medium' }

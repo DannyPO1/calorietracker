@@ -169,7 +169,7 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 .aiFoodHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .aiFoodHeader h2{margin:2px 0 3px;font-size:22px}
 .aiFoodPrivacy{margin:13px 0;padding:12px 13px;border-radius:15px;background:var(--accent-soft);color:var(--text);font-size:12px;line-height:1.5}
-.aiFoodSourceGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.aiFoodSourceGrid{display:grid;grid-template-columns:1fr;gap:9px;margin-top:14px}
 .aiFoodSource{min-height:74px;display:flex;align-items:center;justify-content:center;gap:9px}
 .aiFoodPreview{width:100%;max-height:230px;object-fit:contain;border-radius:18px;background:#101713;margin-top:13px;display:none}
 .aiFoodStatus{margin-top:12px}
@@ -224,7 +224,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.4';
+const APP_VERSION='6.0.5';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -273,7 +273,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.0.4"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.0.5"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -458,11 +458,9 @@ function updateRecipeLineCalorie(i){
   </div>
   <div class="aiFoodPrivacy"><b>Privacy:</b> de foto wordt eenmalig naar Google Gemini gestuurd voor analyse. CalorieTracker slaat de foto niet op. Je bevestigt altijd zelf welke producten en hoeveelheden worden geregistreerd.</div>
   <div class="aiFoodSourceGrid">
-   <button class="primary aiFoodSource" type="button" onclick="document.getElementById('aiCameraInput').click()">📷 Maak foto</button>
-   <button class="secondary aiFoodSource" type="button" onclick="document.getElementById('aiGalleryInput').click()">🖼️ Kies foto</button>
+   <button class="primary aiFoodSource" type="button" onclick="document.getElementById('aiPhotoInput').click()">📷 Foto toevoegen</button>
   </div>
-  <input id="aiCameraInput" type="file" accept="image/*" capture="environment" hidden onchange="handleAIFoodFile(event)">
-  <input id="aiGalleryInput" type="file" accept="image/*" hidden onchange="handleAIFoodFile(event)">
+  <input id="aiPhotoInput" type="file" accept="image/*" hidden onchange="handleAIFoodFile(event)">
   <img id="aiFoodPreview" class="aiFoodPreview" alt="Geselecteerde maaltijd">
   <div id="aiFoodStatus" class="aiFoodStatus"></div>
   <div id="aiFoodResults" class="aiFoodResults hidden"></div>
@@ -1933,7 +1931,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.0.4 — AI food photo analysis via private Vercel function + Gemini; clearer error handling */
+/* v6.0.5 — AI food photo scan fix + simplified iOS photo picker */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -1951,8 +1949,7 @@ function openAIFoodModal(){
   document.getElementById('aiFoodMealChoice').classList.add('hidden');
   document.getElementById('aiFoodSummary').classList.add('hidden');
   document.getElementById('aiFoodConfirmBtn').disabled=true;
-  document.getElementById('aiCameraInput').value='';
-  document.getElementById('aiGalleryInput').value='';
+  document.getElementById('aiPhotoInput').value='';
   const p=document.getElementById('aiFoodPreview');p.style.display='none';p.removeAttribute('src');
   aiDetectedItems=[];
   aiBusy=false;
@@ -1964,8 +1961,7 @@ function closeAIFoodModal(){
   document.getElementById('aiFoodModal')?.classList.add('hidden');
   const p=document.getElementById('aiFoodPreview');
   if(p){p.style.display='none';p.removeAttribute('src');}
-  document.getElementById('aiCameraInput').value='';
-  document.getElementById('aiGalleryInput').value='';
+  document.getElementById('aiPhotoInput').value='';
   aiDetectedItems=[];
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
