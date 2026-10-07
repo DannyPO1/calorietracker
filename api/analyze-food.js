@@ -1,9 +1,10 @@
 const PRIMARY_MODEL = 'gemini-3.8-flash';
-const FALLBACK_MODEL = 'gemini-3.7-flash';
-const FINAL_FALLBACK_MODEL = 'gemini-3.1-flash-lite';
+const FALLBACK_MODEL = 'gemini-3.1-flash-lite';
+const FINAL_FALLBACK_MODEL = 'gemini-3.7-flash';
 const PRIMARY_ATTEMPTS = 1;
 const FALLBACK_ATTEMPTS = 1;
 const FINAL_FALLBACK_ATTEMPTS = 1;
+const MODEL_TIMEOUT_MS = 12000;
 
 function requestId() {
   try { return crypto.randomUUID(); } catch (_) { return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
@@ -131,14 +132,29 @@ export default async function handler(req, res) {
     async function callGemini(model, maxAttempts) {
       const payload = { ...geminiPayload, model };
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
-          },
-          body: JSON.stringify(payload)
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+        let r;
+        try {
+          r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } catch (fetchError) {
+          clearTimeout(timeout);
+          lastStatus = 504;
+          lastModel = model;
+          raw = fetchError?.name === 'AbortError' ? 'Gemini request timed out' : String(fetchError?.message || fetchError);
+          result = null;
+          console.warn('Gemini request timed out/failed', { id, model, attempt, reason: raw });
+          return false;
+        }
+        clearTimeout(timeout);
 
         const text = await r.text();
         let parsed = null;
@@ -172,19 +188,20 @@ export default async function handler(req, res) {
       return false;
     }
 
-    // Use a short fallback chain so temporary Gemini capacity problems do not
-    // make the photo scan fail unnecessarily. Each model is attempted once to
-    // keep the response time reasonable. The final fallback is the lightweight
-    // Flash-Lite model, which also supports image input and structured output.
+    // Keep the fallback chain bounded in time. In particular, a Gemini model
+    // can accept the request but take a long time before returning a 503.
+    // The browser may otherwise surface a generic 'Load failed' after waiting
+    // about a minute. Flash-Lite is the preferred fast fallback because it
+    // supports image input and structured output.
     let ok = await callGemini(PRIMARY_MODEL, PRIMARY_ATTEMPTS);
     if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
-      console.warn('Primary Gemini model unavailable; trying fallback model', {
+      console.warn('Primary Gemini model unavailable; trying fast fallback', {
         id, primaryModel: PRIMARY_MODEL, fallbackModel: FALLBACK_MODEL, status: lastStatus
       });
       ok = await callGemini(FALLBACK_MODEL, FALLBACK_ATTEMPTS);
     }
     if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
-      console.warn('Secondary Gemini model unavailable; trying final lightweight fallback', {
+      console.warn('Fast Gemini fallback unavailable; trying secondary fallback', {
         id, fallbackModel: FALLBACK_MODEL, finalFallbackModel: FINAL_FALLBACK_MODEL, status: lastStatus
       });
       ok = await callGemini(FINAL_FALLBACK_MODEL, FINAL_FALLBACK_ATTEMPTS);

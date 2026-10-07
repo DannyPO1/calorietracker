@@ -144,7 +144,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .mealModalPanel{position:relative;width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -12px 45px rgba(0,0,0,.24);animation:mealUp .2s ease}
 @keyframes mealUp{from{transform:translateY(20px);opacity:.7}to{transform:translateY(0);opacity:1}}
 .mealModalHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.mealModalHeader h2{margin:2px 0 0;font-size:22px}.closeCircle{width:42px;height:42px;padding:0;border-radius:50%;font-size:26px;line-height:1}
-/* v6.0.9 — clearer product/recipe sections in meal entry */
+/* v6.1.0 — clearer product/recipe sections in meal entry */
 .mealEntrySection{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035)}
 .mealEntrySectionHeader{margin-bottom:12px}
 .mealEntrySectionHeader .sectionKicker{margin-bottom:3px}
@@ -232,7 +232,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.0.9';
+const APP_VERSION='6.1.0';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1948,7 +1948,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.0.9 — retry the same AI photo and clarify meal-entry sections */
+/* v6.1.0 — retry the same AI photo and clarify meal-entry sections */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
