@@ -232,7 +232,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.1.0';
+const APP_VERSION='6.1.1';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1948,7 +1948,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.1.0 — retry the same AI photo and clarify meal-entry sections */
+/* v6.1.1 — Gemini Flash-Lite only, faster AI scan and clearer errors */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -2122,11 +2122,11 @@ async function resizeAIFoodImage(file){
     const img=new Image();
     img.decoding='async';
     await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=objectUrl;});
-    const max=1280,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const max=1024,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
     const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
     const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
     const ctx=canvas.getContext('2d',{alpha:false});ctx.drawImage(img,0,0,w,h);
-    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.78));
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.72));
     if(!blob)throw new Error('Kon de foto niet voorbereiden.');
     return blob;
   }finally{URL.revokeObjectURL(objectUrl);}
@@ -2149,10 +2149,25 @@ async function analyzeAIFoodFile(file){
     const base64=await new Promise((resolve,reject)=>{
       const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(blob);
     });
-    const response=await fetch(AI_FOOD_API_URL,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({image:base64,mimeType:'image/jpeg'})
-    });
+    const controller=new AbortController();
+    const clientTimeout=setTimeout(()=>controller.abort(),25000);
+    let response;
+    try{
+      response=await fetch(AI_FOOD_API_URL,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({image:base64,mimeType:'image/jpeg'}),
+        signal:controller.signal
+      });
+    }catch(fetchError){
+      if(fetchError?.name==='AbortError'){
+        const err=new Error('De AI reageerde niet binnen de verwachte tijd.');
+        err.code='CLIENT_TIMEOUT';
+        throw err;
+      }
+      const err=new Error(fetchError?.message||'De verbinding met de AI-service mislukte.');
+      err.code='NETWORK_ERROR';
+      throw err;
+    }finally{clearTimeout(clientTimeout);}
     let payload=null;try{payload=await response.json();}catch(e){}
     if(!response.ok){
       const err=new Error(payload?.error||`Analyse mislukt (${response.status}).`);
@@ -2184,6 +2199,8 @@ async function analyzeAIFoodFile(file){
     else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='Gemini is tijdelijk overbelast of niet bereikbaar. Probeer het met dezelfde foto opnieuw.';}
     else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De Gemini-capaciteit is tijdelijk bereikt. Probeer het met dezelfde foto later opnieuw.';}
     else if(code==='GEMINI_BAD_REQUEST'){title='Foto kon niet worden verwerkt.';message='Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.';}
+    else if(code==='CLIENT_TIMEOUT'){title='AI reageert te langzaam.';message='De foto is goed ontvangen, maar de AI reageerde niet op tijd. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='NETWORK_ERROR'){title='Verbinding met AI mislukt.';message='De verbinding met de AI-service werd onderbroken. Probeer het met dezelfde foto opnieuw.';}
     else if(code==='IMAGE_TOO_LARGE'){title='Foto is te groot.';}
     else if(code==='INVALID_IMAGE_TYPE'){title='Ongeldig fotoformaat.';}
     else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='Gemini heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}

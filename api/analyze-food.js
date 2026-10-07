@@ -1,10 +1,8 @@
-const PRIMARY_MODEL = 'gemini-3.8-flash';
-const FALLBACK_MODEL = 'gemini-3.1-flash-lite';
-const FINAL_FALLBACK_MODEL = 'gemini-3.7-flash';
-const PRIMARY_ATTEMPTS = 1;
-const FALLBACK_ATTEMPTS = 1;
-const FINAL_FALLBACK_ATTEMPTS = 1;
-const MODEL_TIMEOUT_MS = 12000;
+const MODEL = 'gemini-3.1-flash-lite';
+const MODEL_TIMEOUT_MS = 20000;
+
+// Give Vercel enough headroom for a normal Lite response plus JSON parsing/response.
+export const config = { maxDuration: 30 };
 
 function requestId() {
   try { return crypto.randomUUID(); } catch (_) { return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
@@ -127,85 +125,58 @@ export default async function handler(req, res) {
     let raw = '';
     let result = null;
     let lastStatus = null;
-    let lastModel = PRIMARY_MODEL;
+    let lastModel = MODEL;
 
-    async function callGemini(model, maxAttempts) {
-      const payload = { ...geminiPayload, model };
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
-        let r;
-        try {
-          r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey
-            },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-        } catch (fetchError) {
-          clearTimeout(timeout);
-          lastStatus = 504;
-          lastModel = model;
-          raw = fetchError?.name === 'AbortError' ? 'Gemini request timed out' : String(fetchError?.message || fetchError);
-          result = null;
-          console.warn('Gemini request timed out/failed', { id, model, attempt, reason: raw });
-          return false;
-        }
+    async function callGemini() {
+      const payload = { ...geminiPayload, model: MODEL };
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+      let r;
+      try {
+        r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+      } catch (fetchError) {
+        lastStatus = fetchError?.name === 'AbortError' ? 504 : 502;
+        lastModel = MODEL;
+        raw = fetchError?.name === 'AbortError' ? 'Gemini request timed out' : String(fetchError?.message || fetchError);
+        result = null;
+        console.warn('Gemini request timed out/failed', { id, model: MODEL, reason: raw });
+        return false;
+      } finally {
         clearTimeout(timeout);
+      }
 
-        const text = await r.text();
-        let parsed = null;
-        try { parsed = JSON.parse(text); } catch (_) {}
+      const text = await r.text();
+      let parsed = null;
+      try { parsed = JSON.parse(text); } catch (_) {}
 
-        lastStatus = r.status;
-        lastModel = model;
-        response = r;
-        raw = text;
-        result = parsed;
+      lastStatus = r.status;
+      lastModel = MODEL;
+      response = r;
+      raw = text;
+      result = parsed;
 
-        if (r.ok) {
-          console.info('Gemini request succeeded', { id, model, attempt });
-          return true;
-        }
-
-        const retryable = [429, 502, 503, 504].includes(r.status);
-        if (retryable && attempt < maxAttempts) {
-          console.warn('Gemini temporary/quota error; retrying', { id, model, status: r.status, attempt });
-          const retryAfter = Number(r.headers.get('retry-after'));
-          const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
-            ? Math.min(retryAfter * 1000, 6000)
-            : Math.min(2000 * (2 ** (attempt - 1)), 6000);
-          await new Promise(resolve => setTimeout(resolve, waitMs));
-          continue;
-        }
-
-        console.warn('Gemini model attempt failed', { id, model, status: r.status, attempt });
+      if (!r.ok) {
+        console.warn('Gemini model attempt failed', { id, model: MODEL, status: r.status });
         return false;
       }
-      return false;
+
+      console.info('Gemini request succeeded', { id, model: MODEL });
+      return true;
     }
 
-    // Keep the fallback chain bounded in time. In particular, a Gemini model
-    // can accept the request but take a long time before returning a 503.
-    // The browser may otherwise surface a generic 'Load failed' after waiting
-    // about a minute. Flash-Lite is the preferred fast fallback because it
-    // supports image input and structured output.
-    let ok = await callGemini(PRIMARY_MODEL, PRIMARY_ATTEMPTS);
-    if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
-      console.warn('Primary Gemini model unavailable; trying fast fallback', {
-        id, primaryModel: PRIMARY_MODEL, fallbackModel: FALLBACK_MODEL, status: lastStatus
-      });
-      ok = await callGemini(FALLBACK_MODEL, FALLBACK_ATTEMPTS);
-    }
-    if (!ok && [429, 502, 503, 504].includes(lastStatus)) {
-      console.warn('Fast Gemini fallback unavailable; trying secondary fallback', {
-        id, fallbackModel: FALLBACK_MODEL, finalFallbackModel: FINAL_FALLBACK_MODEL, status: lastStatus
-      });
-      ok = await callGemini(FINAL_FALLBACK_MODEL, FINAL_FALLBACK_ATTEMPTS);
-    }
+    // v6.1.1 deliberately uses only Gemini 3.1 Flash-Lite. It is the only
+    // model we have observed consistently accepting these image requests.
+    // Avoiding the unavailable Flash models also keeps the browser request
+    // short enough to return a reliable response on iPhone/Safari.
+    const ok = await callGemini();
 
     if (!ok) {
       console.error('Gemini API failed after retries/fallback', {
@@ -218,7 +189,7 @@ export default async function handler(req, res) {
         return errorResponse(res, 429, 'GEMINI_QUOTA', 'De AI-service heeft tijdelijk geen capaciteit meer. Probeer het later opnieuw.', id);
       }
       if (lastStatus === 503 || lastStatus === 502 || lastStatus === 504) {
-        return errorResponse(res, 503, 'GEMINI_UNAVAILABLE', 'De AI-service is tijdelijk overbelast. De app heeft meerdere modellen geprobeerd. Probeer het over een moment opnieuw.', id);
+        return errorResponse(res, 503, 'GEMINI_UNAVAILABLE', 'De AI-service reageerde niet op tijd. Probeer het met dezelfde foto opnieuw.', id);
       }
       if (lastStatus === 400) {
         return errorResponse(res, 502, 'GEMINI_BAD_REQUEST', 'Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.', id);
@@ -267,6 +238,7 @@ export default async function handler(req, res) {
       }))
       .filter(item => item.name);
 
+    console.info('AI food response ready', { id, model: MODEL, items: cleanItems.length });
     return send(res, 200, { items: cleanItems });
   } catch (error) {
     console.error('analyze-food error', id, error);

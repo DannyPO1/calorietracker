@@ -1,4 +1,4 @@
-# CalorieTracker v6.1.0
+# CalorieTracker v6.1.1
 
 AI-fotoscan toegevoegd via Google Gemini.
 
@@ -32,13 +32,13 @@ The photo is sent to Google Gemini for analysis. CalorieTracker does not store t
 - Added a one-tap practical-portion weight suggestion in the AI result editor.
 
 
-## v6.1.0
+## v6.1.1
 - Added a one-tap “Opnieuw proberen met deze foto” action after AI analysis errors. The selected photo is kept only in memory and is not stored locally.
 - Refactored AI analysis so retrying reuses the same photo without reopening the iOS photo/camera picker.
 - Clarified the meal-entry modal with distinct Product and Recept section headings and descriptions.
 
 
-## v6.1.0
+## v6.1.1
 - Bounded Gemini model calls with a 12-second timeout to prevent long hangs.
 - gemini-3.1-flash-lite is now the fast first fallback after gemini-3.8-flash.
 - Keeps a secondary gemini-3.7-flash fallback only if needed.
