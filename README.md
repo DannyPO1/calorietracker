@@ -1,8 +1,8 @@
-# CalorieTracker v6.2.1
+# CalorieTracker v6.2.2
 
 AI-fotoscan met Google Gemini en database-first voedingsregistratie.
 
-## v6.2.1
+## v6.2.2
 - AI-scan ondersteunt naast gram ook een hoeveelheid in stuks wanneer het gekoppelde product een betrouwbare stuk-portie heeft.
 - De app toont en gebruikt het gewicht per stuk; dit is aanpasbaar.
 - Calorieën en macro’s blijven volledig gebaseerd op het gekoppelde product uit de voedingsdatabase.
@@ -26,4 +26,4 @@ The existing GitHub Pages frontend remains supported.
 The photo is sent to Google Gemini for analysis. CalorieTracker does not store the photo locally. Nutrition values are calculated from the app's own food database after the user reviews and confirms the detected products.
 
 ## Release
-Version 6.2.1 — 7 October 2026
+Version 6.2.2 — 7 October 2026
