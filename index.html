@@ -49,6 +49,17 @@ html[data-theme="dark"] .themeSwitch{background:#274638;border-color:#3b5b4a}
 html[data-theme="dark"] .themeSwitch .knob{transform:translateX(22px);background:#f5d98b}
 html[data-theme="dark"] .themeSwitch .sun{opacity:1}.themeSwitch .moon{opacity:0}
 html[data-theme="dark"] .themeSwitch .moon{opacity:1}.themeSwitch .sun{opacity:0}
+/* 6.2.7: dark-theme dashboard polish */
+html[data-theme="dark"] .calorieDashboard{background:linear-gradient(145deg,#121d17 0%,#16251d 58%,#132018 100%);border-color:#2c4136;box-shadow:0 12px 34px rgba(0,0,0,.32)}
+html[data-theme="dark"] .calorieDashboard:after{background:rgba(44,83,61,.28)}
+html[data-theme="dark"] .calorieDashboard .calorieHero{background:transparent}
+html[data-theme="dark"] .dashboardStats{background:#142019!important;border-top-color:#294036!important}
+html[data-theme="dark"] .dashboardStats .dashStat{background:#17251e;border-right-color:#294036}
+html[data-theme="dark"] .dashboardStats .dashStat:nth-child(-n+2){border-bottom-color:#294036}
+html[data-theme="dark"] .dashboardFooter{background:#142019;color:#9eafa5;border-top:1px solid #294036;padding-top:11px}
+html[data-theme="dark"] .dashboardFooter strong{color:#63c98c}
+html[data-theme="dark"] .dashboardBar{background:#26382f;margin-bottom:17px}
+html[data-theme="dark"] .dashboardBar>div{background:linear-gradient(90deg,#3fa86d,#63c98c)}
 
 main{max-width:760px;margin:auto;padding:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
 h2{font-size:18px;margin:0 0 13px;letter-spacing:-.2px}h3{font-size:14px;margin:15px 0 8px}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
@@ -250,7 +261,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.6';
+const APP_VERSION='6.2.7';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
