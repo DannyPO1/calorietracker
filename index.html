@@ -50,6 +50,7 @@ html[data-theme="dark"] .themeSwitch .knob{transform:translateX(22px);background
 html[data-theme="dark"] .themeSwitch .sun{opacity:1}.themeSwitch .moon{opacity:0}
 html[data-theme="dark"] .themeSwitch .moon{opacity:1}.themeSwitch .sun{opacity:0}
 /* 6.2.7: dark-theme dashboard polish */
+/* 6.2.8: refreshed dashboard nutrition icons */
 html[data-theme="dark"] .calorieDashboard{background:linear-gradient(145deg,#121d17 0%,#16251d 58%,#132018 100%);border-color:#2c4136;box-shadow:0 12px 34px rgba(0,0,0,.32)}
 html[data-theme="dark"] .calorieDashboard:after{background:rgba(44,83,61,.28)}
 html[data-theme="dark"] .calorieDashboard .calorieHero{background:transparent}
@@ -103,9 +104,9 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 @media(max-width:560px){.calorieDashboard .calorieHero{grid-template-columns:145px 1fr;gap:14px;padding:17px 14px 14px}.calorieDashboard .calorieRing{width:142px;height:142px}.calorieDashboard .ringKcal{font-size:24px}.calorieDashboard .goalSummary .goalValue{font-size:21px}.dashboardStats{grid-template-columns:1fr 1fr}.dashStat{padding:12px 11px}.dashStat:nth-child(2){border-right:0}.dashStat:nth-child(-n+2){border-bottom:1px solid rgba(35,107,69,.10)}.dashboardFooter{padding-top:11px}}
 
 /* 4.5.2: functional colour + consistent line icons */
-.dashIcon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:0 0 34px}
-.dashIcon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.proteinIcon{background:#dcefe3;color:#1f7a4f}.macroIcon{background:#fff0df;color:#c46d22}.progressIcon{background:#e3edf9;color:#3e73a4}.mealIcon{background:#eee7f8;color:#7255a1}
+.dashIcon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:0 0 42px;box-shadow:inset 0 1px 1px rgba(255,255,255,.16),0 4px 10px rgba(0,0,0,.08)}
+.dashIcon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.proteinIcon{background:#bfead0;color:#177247}.macroIcon{background:#ffe9b5;color:#b86a00}.progressIcon{background:#cfe1fb;color:#376db4}.mealIcon{background:#e3d8fb;color:#7352a8}
 .dashStat{background:rgba(255,255,255,.18)}
 .foodItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
 .foodItem:first-child{border-top:0}
@@ -261,7 +262,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.7';
+const APP_VERSION='6.2.8';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -354,10 +355,10 @@ function updateRecipeLineCalorie(i){
    </div>
   </div>
   <div class="dashboardStats">
-   <div class="dashStat"><span class="dashIcon proteinIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5c1.5 0 2.7 1.1 3 2.5C12.1 6.1 13.4 5 15 5c2.2 0 4 1.8 4 4 0 4.7-4.6 8.1-7 9.5C9.6 17.1 5 13.7 5 9c0-2.2 1.8-4 4-4Z"/></svg></span><div><b id="protein">0 g</b><span>eiwit</span></div></div>
-   <div class="dashStat"><span class="dashIcon macroIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17c2.5-5.5 4.5-8.5 7-10 2.5 1.5 4.5 4.5 7 10"/><path d="M9 13c1.5-1 4.5-1 6 0"/></svg></span><div><b id="macro">0/0</b><span>koolhydraten / vet</span></div></div>
-   <div class="dashStat"><span class="dashIcon progressIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span><div><b id="dayProgress">0%</b><span>van dagdoel</span></div></div>
-   <div class="dashStat"><span class="dashIcon mealIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 5h10M7 9h10M7 13h6"/><path d="m16 15 2 2 4-4"/><path d="M4 4v16h16"/></svg></span><div><b id="mealCount">0</b><span>registraties</span></div></div>
+   <div class="dashStat"><span class="dashIcon proteinIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.2 7.1c1.1-1.1 2.9-.9 3.8.3l5.1 6.6c.9 1.2.8 2.8-.3 3.8l-.9.9c-1.1 1-2.7 1-3.7-.1L5.4 12c-1-1.1-.9-2.8.1-3.8l.7-.7Z"/><path d="m14.1 14.1 2.2-2.2"/><path d="M8.1 8.1 5.9 5.9"/><path d="M16.2 4.8c.8.7 1.2 1.7 1.1 2.8"/><path d="M18.1 3.1c1.3.9 2.2 2.2 2.5 3.8"/></svg></span><div><b id="protein">0 g</b><span>eiwit</span></div></div>
+   <div class="dashStat"><span class="dashIcon macroIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 19c2.1-5.9 4.7-9.8 8.8-13.4"/><path d="M9 14.2c1.4.2 2.7.8 3.7 1.8"/><path d="M11.1 10.7c1.4.1 2.8.6 3.9 1.5"/><path d="M13.4 7.4c1.2.1 2.4.5 3.4 1.2"/><path d="M5.2 19.3h3.2"/></svg></span><div><b id="macro">0/0</b><span>koolhydraten / vet</span></div></div>
+   <div class="dashStat"><span class="dashIcon progressIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="13" r="6.5"/><circle cx="11" cy="13" r="2.1"/><path d="M11 3v2.5M11 20.5V23M1 13h2.5M17.5 13H20"/><path d="m14.5 9.5 5-5"/><path d="m17.2 4.5 2.3-.1-.1 2.3"/></svg></span><div><b id="dayProgress">0%</b><span>van dagdoel</span></div></div>
+   <div class="dashStat"><span class="dashIcon mealIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5h14"/><path d="M5 10h14"/><path d="M5 14.5h9"/><path d="M5 19h14"/><circle cx="4.2" cy="5.5" r=".7" fill="currentColor" stroke="none"/><circle cx="4.2" cy="10" r=".7" fill="currentColor" stroke="none"/><circle cx="4.2" cy="14.5" r=".7" fill="currentColor" stroke="none"/><circle cx="4.2" cy="19" r=".7" fill="currentColor" stroke="none"/></svg></span><div><b id="mealCount">0</b><span>registraties</span></div></div>
   </div>
   <div class="dashboardFooter"><span>Dagvoortgang</span><strong id="dashboardFooterText">0%</strong></div>
   <div class="dashboardBar"><div id="progress"></div></div>
