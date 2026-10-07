@@ -96,13 +96,20 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .dashIcon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .proteinIcon{background:#dcefe3;color:#1f7a4f}.macroIcon{background:#fff0df;color:#c46d22}.progressIcon{background:#e3edf9;color:#3e73a4}.mealIcon{background:#eee7f8;color:#7255a1}
 .dashStat{background:rgba(255,255,255,.18)}
-.foodItem{display:grid;grid-template-columns:minmax(0,1fr) 146px;gap:16px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.foodItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
 .foodItem:first-child{border-top:0}
 .foodItemInfo{min-width:0;padding-top:2px}
 .foodItemInfo b{display:block;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
 .foodItemInfo small{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
-.foodItemActions{width:146px;display:flex;flex-direction:column;gap:7px;align-items:stretch}
-.foodItemActions button{width:146px;min-height:44px;padding:10px 8px;white-space:nowrap}
+.foodItemActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;align-items:center}
+.foodItemActions button{min-height:44px;padding:10px 12px;white-space:nowrap}
+.standardResult{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 4px;border-top:1px solid var(--line);cursor:pointer}
+.standardResult:first-child{border-top:0}
+.standardResult:active{opacity:.75}
+.standardResultMain{min-width:0}
+.standardResultMain b{display:block;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.standardResultMain small{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:4px}
+.standardResultArrow{font-size:26px;color:var(--muted);flex:0 0 auto}
 .barcodeButton{margin-top:8px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
 .barcodeIcon{font-size:17px;line-height:1}
 .scannerWrap{background:#0b120e;border-radius:18px;overflow:hidden;border:1px solid var(--line);min-height:250px}
@@ -116,7 +123,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .barcodeMeta{font-size:11px;color:var(--muted);line-height:1.5}
 .barcodeActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:560px){.barcodeActions{grid-template-columns:1fr}.scannerWrap,#barcodeReader{min-height:230px}}
-@media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) 132px;gap:12px}.foodItemActions,.foodItemActions button{width:132px}.foodItemActions button{min-height:42px;padding:9px 6px;font-size:14px}}
+@media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr);gap:10px}.foodItemActions{justify-content:flex-start}.foodItemActions button{min-height:42px;padding:9px 10px;font-size:14px}.standardResult{padding:15px 2px}}
 
 
 /* v5.0.11 premium meal tiles — based on the approved visual design */
@@ -234,7 +241,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.2';
+const APP_VERSION='6.2.3';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -283,7 +290,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.2.2"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.2.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -423,7 +430,7 @@ function updateRecipeLineCalorie(i){
 
 <section id="food" class="hidden">
  <div class="card">
-  <div class="row between"><div><h2>Voedingsdatabase</h2><p class="muted">Standaardproducten uit de database. Je kunt hier ook een stukgewicht toevoegen of aanpassen als dat logisch is voor het product.</p></div></div>
+  <div class="row between"><div><h2>Voedingsdatabase</h2><p class="muted">Zoek een standaardproduct. Tik op een resultaat om de productgegevens te bekijken en het stukgewicht in te stellen of aan te passen.</p></div></div>
   <input id="standardProductSearch" placeholder="Zoek in de voedingsdatabase…" oninput="renderStandardProducts()" autocomplete="off">
   <div id="standardProductList" style="margin-top:10px"></div>
  </div>
@@ -509,6 +516,8 @@ function updateRecipeLineCalorie(i){
 
 
 <div id="pieceWeightModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:95;padding:20px;overflow:auto"><div class="card" style="max-width:500px;margin:20vh auto 0"><h2>Stuksgewicht instellen</h2><p id="pieceWeightProductName" class="muted"></p><label>1 stuk weegt</label><div class="row"><input id="pieceWeightValue" type="number" min="0.1" step="0.1" placeholder="bijv. 110"><span>gram</span></div><p class="tiny" style="margin-top:8px">Dit gewicht wordt gebruikt voor stuksregistratie en voor de AI-scan wanneer dit product wordt herkend.</p><div class="actions"><button class="primary" onclick="savePieceWeight()">Opslaan</button><button class="ghost" onclick="closePieceWeightModal()">Annuleren</button></div></div></div>
+
+<div id="standardProductModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:96;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><div class="row between"><div><h2 id="standardProductModalTitle">Product</h2><p class="muted" style="margin:4px 0 0">Standaardproduct uit de voedingsdatabase</p></div><button class="ghost" type="button" onclick="closeStandardProductEditor()">Sluiten</button></div><div class="grid" style="margin-top:18px"><div><label>Naam</label><input id="standardDetailName" readonly></div><div><label>Eenheid</label><input id="standardDetailUnit" readonly></div><div><label>kcal per 100 g</label><input id="standardDetailKcal" readonly></div><div><label>eiwit per 100 g</label><input id="standardDetailP" readonly></div><div><label>koolhydraten per 100 g</label><input id="standardDetailC" readonly></div><div><label>vet per 100 g</label><input id="standardDetailF" readonly></div></div><div class="notice" style="margin-top:14px"><b>Stuksgewicht</b><br><span class="tiny">Stel dit alleen in als het logisch is om dit product ook in stuks te registreren.</span><div class="row" style="margin-top:10px"><label style="flex:1;margin:0">1 stuk = <input id="standardDetailPieceGrams" type="number" min="0.1" step="0.1" placeholder="bijv. 110" style="width:130px;display:inline-block"> g</label></div></div><div class="actions"><button class="primary" onclick="saveStandardProductDetails()">Opslaan</button><button class="ghost" onclick="closeStandardProductEditor()">Annuleren</button></div></div></div>
 
 <div id="barcodeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:90;padding:14px;overflow:auto">
   <div class="card" style="max-width:600px;margin:20px auto">
@@ -1287,35 +1296,40 @@ function toggleCustomPieceField(){
  if(input){input.disabled=!enabled;if(!enabled)input.value='';}
 }
 let editingPieceWeightProduct=null;
-function openPieceWeightEditor(productName){
- const v=allProducts()[productName];
- if(!v||v.u==='ml')return;
- editingPieceWeightProduct=productName;
- document.getElementById('pieceWeightProductName').innerHTML=`<b>${esc(productName)}</b>`;
- document.getElementById('pieceWeightValue').value=hasPieceWeight(productName)?getPieceWeight(productName):'';
- document.getElementById('pieceWeightModal').classList.remove('hidden');
- setTimeout(()=>document.getElementById('pieceWeightValue').focus(),50);
+let editingStandardProduct=null;
+function openStandardProductEditor(productName){
+ const v=BASE[productName];
+ if(!v)return;
+ editingStandardProduct=productName;
+ document.getElementById('standardProductModalTitle').textContent=productName;
+ document.getElementById('standardDetailName').value=productName;
+ document.getElementById('standardDetailUnit').value=v.u||'g';
+ document.getElementById('standardDetailKcal').value=`${v.kcal}`;
+ document.getElementById('standardDetailP').value=`${v.p||0} g`;
+ document.getElementById('standardDetailC').value=`${v.c||0} g`;
+ document.getElementById('standardDetailF').value=`${v.f||0} g`;
+ document.getElementById('standardDetailPieceGrams').value=hasPieceWeight(productName)?getPieceWeight(productName):'';
+ document.getElementById('standardProductModal').classList.remove('hidden');
+ setTimeout(()=>document.getElementById('standardDetailPieceGrams').focus(),50);
 }
-function closePieceWeightModal(){editingPieceWeightProduct=null;document.getElementById('pieceWeightModal').classList.add('hidden');}
-function savePieceWeight(){
- const n=editingPieceWeightProduct;if(!n)return;
- const g=Number(document.getElementById('pieceWeightValue').value);
+function closeStandardProductEditor(){editingStandardProduct=null;document.getElementById('standardProductModal')?.classList.add('hidden');}
+function saveStandardProductDetails(){
+ const n=editingStandardProduct;if(!n)return;
+ const g=Number(document.getElementById('standardDetailPieceGrams').value);
  if(!Number.isFinite(g)||g<=0){msg('Vul een geldig stukgewicht in.','warn');return;}
- const custom=data.custom&&data.custom[n];
- if(custom){custom.pieceGrams=g;}else{data.pieceWeights??={};data.pieceWeights[n]=g;}
- save();closePieceWeightModal();render();msg(`Stuksgewicht opgeslagen: 1 stuk = ${g} g.`,'success');
-}
-function clearPieceWeight(productName){
- if(data.custom&&data.custom[productName]){delete data.custom[productName].pieceGrams;}
- if(data.pieceWeights)delete data.pieceWeights[productName];
- save();render();
+ data.pieceWeights??={};
+ data.pieceWeights[n]=g;
+ save();
+ closeStandardProductEditor();
+ render();
+ msg(`Stuksgewicht opgeslagen: 1 stuk = ${g} g.`,'success');
 }
 function renderStandardProducts(){
  const box=document.getElementById('standardProductList');if(!box)return;
  const q=String(document.getElementById('standardProductSearch')?.value||'').toLowerCase().trim();
  let keys=Object.keys(BASE).filter(k=>!q||k.toLowerCase().includes(q)).sort((a,b)=>a.localeCompare(b,'nl'));
  const total=keys.length; keys=keys.slice(0,30);
- box.innerHTML=keys.length?keys.map(n=>{const v=BASE[n],piece=getPieceWeight(n);return `<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${v.kcal} kcal/100 ${v.u} · ${piece>0?`1 stuk = ${piece} g`:'Stuksgewicht niet ingesteld'}</small></div><div class="foodItemActions"><button class="secondary" onclick="openPieceWeightEditor('${esc(n).replace(/'/g,"&#39;")}')">${piece>0?'Stuksgewicht aanpassen':'Stuksgewicht instellen'}</button></div></div>`}).join(''):'<p class="muted">Geen standaardproduct gevonden.</p>';
+ box.innerHTML=keys.length?keys.map(n=>{const v=BASE[n],piece=getPieceWeight(n);return `<div class="standardResult" role="button" tabindex="0" onclick="openStandardProductEditor('${esc(n).replace(/'/g,"&#39;")}')" onkeydown="if(event.key==='Enter'||event.key===' ')openStandardProductEditor('${esc(n).replace(/'/g,"&#39;")}')"><div class="standardResultMain"><b>${esc(n)}</b><small>${v.kcal} kcal/100 ${v.u} · ${piece>0?`1 stuk = ${piece} g`:'Stuksgewicht niet ingesteld'}</small></div><span class="standardResultArrow">›</span></div>`}).join(''):'<p class="muted">Geen standaardproduct gevonden.</p>';
  if(total>30)box.insertAdjacentHTML('beforeend',`<p class="tiny" style="margin-top:8px">Toon de eerste 30 resultaten. Verfijn je zoekopdracht voor meer.</p>`);
 }
 function renderCustom(){
@@ -2030,7 +2044,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.2.2 — configurable piece weights for standard and custom products */
+/* v6.2.3 — standard product search and detail editor */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
