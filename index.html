@@ -232,7 +232,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.1.1';
+const APP_VERSION='6.1.2';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1948,7 +1948,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.1.1 — Gemini Flash-Lite only, faster AI scan and clearer errors */
+/* v6.1.2 — Gemini Flash-Lite only, faster AI scan and clearer errors */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
