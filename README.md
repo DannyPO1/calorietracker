@@ -1,6 +1,18 @@
-# CalorieTracker v6.2.0
+# CalorieTracker v6.2.1
 
-AI-fotoscan toegevoegd via Google Gemini.
+AI-fotoscan met Google Gemini en database-first voedingsregistratie.
+
+## v6.2.1
+- AI-scan ondersteunt naast gram ook een hoeveelheid in stuks wanneer het gekoppelde product een betrouwbare stuk-portie heeft.
+- De app toont en gebruikt het gewicht per stuk; dit is aanpasbaar.
+- Calorieën en macro’s blijven volledig gebaseerd op het gekoppelde product uit de voedingsdatabase.
+- Bij registratie wordt bij stuks de gekozen hoeveelheid als `stuks` opgeslagen en het omgerekende gewicht apart bewaard.
+
+## AI-fotoscan
+- Gebruikt Gemini 3.1 Flash-Lite als AI-model.
+- Foto wordt niet lokaal opgeslagen.
+- De gebruiker controleert altijd herkenning, productkoppeling en hoeveelheid.
+- Dezelfde foto kan na een fout opnieuw worden geprobeerd.
 
 ## Vercel
 - Deploy this repository on Vercel.
@@ -13,33 +25,5 @@ The existing GitHub Pages frontend remains supported.
 ## Privacy
 The photo is sent to Google Gemini for analysis. CalorieTracker does not store the photo locally. Nutrition values are calculated from the app's own food database after the user reviews and confirms the detected products.
 
-## Version
-6.1.0 — 6 October 2026
-
-## AI fallback
-- Primary: `gemini-3.8-flash`
-- Fallback: `gemini-3.7-flash`
-- Final fallback: `gemini-3.1-flash-lite`
-- Each model is attempted once per scan to limit latency during temporary service-capacity issues.
-
-
-## v6.0.8
-- Database-first AI matching: generic visual labels no longer silently map to a specific product.
-- Added AH Oatmeal cookie as a concrete database product using current Albert Heijn nutrition data.
-- Added practical portion: 1 stuk = 110 g.
-- Added oatmeal/havermout aliases for stronger database matching.
-- AI prompt now asks for concrete food descriptions such as havermoutkoek when visible.
-- Added a one-tap practical-portion weight suggestion in the AI result editor.
-
-
-## v6.2.0
-- Added a one-tap “Opnieuw proberen met deze foto” action after AI analysis errors. The selected photo is kept only in memory and is not stored locally.
-- Refactored AI analysis so retrying reuses the same photo without reopening the iOS photo/camera picker.
-- Clarified the meal-entry modal with distinct Product and Recept section headings and descriptions.
-
-
-## v6.2.0
-- Bounded Gemini model calls with a 12-second timeout to prevent long hangs.
-- gemini-3.1-flash-lite is now the fast first fallback after gemini-3.8-flash.
-- Keeps a secondary gemini-3.7-flash fallback only if needed.
-- Prevents Safari from waiting about a minute and ending with generic “Load failed”.
+## Release
+Version 6.2.1 — 7 October 2026

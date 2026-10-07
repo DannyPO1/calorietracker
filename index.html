@@ -234,8 +234,8 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.0';
-const RELEASE_DATE='6 oktober 2026';
+const APP_VERSION='6.2.1';
+const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -283,7 +283,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.2.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.2.1"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -1961,7 +1961,7 @@ const PORTIONS = {
 document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
-/* v6.1.2 — Gemini Flash-Lite only, faster AI scan and clearer errors */
+/* v6.2.1 — AI scan supports gram/stuks quantities with editable grams per piece */
 const AI_FOOD_API_URL = location.hostname.endsWith('vercel.app')
   ? '/api/analyze-food'
   : 'https://calorietracker-dusky.vercel.app/api/analyze-food';
@@ -2072,7 +2072,14 @@ function aiSetProduct(index,value){
   const exact=Object.keys(allProducts()).find(k=>aiNormalize(k)===aiNormalize(value));
   item.productName=exact||null;
   item.productInput=exact||value;
-  if(exact)aiRememberMapping(item.name,exact);
+  if(exact){
+    const piece=aiPieceInfo(exact);
+    if(piece){
+      item.gramsPerPiece=piece.gramsPerPiece;
+      if(item.quantityMode==='stuks') item.grams=Math.max(.1,Number(item.quantity)||1)*item.gramsPerPiece;
+    }
+    aiRememberMapping(item.name,exact);
+  }
   renderAIFoodResults(false);
 }
 function aiSetName(index,value){
@@ -2081,6 +2088,11 @@ function aiSetName(index,value){
   const exact=Object.keys(allProducts()).find(k=>aiNormalize(k)===aiNormalize(value));
   if(exact){
     item.productName=exact;
+    const piece=aiPieceInfo(exact);
+    if(piece){
+      item.gramsPerPiece=piece.gramsPerPiece;
+      if(item.quantityMode==='stuks') item.grams=Math.max(.1,Number(item.quantity)||1)*item.gramsPerPiece;
+    }
     aiRememberMapping(item.name,exact);
   }else{
     item.productName=null;
@@ -2109,17 +2121,90 @@ function aiLinkCurrentProduct(index){
   const input=document.getElementById(`aiProductInput${index}`);
   aiSetProduct(index,input?.value||'');
 }
+function aiPieceInfo(productName){
+  if(!productName)return null;
+  const options=portionOptions(productName);
+  for(const option of options){
+    const label=String(option.label||'').toLowerCase();
+    const m=label.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s+stuks?\b/);
+    if(m){
+      const count=Math.max(.1,Number(String(m[1]).replace(',','.'))||1);
+      return {gramsPerPiece:Number(option.grams)/count,label:option.label,grams:Number(option.grams),count};
+    }
+    if(/\bstuk\b/.test(label)){
+      return {gramsPerPiece:Number(option.grams),label:option.label,grams:Number(option.grams),count:1};
+    }
+  }
+  return null;
+}
+function aiEnsureQuantityState(item){
+  if(!item)return;
+  const piece=aiPieceInfo(item.productName);
+  if(item.quantityMode==='stuks' && piece){
+    item.gramsPerPiece=Math.max(.1,Number(item.gramsPerPiece)||piece.gramsPerPiece);
+    item.quantity=Math.max(.1,Number(item.quantity)||Math.max(.1,(Number(item.grams)||item.gramsPerPiece)/item.gramsPerPiece));
+    item.grams=item.quantity*item.gramsPerPiece;
+  }else{
+    item.quantityMode='g';
+    item.quantity=Math.max(1,Number(item.grams)||1);
+    if(piece)item.gramsPerPiece=piece.gramsPerPiece;
+  }
+}
+function aiSetQuantityMode(index,mode){
+  const item=aiDetectedItems[index]; if(!item)return;
+  const piece=aiPieceInfo(item.productName);
+  if(mode==='stuks' && piece){
+    const gpp=Math.max(.1,Number(item.gramsPerPiece)||piece.gramsPerPiece);
+    item.quantityMode='stuks';
+    item.gramsPerPiece=gpp;
+    item.quantity=Math.max(.1,Math.round(((Number(item.grams)||gpp)/gpp)*2)/2);
+    item.grams=item.quantity*gpp;
+  }else{
+    item.quantityMode='g';
+    item.quantity=Math.max(1,Number(item.grams)||1);
+  }
+  renderAIFoodResults(false);
+}
+function aiSetPieceQuantity(index,value){
+  const item=aiDetectedItems[index]; if(!item)return;
+  const piece=aiPieceInfo(item.productName); if(!piece)return;
+  item.quantityMode='stuks';
+  item.quantity=Math.max(.1,Number(value)||0);
+  item.gramsPerPiece=Math.max(.1,Number(item.gramsPerPiece)||piece.gramsPerPiece);
+  item.grams=item.quantity*item.gramsPerPiece;
+  renderAIFoodResults(false);
+}
+function aiSetGramsPerPiece(index,value){
+  const item=aiDetectedItems[index]; if(!item)return;
+  const piece=aiPieceInfo(item.productName); if(!piece)return;
+  item.quantityMode='stuks';
+  item.gramsPerPiece=Math.max(.1,Number(value)||piece.gramsPerPiece);
+  item.quantity=Math.max(.1,Number(item.quantity)||1);
+  item.grams=item.quantity*item.gramsPerPiece;
+  renderAIFoodResults(false);
+}
 function aiSetGrams(index,value){
   const item=aiDetectedItems[index]; if(!item)return;
+  item.quantityMode='g';
   item.grams=Math.max(1,Number(value)||0);
+  item.quantity=item.grams;
   renderAIFoodResults(false);
 }
 function aiUseProductPortion(index){
   const item=aiDetectedItems[index];
   if(!item||!item.productName)return;
+  const piece=aiPieceInfo(item.productName);
   const p=portionOptions(item.productName)[0];
-  if(!p)return;
-  item.grams=p.grams;
+  if(piece){
+    item.quantityMode='stuks';
+    item.gramsPerPiece=piece.gramsPerPiece;
+    item.quantity=piece.count;
+    item.grams=piece.grams;
+  }else if(p){
+    item.quantityMode='g';
+    item.grams=p.grams;
+    item.quantity=item.grams;
+  }
   renderAIFoodResults(false);
 }
 function aiRemoveItem(index){
@@ -2156,7 +2241,7 @@ function renderAIFoodResults(focusFirst=true){
       <div class="aiFoodResultTop"><label style="display:flex;align-items:center;gap:8px;margin:0;flex:1"><input type="checkbox" ${selected?'checked':''} onchange="aiToggleSelected(${i},this.checked)" style="width:20px;height:20px"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}</label><button class="danger aiFoodResultRemove" type="button" onclick="aiRemoveItem(${i})">Verwijder</button></div>
       <div class="aiFoodResultGrid">
        <div><label>Productnaam / databasekoppeling</label><input id="aiProductInput${i}" list="aiProductsList" value="${esc(item.productName||item.productInput||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
-       <div><label>Gewicht</label><input type="number" min="1" max="3000" step="1" value="${Math.round(item.grams||100)}" onchange="aiSetGrams(${i},this.value)">${item.productName&&portionOptions(item.productName).length?`<button type="button" class="ghost tiny" style="margin-top:6px;width:100%" onclick="aiUseProductPortion(${i})">1 stuk = ${portionOptions(item.productName)[0].grams} g</button>`:''}</div>
+       <div><label>Hoeveelheid</label>${(()=>{const piece=aiPieceInfo(item.productName);const mode=item.quantityMode==='stuks'&&piece?'stuks':'g';if(mode==='stuks'){item.gramsPerPiece=Math.max(.1,Number(item.gramsPerPiece)||piece.gramsPerPiece);item.quantity=Math.max(.1,Number(item.quantity)||1);item.grams=item.quantity*item.gramsPerPiece;}else{item.quantity=Math.max(1,Number(item.grams)||1);}return `<div class="grid" style="gap:8px"><input type="number" min="0.1" max="3000" step="${mode==='stuks'?'0.5':'1'}" value="${mode==='stuks'?Math.round(item.quantity*10)/10:Math.round(item.grams)}" onchange="${mode==='stuks'?`aiSetPieceQuantity(${i},this.value)`:`aiSetGrams(${i},this.value)`}"><select onchange="aiSetQuantityMode(${i},this.value)" ${piece?'':'disabled'}><option value="g" ${mode==='g'?'selected':''}>gram</option>${piece?`<option value="stuks" ${mode==='stuks'?'selected':''}>stuks</option>`:''}</select></div>${piece?`<div class="tiny" style="margin-top:6px">1 stuk = <input type="number" min="0.1" step="0.1" value="${Math.round(item.gramsPerPiece*10)/10}" onchange="aiSetGramsPerPiece(${i},this.value)" style="display:inline-block;width:92px;padding:5px 8px;margin:0 3px"> g</div>`:''}`})()}</div>
       </div>
       <div class="aiFoodMatch">${status}</div>
       ${n?`<div class="aiFoodNutrition">${Math.round(n.kcal)} kcal • ${Math.round(n.p*10)/10} g eiwit • ${Math.round(n.c*10)/10} g koolhydraten • ${Math.round(n.f*10)/10} g vet</div>`:`<div class="aiFoodNutrition">Koppel dit aan een product uit je database. De AI-voedingswaarden worden niet gebruikt.</div>`}
@@ -2246,7 +2331,10 @@ async function analyzeAIFoodFile(file){
       notes:String(x.notes||''),
       productName:aiBestProduct(String(x.name||''))||null,
       productInput:aiBestProduct(String(x.name||''))||String(x.name||''),
-      selected:true
+      selected:true,
+      quantityMode:'g',
+      quantity:Math.max(1,Number(x.grams)||100),
+      gramsPerPiece:(()=>{const p=aiPieceInfo(aiBestProduct(String(x.name||''))||'');return p?p.gramsPerPiece:null})()
     }));
     if(!aiDetectedItems.length)throw new Error('Gemini kon geen duidelijke voedingsmiddelen in de foto herkennen.');
     const currentMeal=document.getElementById('mealType')?.value;
@@ -2305,7 +2393,11 @@ function confirmAIFood(){
   data.days[d]??=[];
   valid.forEach(({item,n})=>{
     const grams=Number(item.grams)||0;
-    data.days[d].push({name:item.productName,amount:grams,unit:'g',grams,kcal:n.kcal,p:n.p,c:n.c,f:n.f,meal});
+    const piece=aiPieceInfo(item.productName);
+    const isPieces=item.quantityMode==='stuks' && piece && Number(item.gramsPerPiece)>0;
+    const amount=isPieces?Math.max(.1,Number(item.quantity)||1):grams;
+    const unit=isPieces?'stuks':'g';
+    data.days[d].push({name:item.productName,amount,unit,grams,kcal:n.kcal,p:n.p,c:n.c,f:n.f,meal});
     aiRememberMapping(item.name,item.productName);
   });
   save();render();closeAIFoodModal();
