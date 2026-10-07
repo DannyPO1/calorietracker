@@ -101,8 +101,15 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .foodItemInfo{min-width:0;padding-top:2px}
 .foodItemInfo b{display:block;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
 .foodItemInfo small{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
-.foodItemActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;align-items:center}
-.foodItemActions button{min-height:44px;padding:10px 12px;white-space:nowrap}
+.foodItemActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;align-items:center}
+.foodItemActions button{min-height:40px;padding:0;white-space:nowrap}
+.iconAction{width:42px;height:42px;min-width:42px!important;padding:0!important;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--muted);box-shadow:none}
+.iconAction:hover{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.iconAction.dangerIcon:hover{background:#fee7e3;color:var(--red)}
+.iconAction svg{width:19px;height:19px;display:block;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.iconAction .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.iconActionToday{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+
 .standardResult{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 4px;border-top:1px solid var(--line);cursor:pointer}
 .standardResult:first-child{border-top:0}
 .standardResult:active{opacity:.75}
@@ -123,7 +130,7 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .barcodeMeta{font-size:11px;color:var(--muted);line-height:1.5}
 .barcodeActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:560px){.barcodeActions{grid-template-columns:1fr}.scannerWrap,#barcodeReader{min-height:230px}}
-@media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr);gap:10px}.foodItemActions{justify-content:flex-start}.foodItemActions button{min-height:42px;padding:9px 10px;font-size:14px}.standardResult{padding:15px 2px}}
+@media(max-width:560px){.foodItem{grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}.foodItemActions{justify-content:flex-end;align-self:start;flex-wrap:nowrap;gap:5px}.foodItemActions button{min-height:40px;width:40px;min-width:40px!important;padding:0;font-size:0}.iconAction{width:40px;height:40px;min-width:40px!important;border-radius:11px}.iconAction svg{width:18px;height:18px}.standardResult{padding:15px 2px}}
 
 
 /* v5.0.11 premium meal tiles — based on the approved visual design */
@@ -241,7 +248,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.3';
+const APP_VERSION='6.2.5';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1336,8 +1343,8 @@ function renderCustom(){
  let keys=Object.keys(data.custom).sort();
  document.getElementById("customList").innerHTML=keys.length?
  keys.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}${Number(data.custom[n].pieceGrams)>0?` • 1 stuk = ${data.custom[n].pieceGrams} g`:''}${data.custom[n].barcode?` • barcode ${esc(data.custom[n].barcode)}`:''}${data.custom[n].source==='openfoodfacts'?' • Open Food Facts':''}</small></div><div class="foodItemActions">
- <button class="secondary" onclick="editCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button>
- <button class="danger" onclick="deleteCustomProduct('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button>
+ <button class="iconAction" type="button" title="Product bewerken" aria-label="Product bewerken" onclick="editCustomProduct('${esc(n).replace(/'/g,"&#39;")}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg><span class="srOnly">Bewerken</span></button>
+ <button class="iconAction dangerIcon" type="button" title="Product verwijderen" aria-label="Product verwijderen" onclick="deleteCustomProduct('${esc(n).replace(/'/g,"&#39;")}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button>
  </div></div>`).join("")
  :'<p class="muted">Nog geen eigen producten.</p>';
 }
@@ -1410,7 +1417,7 @@ function saveRecipe(){
 }
 function renderRecipes(){
  let keys=Object.keys(data.recipes).sort();
- document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></div><div class="foodItemActions"><button class="secondary" onclick="editRecipe('${esc(n).replace(/'/g,"&#39;")}')">Bewerken</button><button class="secondary" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')">Naar Vandaag</button><button class="danger" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')">Verwijderen</button></div></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
+ document.getElementById("recipeList").innerHTML=keys.length?keys.map(n=>{let r=data.recipes[n],ps=r.perServing||{kcal:r.kcal,p:r.p,c:r.c,f:r.f};return `<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${Math.round((r.total||r).kcal)} kcal totaal • ${Math.round(ps.kcal)} kcal/portie • ${(r.servings||1)} portie(s)</small></div><div class="foodItemActions"><button class="iconAction" type="button" title="Recept bewerken" aria-label="Recept bewerken" onclick="editRecipe('${esc(n).replace(/'/g,"&#39;")}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg><span class="srOnly">Bewerken</span></button><button class="iconAction iconActionToday" type="button" title="Recept naar Vandaag" aria-label="Recept naar Vandaag" onclick="prepareRecipe('${esc(n).replace(/'/g,"&#39;")}')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"></rect><path d="M8 2.5v4"></path><path d="M16 2.5v4"></path><path d="M3 9h18"></path><path d="M12 12v6"></path><path d="M9 15h6"></path></svg><span class="srOnly">Naar Vandaag</span></button><button class="iconAction dangerIcon" type="button" title="Recept verwijderen" aria-label="Recept verwijderen" onclick="deleteRecipe('${esc(n).replace(/'/g,"&#39;")}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button></div></div>`}).join(""):'<p class="muted">Nog geen recepten. Maak er één via de knop Recept.</p>'
 }
 function prepareRecipe(n){selectedRecipeToday=n;document.getElementById("recipeSearchToday").value=n;document.getElementById("recipePortions").value=1;document.getElementById("recipeAddInfo").innerHTML=`<div class="notice">Geselecteerd: <b>${esc(n)}</b>. Kies eventueel het aantal porties en tik op ‘Recept toevoegen’.</div>`;tab("today",document.querySelectorAll(".tabs button")[0])}
 function suggestRecipesToday(){
