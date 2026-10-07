@@ -183,6 +183,8 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 .aiFoodStatus{margin-top:12px}
 .aiFoodResults{margin-top:14px}
 .aiFoodResult{border:1px solid var(--line);border-radius:18px;padding:13px;margin-top:10px;background:rgba(255,255,255,.18)}
+.aiFoodResultMuted{opacity:.62}
+.aiFoodResult input[type="checkbox"]{accent-color:var(--green)}
 .aiFoodResultTop{display:flex;align-items:center;gap:9px}
 .aiFoodResultTop b{font-size:14px}
 .aiFoodResultRemove{margin-left:auto;padding:6px 9px;border-radius:10px}
@@ -232,7 +234,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.1.2';
+const APP_VERSION='6.2.0';
 const RELEASE_DATE='6 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -281,7 +283,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.0.7"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="6.2.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -759,7 +761,7 @@ const BASE={
 "samosa":{kcal:250,p:6,c:25,f:14,u:"g"}
 };
 let data=load();
-function load(){try{let d=JSON.parse(localStorage.getItem("calorieTrackerV2")||"null");if(d)return {...{profile:{},days:{},weights:[],custom:{},recipes:{}},...d}}catch(e){}return {profile:{},days:{},weights:[],custom:{},recipes:{}}}
+function load(){try{let d=JSON.parse(localStorage.getItem("calorieTrackerV2")||"null");if(d)return {...{profile:{},days:{},weights:[],custom:{},recipes:{},aiMappings:{}},...d}}catch(e){}return {profile:{},days:{},weights:[],custom:{},recipes:{},aiMappings:{}}}
 function save(){localStorage.setItem("calorieTrackerV2",JSON.stringify(data))}
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function today(){return new Date().toISOString().slice(0,10)}
@@ -1232,11 +1234,20 @@ function saveCustom(){
  const source=barcode ? (previous.source||'openfoodfacts') : previous.source;
  data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value,...(barcode?{barcode,source}:{}),...(previous.brand?{brand:previous.brand}:{}),...(previous.image?{image:previous.image}:{})};
  pendingBarcodeForCustom=null;
+ const aiIndex=aiPendingNewProductIndex;
+ aiPendingNewProductIndex=null;
  save();
  closeModal("foodModal");
  resetCustomEditor();
  render();
  selectProduct(n);
+ if(Number.isInteger(aiIndex) && aiDetectedItems[aiIndex]){
+  aiDetectedItems[aiIndex].productName=n;
+  aiDetectedItems[aiIndex].productInput=n;
+  aiRememberMapping(aiDetectedItems[aiIndex].name,n);
+  document.getElementById("aiFoodModal")?.classList.remove("hidden");
+  renderAIFoodResults(false);
+ }
 }
 function renderCustom(){
  let keys=Object.keys(data.custom).sort();
@@ -1573,6 +1584,7 @@ function mergeStorageKey(index){
   const wm=new Map(); merged.weights.forEach(x=>{if(x&&x.date)wm.set(x.date,x)}); merged.weights=[...wm.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   merged.custom={...(incoming.custom||{}),...(data.custom||{})};
   merged.recipes={...(incoming.recipes||{}),...(data.recipes||{})};
+  merged.aiMappings={...(incoming.aiMappings||{}),...(data.aiMappings||{})};
   data=merged;
   save();
   try{render();}catch(err){console.error("CalorieTracker storage merge render error",err);}
@@ -1633,7 +1645,7 @@ function importData(e){
 }
 function closeImportModal(){pendingImport=null;document.getElementById("importModal").classList.add("hidden")}
 function mergeDatasets(current,incoming){
-  const merged={profile:{},days:{},weights:[],custom:{},recipes:{}};
+  const merged={profile:{},days:{},weights:[],custom:{},recipes:{},aiMappings:{}};
   merged.profile={...(incoming.profile||{}),...(current.profile||{})};
   const allDates=new Set([...Object.keys(incoming.days||{}),...Object.keys(current.days||{})]);
   allDates.forEach(date=>{
@@ -1651,6 +1663,7 @@ function mergeDatasets(current,incoming){
   merged.weights=[...wm.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   merged.custom={...(incoming.custom||{}),...(current.custom||{})};
   merged.recipes={...(incoming.recipes||{}),...(current.recipes||{})};
+  merged.aiMappings={...(incoming.aiMappings||{}),...(current.aiMappings||{})};
   return merged;
 }
 function mergePendingImport(){
@@ -1680,7 +1693,7 @@ function replaceWithPendingImport(){
   if(!pendingImport)return;
   const source=pendingImport.source;
   if(!confirm("Dit vervangt de huidige gegevens door de geïmporteerde gegevens. Maak eerst een back-up als je de huidige gegevens wilt behouden. Doorgaan?"))return;
-  data={profile:{},days:{},weights:[],custom:{},recipes:{},...pendingImport.data};save();render();inspectStorage();closeImportModal();
+  data={profile:{},days:{},weights:[],custom:{},recipes:{},aiMappings:{},...pendingImport.data};save();render();inspectStorage();closeImportModal();
   const st=document.getElementById("storageActionStatus");if(st)st.textContent=`Gegevens vervangen door de import vanuit ${source}.`;
 }
 function tab(id,btn){
@@ -1957,6 +1970,7 @@ let aiDetectedItems=[];
 let aiPreviewUrl=null;
 let aiBusy=false;
 let aiLastFile=null;
+let aiPendingNewProductIndex=null;
 
 function openAIFoodModal(){
   const modal=document.getElementById('aiFoodModal');
@@ -1972,6 +1986,7 @@ function openAIFoodModal(){
   aiDetectedItems=[];
   aiBusy=false;
   aiLastFile=null;
+  aiPendingNewProductIndex=null;
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
 
@@ -1983,6 +1998,7 @@ function closeAIFoodModal(){
   document.getElementById('aiPhotoInput').value='';
   aiDetectedItems=[];
   aiLastFile=null;
+  aiPendingNewProductIndex=null;
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
 
@@ -2025,6 +2041,8 @@ function aiFindProducts(name){
 }
 function aiBestProduct(name){
   const n=aiNormalize(name);
+  const learned=data.aiMappings&&data.aiMappings[n];
+  if(learned && allProducts()[learned]) return learned;
   const alias=AI_PRODUCT_ALIASES[n];
   if(alias && allProducts()[alias]) return alias;
   const hits=aiFindProducts(name);
@@ -2034,6 +2052,14 @@ function aiBestProduct(name){
   // become a specific branded/product entry. Only exact/strong matches auto-link.
   if(score<100 && !allProducts()[name])return null;
   return best;
+}
+function aiRememberMapping(aiName,productName){
+  if(!productName || !allProducts()[productName])return;
+  data.aiMappings??={};
+  const key=aiNormalize(aiName);
+  if(!key)return;
+  data.aiMappings[key]=productName;
+  save();
 }
 function aiPopulateDatalist(){
   const dl=document.getElementById('aiProductsList');
@@ -2046,15 +2072,42 @@ function aiSetProduct(index,value){
   const exact=Object.keys(allProducts()).find(k=>aiNormalize(k)===aiNormalize(value));
   item.productName=exact||null;
   item.productInput=exact||value;
-  renderAIFoodResults();
+  if(exact)aiRememberMapping(item.name,exact);
+  renderAIFoodResults(false);
 }
 function aiSetName(index,value){
   const item=aiDetectedItems[index]; if(!item)return;
-  item.name=value;
-  const best=aiBestProduct(value);
-  if(best)item.productName=best;
-  else item.productName=null;
+  item.productInput=value;
+  const exact=Object.keys(allProducts()).find(k=>aiNormalize(k)===aiNormalize(value));
+  if(exact){
+    item.productName=exact;
+    aiRememberMapping(item.name,exact);
+  }else{
+    item.productName=null;
+  }
   renderAIFoodResults(false);
+}
+function aiToggleSelected(index,checked){
+  const item=aiDetectedItems[index]; if(!item)return;
+  item.selected=!!checked;
+  renderAIFoodResults(false);
+}
+function openAIProductCreator(index){
+  if(!aiDetectedItems[index])return;
+  aiPendingNewProductIndex=index;
+  document.getElementById('aiFoodModal')?.classList.add('hidden');
+  openNewProduct();
+  setTimeout(()=>{
+    const item=aiDetectedItems[index];
+    const nameEl=document.getElementById('newName');
+    if(nameEl)nameEl.value=String(item.name||'').trim().toLowerCase();
+  },30);
+}
+function aiLinkCurrentProduct(index){
+  const item=aiDetectedItems[index];
+  if(!item)return;
+  const input=document.getElementById(`aiProductInput${index}`);
+  aiSetProduct(index,input?.value||'');
 }
 function aiSetGrams(index,value){
   const item=aiDetectedItems[index]; if(!item)return;
@@ -2096,24 +2149,33 @@ function renderAIFoodResults(focusFirst=true){
     const matches=aiFindProducts(item.name);
     const conf=Number(item.confidence);
     const confidence=Number.isFinite(conf)?`<span class="aiFoodConfidence">AI ${Math.round(conf*100)}%</span>`:'';
-    return `<div class="aiFoodResult">
-      <div class="aiFoodResultTop"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}<button class="danger aiFoodResultRemove" type="button" onclick="aiRemoveItem(${i})">Verwijder</button></div>
+    const selected=item.selected!==false;
+    const status=n?`<span class="aiFoodMatched">✓ ${esc(item.productName)} gekoppeld</span>`:`<span class="aiFoodUnmatched">⚠ Nog te koppelen</span>`;
+    const action=n?'':`<div class="actions" style="margin-top:8px"><button type="button" class="secondary" onclick="aiLinkCurrentProduct(${i})">Koppelen</button><button type="button" class="ghost" onclick="openAIProductCreator(${i})">＋ Nieuw product</button></div>`;
+    return `<div class="aiFoodResult ${selected?'':'aiFoodResultMuted'}">
+      <div class="aiFoodResultTop"><label style="display:flex;align-items:center;gap:8px;margin:0;flex:1"><input type="checkbox" ${selected?'checked':''} onchange="aiToggleSelected(${i},this.checked)" style="width:20px;height:20px"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}</label><button class="danger aiFoodResultRemove" type="button" onclick="aiRemoveItem(${i})">Verwijder</button></div>
       <div class="aiFoodResultGrid">
-       <div><label>Productnaam / databasekoppeling</label><input list="aiProductsList" value="${esc(item.productName||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
+       <div><label>Productnaam / databasekoppeling</label><input id="aiProductInput${i}" list="aiProductsList" value="${esc(item.productName||item.productInput||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
        <div><label>Gewicht</label><input type="number" min="1" max="3000" step="1" value="${Math.round(item.grams||100)}" onchange="aiSetGrams(${i},this.value)">${item.productName&&portionOptions(item.productName).length?`<button type="button" class="ghost tiny" style="margin-top:6px;width:100%" onclick="aiUseProductPortion(${i})">1 stuk = ${portionOptions(item.productName)[0].grams} g</button>`:''}</div>
       </div>
-      <div class="aiFoodMatch">${n?`<span class="aiFoodMatched">✓ ${esc(item.productName)} gekoppeld</span>`:`<span class="aiFoodUnmatched">⚠ Niet gekoppeld aan je voedingsdatabase</span>`}</div>
-      ${n?`<div class="aiFoodNutrition">${Math.round(n.kcal)} kcal • ${Math.round(n.p*10)/10} g eiwit • ${Math.round(n.c*10)/10} g koolhydraten • ${Math.round(n.f*10)/10} g vet</div>`:`<div class="aiFoodNutrition">Kies een product uit de lijst om de voedingswaarde te berekenen. De AI-kcal worden bewust niet gebruikt.</div>`}
+      <div class="aiFoodMatch">${status}</div>
+      ${n?`<div class="aiFoodNutrition">${Math.round(n.kcal)} kcal • ${Math.round(n.p*10)/10} g eiwit • ${Math.round(n.c*10)/10} g koolhydraten • ${Math.round(n.f*10)/10} g vet</div>`:`<div class="aiFoodNutrition">Koppel dit aan een product uit je database. De AI-voedingswaarden worden niet gebruikt.</div>`}
+      ${action}
       ${matches.length>1?`<div class="tiny" style="margin-top:6px">Suggesties: ${matches.slice(0,4).map(x=>esc(x)).join(' · ')}</div>`:''}
     </div>`;
   }).join('');
-  const meal=document.getElementById('aiMealType');
   document.getElementById('aiFoodMealChoice').classList.remove('hidden');
   document.getElementById('aiFoodSummary').classList.remove('hidden');
-  const valid=aiDetectedItems.filter(x=>aiNutrition(x));
+  const selected=aiDetectedItems.filter(x=>x.selected!==false);
+  const valid=selected.filter(x=>aiNutrition(x));
   const t=valid.reduce((o,x)=>{const n=aiNutrition(x);o.kcal+=n.kcal;o.p+=n.p;o.c+=n.c;o.f+=n.f;return o},{kcal:0,p:0,c:0,f:0});
-  document.getElementById('aiFoodSummary').innerHTML=`<span><b>${valid.length}/${aiDetectedItems.length}</b> gekoppeld aan je database<br><span class="tiny">Alleen gekoppelde producten kunnen worden geregistreerd.</span></span><strong>${Math.round(t.kcal)} kcal</strong>`;
-  document.getElementById('aiFoodConfirmBtn').disabled=valid.length!==aiDetectedItems.length || valid.length===0 || aiBusy;
+  const unlinkedSelected=selected.filter(x=>!aiNutrition(x)).length;
+  const linkedAll=aiDetectedItems.filter(x=>aiNutrition(x)).length;
+  document.getElementById('aiFoodSummary').innerHTML=`<span><b>${selected.length} geselecteerd</b> · ${linkedAll}/${aiDetectedItems.length} gekoppeld<br><span class="tiny">Niet-geselecteerde producten worden niet geregistreerd. Je kunt ze later alsnog koppelen.</span></span><strong>${Math.round(t.kcal)} kcal</strong>`;
+  document.getElementById('aiFoodConfirmBtn').disabled=valid.length===0 || unlinkedSelected>0 || aiBusy;
+  if(unlinkedSelected>0){
+    document.getElementById('aiFoodSummary').innerHTML+=`<div class="tiny" style="margin-top:6px;color:var(--red)">Koppel de geselecteerde producten voordat je registreert.</div>`;
+  }
 }
 
 async function resizeAIFoodImage(file){
@@ -2182,7 +2244,9 @@ async function analyzeAIFoodFile(file){
       grams:Math.max(1,Number(x.grams)||100),
       confidence:Number(x.confidence),
       notes:String(x.notes||''),
-      productName:aiBestProduct(String(x.name||''))||null
+      productName:aiBestProduct(String(x.name||''))||null,
+      productInput:aiBestProduct(String(x.name||''))||String(x.name||''),
+      selected:true
     }));
     if(!aiDetectedItems.length)throw new Error('Gemini kon geen duidelijke voedingsmiddelen in de foto herkennen.');
     const currentMeal=document.getElementById('mealType')?.value;
@@ -2234,27 +2298,17 @@ async function retryAIFood(){
 function confirmAIFood(){
   if(aiBusy||!aiDetectedItems.length)return;
   const meal=document.getElementById('aiMealType').value||'Ontbijt',d=today();
-  const valid=aiDetectedItems.map(item=>({item,n:aiNutrition(item)}));
-  if(valid.some(x=>!x.n)){msg('Koppel eerst alle herkende producten aan je voedingsdatabase.','warn');return;}
+  const selected=aiDetectedItems.filter(item=>item.selected!==false);
+  if(!selected.length){msg('Selecteer minimaal één product om te registreren.','warn');return;}
+  const valid=selected.map(item=>({item,n:aiNutrition(item)}));
+  if(valid.some(x=>!x.n)){msg('Koppel eerst de geselecteerde producten aan je voedingsdatabase. Niet-geselecteerde producten hoeven niet gekoppeld te zijn.','warn');return;}
   data.days[d]??=[];
   valid.forEach(({item,n})=>{
-    const p=allProducts()[item.productName];
     const grams=Number(item.grams)||0;
-    data.days[d].push({
-      name:item.productName,
-      amount:grams,
-      unit:'g',
-      grams,
-      kcal:n.kcal,
-      p:n.p,
-      c:n.c,
-      f:n.f,
-      meal
-    });
+    data.days[d].push({name:item.productName,amount:grams,unit:'g',grams,kcal:n.kcal,p:n.p,c:n.c,f:n.f,meal});
+    aiRememberMapping(item.name,item.productName);
   });
-  save();render();
-  closeAIFoodModal();
-  // Give the user an explicit confirmation without changing the existing meal modal.
+  save();render();closeAIFoodModal();
   setTimeout(()=>alert(`${valid.length} voedingsmiddel${valid.length===1?'':'en'} toegevoegd aan ${meal}.`),40);
 }
 
