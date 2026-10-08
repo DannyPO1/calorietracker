@@ -88,6 +88,13 @@ button{border:0;border-radius:13px;padding:12px 15px;font:inherit;font-weight:75
 .goalSummary{display:flex;flex-direction:column;gap:10px}.goalSummary .goalLine{display:flex;justify-content:space-between;gap:10px;align-items:end}.goalSummary .goalValue{font-size:26px;font-weight:800;letter-spacing:-.5px}.goalSummary .goalCaption{font-size:12px;color:var(--muted)}
 .motivation{padding:11px 13px;background:#e8f2eb;border-radius:15px;color:#245b3d;font-size:13px;font-weight:650}
 .sectionKicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:800;margin-bottom:5px}
+.dashboardDatePicker{position:relative;display:inline-block;max-width:100%;min-height:23px;margin-bottom:2px}
+.dashboardDateButton{display:flex;align-items:center;gap:7px;min-height:23px}
+.dashboardDateButton .sectionKicker{margin:0;color:var(--accent);font-size:11px;line-height:1.35}
+.dashboardDateIcon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:var(--accent);opacity:.95}.dashboardDateIcon svg{display:block;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dashboardDatePicker input[type="date"]{position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0;border:0!important;background:transparent!important;opacity:0;cursor:pointer;z-index:2}
+html[data-theme="dark"] .dashboardDatePicker input[type="date"]{color:transparent}
+
 @media(max-width:560px){.calorieHero{grid-template-columns:150px 1fr;gap:14px;padding:15px}.calorieRing{width:146px;height:146px}.ringKcal{font-size:24px}.goalSummary .goalValue{font-size:21px}}
 .calorieDashboard{position:relative;overflow:hidden;background:linear-gradient(145deg,#fffdf8 0%,#f4f8f1 58%,#edf5ef 100%);border:1px solid #d9e5db;border-radius:28px;margin-bottom:15px;box-shadow:0 12px 34px rgba(24,59,43,.10)}
 .calorieDashboard:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-85px;top:-90px;background:rgba(221,239,226,.65);pointer-events:none}
@@ -262,7 +269,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.10';
+const APP_VERSION='6.2.11';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -349,7 +356,11 @@ function updateRecipeLineCalorie(i){
     </div>
    </div>
    <div class="goalSummary">
-    <div><div class="sectionKicker" id="dateLabel"></div><div class="goalCaption">Dagbudget</div><div class="goalValue" id="targetKcal">—</div></div>
+    <div class="dashboardDatePicker">
+     <div class="dashboardDateButton" aria-hidden="true"><span class="dashboardDateIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="3"></rect><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"></path></svg></span><span class="sectionKicker" id="dateLabel"></span></div>
+     <input id="dashboardDate" type="date" aria-label="Kies datum" onchange="onDashboardDateChange(this.value)">
+    </div>
+    <div><div class="goalCaption">Dagbudget</div><div class="goalValue" id="targetKcal">—</div></div>
     <div class="goalMeta"><span class="goalCaption">Streefgewicht</span><span class="chip" id="goalTag">Stel doel in</span></div>
     <div class="motivation" id="dailyMessage">Rustig opbouwen. Elke registratie telt.</div>
    </div>
@@ -381,7 +392,7 @@ function updateRecipeLineCalorie(i){
    </div>
    <div class="grid">
     <input id="mealType" type="hidden" value="Ontbijt">
-    <div><label>Datum</label><input id="entryDate" type="date" onchange="renderMealTiles();updateMealModalHeader()"></div>
+    <div><label>Datum</label><input id="entryDate" type="date" onchange="onEntryDateChange(this.value)"></div>
    </div>
 
    <div class="mealEntrySection">
@@ -802,7 +813,26 @@ function load(){try{let d=JSON.parse(localStorage.getItem("calorieTrackerV2")||"
 function save(){localStorage.setItem("calorieTrackerV2",JSON.stringify(data))}
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function today(){return new Date().toISOString().slice(0,10)}
-function activeDate(){return document.getElementById("entryDate").value||today()}
+function activeDate(){return document.getElementById("dashboardDate")?.value||document.getElementById("entryDate")?.value||today()}
+function syncDateInputs(d){
+ const value=d||today();
+ const dash=document.getElementById("dashboardDate");
+ const entry=document.getElementById("entryDate");
+ if(dash)dash.value=value;
+ if(entry)entry.value=value;
+ return value;
+}
+function onDashboardDateChange(d){
+ if(!d)return;
+ syncDateInputs(d);
+ render();
+}
+function onEntryDateChange(d){
+ if(!d)return;
+ syncDateInputs(d);
+ render();
+ updateMealModalHeader();
+}
 function allProducts(){return {...BASE,...data.custom}}
 function isCustomProduct(name){return !!(data.custom && data.custom[name])}
 function product(name){let ps=allProducts(),n=name.toLowerCase().trim();if(ps[n])return [n,ps[n]];let keys=Object.keys(ps);let exact=keys.find(k=>k===n);if(exact)return [exact,ps[exact]];let hits=keys.filter(k=>k.includes(n)||n.includes(k));return hits.length?[hits[0],ps[hits[0]]]:null}
@@ -1070,7 +1100,7 @@ function openMealEntry(meal){
  const d=activeDate();
  document.getElementById("foodEntryModal").classList.remove("hidden");
  document.getElementById("mealType").value=meal;
- document.getElementById("entryDate").value=d;
+ syncDateInputs(d);
  document.getElementById("productSearch").value="";
  document.getElementById("recipeSearchToday").value="";
  document.getElementById("amount").value=100;
@@ -1173,16 +1203,17 @@ function renderFourWeekDashboard(){
 function render(){
  let d=activeDate(),items=data.days[d]||[],t=totals(items),c=calc(),dt=new Date(d+"T12:00:00");
  document.getElementById("dateLabel").textContent=dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
+ const ringLabel=document.querySelector(".ringLabel"); if(ringLabel) ringLabel.textContent=d===today()?"vandaag gegeten":"gegeten";
  const dayTitle=document.getElementById("dayTitle"); if(dayTitle) dayTitle.textContent=d===today()?"Vandaag":"Dagoverzicht";
  let tw=data.weights.find(x=>x.date===d);let twEl=document.getElementById("todayWeightInfo");if(twEl)twEl.innerHTML=tw?`Gewicht op ${esc(d)}: <b>${tw.weight} kg</b>`:"Nog geen gewicht gelogd voor deze datum.";
  document.getElementById("weightDate").value=d; if(tw)document.getElementById("weightEntry").value=tw.weight;
  document.getElementById("totalKcal").textContent=Math.round(t.kcal);document.getElementById("protein").textContent=Math.round(t.p)+" g";
  document.getElementById("macro").textContent=Math.round(t.c)+" / "+Math.round(t.f);
  document.getElementById("targetKcal").textContent=c?c.target+" kcal":"—";document.getElementById("remainingKcal").textContent=c?Math.max(0,Math.round(c.target-t.kcal))+" over":"—";
- document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const dft=document.getElementById("dashboardFooterText");if(dft)dft.textContent=Math.round(pct)+"% van dagdoel";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?"Klaar om je eerste maaltijd van vandaag te registreren.":t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte vandaag.":t.kcal<=c.target?"Je ligt mooi op koers voor vandaag.":"Je zit boven je dagdoel. Geen probleem — morgen is een nieuwe dag.";}
+ document.getElementById("goalTag").textContent=data.profile.goalWeight?data.profile.goalWeight+" kg doel":"Stel doel in";const pct=c?Math.min(100,t.kcal/c.target*100):0;document.getElementById("progress").style.width=pct+"%";const ring=document.getElementById("calorieRing");if(ring)ring.style.setProperty("--pct",pct+"%");const dp=document.getElementById("dayProgress");if(dp)dp.textContent=Math.round(pct)+"%";const dft=document.getElementById("dashboardFooterText");if(dft)dft.textContent=Math.round(pct)+"% van dagdoel";const mc=document.getElementById("mealCount");if(mc)mc.textContent=items.length;const dm=document.getElementById("dailyMessage");if(dm){const dayWord=d===today()?"vandaag":"deze dag";dm.textContent=!c?"Stel je dagdoel in om je voortgang te zien.":t.kcal===0?`Klaar om je eerste maaltijd van ${dayWord} te registreren.`:t.kcal<c.target*.5?"Mooi begin. Je hebt nog volop ruimte deze dag.":t.kcal<=c.target?`Je ligt mooi op koers voor ${dayWord}.`:"Je zit boven je dagdoel. Geen probleem — je kunt deze dag nog aanpassen.";}
  let groups={};items.forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));
  const legacyMeals=document.getElementById("meals"); if(legacyMeals) legacyMeals.innerHTML=Object.keys(groups).length?Object.entries(groups).map(([m,a])=>`<div class="meal"><div class="row between"><b>${m}</b><b>${Math.round(totals(a).kcal)} kcal</b></div>${a.map(x=>`<div class="item"><span>${esc(x.name)} <small>${x.amount} ${esc(x.unit)}</small></span><span class="itemRight"><span>${Math.round(x.kcal)} kcal</span><button class="iconAction dangerIcon" type="button" title="Voeding verwijderen" aria-label="Voeding verwijderen" onclick="removeItem(${x.i})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button></span></div>`).join("")}</div>`).join(""):'<div class="empty">Nog niets ingevoerd.</div>';
- document.getElementById("entryDate").value=d;renderMealTiles();renderMealCurrent();renderSettings()
+ syncDateInputs(d);renderMealTiles();renderMealCurrent();renderSettings()
 }
 function saveProfile(){
  let vals={age:+age.value,height:+height.value,weight:+weight.value,goalWeight:+goalWeight.value,sex:sex.value,activity:+activity.value,rate:+rate.value};
@@ -1425,7 +1456,7 @@ function saveRecipe(){
  recipeReturnMeal=null;
  render();
  if(returnMeal){
-   setTimeout(()=>{openMealEntry(returnMeal.meal); document.getElementById("entryDate").value=returnMeal.date; updateMealModalHeader();},80);
+   setTimeout(()=>{openMealEntry(returnMeal.meal); syncDateInputs(returnMeal.date); updateMealModalHeader();},80);
  }
  alert(old ? "Recept gewijzigd." : "Recept opgeslagen en beschikbaar onder ‘Mijn recepten toevoegen’.");
 }
@@ -1821,7 +1852,7 @@ function closeRecipeModal(){
  if(returnMeal){
    setTimeout(()=>{
      openMealEntry(returnMeal.meal);
-     document.getElementById("entryDate").value=returnMeal.date;
+     syncDateInputs(returnMeal.date);
      updateMealModalHeader();
    },50);
  }
@@ -2062,7 +2093,7 @@ const PORTIONS = {
 };
 
 
-document.getElementById("entryDate").value=today();document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
+syncDateInputs(today());document.getElementById("weightDate").value=today();document.getElementById("productSearch").addEventListener("change",showSelected);document.getElementById("productSearch").addEventListener("keyup",showSelected);
 render();renderSettings();inspectStorage();refreshStorageContext();
 
 /* v6.2.3 — standard product search and detail editor */

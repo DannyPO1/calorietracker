@@ -1,19 +1,22 @@
-# CalorieTracker v6.2.10
+# CalorieTracker v6.2.11
 
 Persoonlijke calorie- en voedingsregistratie voor iPhone/Safari. Gegevens worden lokaal opgeslagen; een account is niet nodig.
 
-## Release notes — v6.2.10
+## Release notes — v6.2.11
 
-### Dashboardiconen
-- De iconen voor **eiwit** en **koolhydraten/vet** zijn vervangen door de gecorrigeerde assets uit de goedgekeurde dashboard-mock-up.
-- De volledige cirkels zijn nu correct binnen het 120×120 px canvas gecentreerd.
-- De iconen zijn verticaal gecentreerd binnen de cirkels.
-- De bestaande vormgeving, kleuren en stijl van de mock-up zijn behouden; de iconen zijn niet opnieuw geïnterpreteerd of nagetekend.
-- De iconen voor **dagdoel** en **registraties** uit v6.2.9 blijven ongewijzigd.
+### Datumselectie op het dashboard
+- De datum van het dashboard is nu rechtstreeks op het dashboard aanklikbaar.
+- Standaard staat de datum op vandaag.
+- Tik op de datum om de iOS-datumkiezer te openen en een andere dag te selecteren.
+- De geselecteerde datum wordt direct gebruikt voor het dashboard en de bijbehorende maaltijdregistraties.
+- De datum in het maaltijdformulier blijft gesynchroniseerd met de dashboarddatum.
+- Ook de datum voor het gewichtsoverzicht volgt de geselecteerde dag.
+- Teruggaan naar vandaag kan door in de datumkiezer opnieuw de datum van vandaag te selecteren.
+- Bij historische dagen worden teksten op het dashboard niet onterecht als "vandaag" aangeduid.
 
 ### Technisch
-- Applicatieversie bijgewerkt naar **v6.2.10**.
-- Service-workercache bijgewerkt naar **6.2.10** zodat de nieuwe dashboard-assets correct worden geladen.
+- Applicatieversie bijgewerkt naar **v6.2.11**.
+- Service-workercache bijgewerkt naar **6.2.11** zodat de nieuwe interface direct wordt geladen.
 
 ## Deployment
-Upload `CalorieTracker-iPhone-v6.2.10.zip` naar de repository en commit de ZIP. De bestaande GitHub Actions-workflow installeert de release, maakt de releasecommit en tag `v6.2.10`.
+Upload `CalorieTracker-iPhone-v6.2.11.zip` naar de repository en commit de ZIP. De bestaande GitHub Actions-workflow installeert de release, maakt de releasecommit en tag `v6.2.11`.
