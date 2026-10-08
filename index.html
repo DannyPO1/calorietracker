@@ -269,7 +269,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.11';
+const APP_VERSION='6.2.12';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1614,7 +1614,7 @@ function drawChart(){
    svg.innerHTML+=`<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="${gridColor}" stroke-width="1" opacity=".75"/>`;
    svg.innerHTML+=`<text x="${padL-12}" y="${y+5}" text-anchor="end" font-size="13" fill="${muted}">${value.toFixed(1)}</text>`;
  }
- svg.innerHTML+=`<text x="16" y="18" font-size="12" font-weight="700" fill="${muted}">kg</text>`;
+ svg.innerHTML+=`<text x="${padL-48}" y="14" font-size="12" font-weight="700" fill="${muted}">kg</text>`;
  // X-axis: adaptive ticks. Short ranges use 2-day spacing; longer ranges use weekly labels.
  const spanDays=Math.max(1,Math.round((endMs-startMs)/DAY));
  const tickStep=spanDays<=14?2:7;
