@@ -1,4 +1,4 @@
-const CACHE='calorietracker-6.2.8';
+const CACHE='calorietracker-6.2.10';
 const ASSETS=[
   './',
   './index.html',
@@ -14,7 +14,11 @@ const ASSETS=[
   './meal-lunch-food.png',
   './meal-lunch-icon.png',
   './meal-snacks-food.png',
-  './meal-snacks-icon.png'
+  './meal-snacks-icon.png',
+  './dashboard-protein.png',
+  './dashboard-carbs.png',
+  './dashboard-target.png',
+  './dashboard-registrations.png'
 ];
 
 self.addEventListener('install', event=>{
