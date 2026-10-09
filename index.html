@@ -269,7 +269,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.13';
+const APP_VERSION='6.2.14';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -1334,6 +1334,7 @@ function saveCustom(){
  closeModal("foodModal");
  resetCustomEditor();
  render();
+ renderFood();
  selectProduct(n);
  if(Number.isInteger(aiIndex) && aiDetectedItems[aiIndex]){
   aiDetectedItems[aiIndex].productName=n;
@@ -1414,7 +1415,7 @@ function saveCustomAsNew(){
  const original=data.custom[sourceName];
  const pieceGrams=Number(document.getElementById("newPieceGrams").value)||0;
  data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value,...(pieceGrams>0?{pieceGrams}:{}),...(original.barcode?{barcode:original.barcode}:{}),...(original.source?{source:original.source}:{}),...(original.brand?{brand:original.brand}:{}),...(original.image?{image:original.image}:{})};
- save(); closeModal("foodModal"); render();
+ save(); closeModal("foodModal"); render(); renderFood();
  alert("Nieuw product opgeslagen als ‘"+n+"’. Het oorspronkelijke product is ongewijzigd gebleven.");
 }
 
@@ -1427,6 +1428,7 @@ function deleteCustomProduct(n){
      delete data.custom[n];
      save();
      render();
+     renderFood();
    }
  );
 }
@@ -1499,6 +1501,7 @@ function saveRecipe(){
  resetRecipeEditor();
  recipeReturnMeal=null;
  render();
+ renderFood();
  if(returnMeal){
    setTimeout(()=>{openMealEntry(returnMeal.meal); syncDateInputs(returnMeal.date); updateMealModalHeader();},80);
  }
@@ -1544,6 +1547,7 @@ function deleteRecipe(n){
      delete data.recipes[n];
      save();
      render();
+     renderFood();
    }
  );
 }
