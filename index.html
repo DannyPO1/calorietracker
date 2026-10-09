@@ -269,7 +269,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.12';
+const APP_VERSION='6.2.13';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -544,7 +544,7 @@ function updateRecipeLineCalorie(i){
  </div>
 </div>
 
-<div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit" onchange="toggleCustomPieceField()"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div id="customPieceField" class="notice" style="margin-top:12px"><b>Stuksgewicht (optioneel)</b><br><span class="tiny">Gebruik dit als het logisch is om dit product in stuks te registreren, bijvoorbeeld een koek, ei, broodje of snack.</span><div class="row" style="margin-top:8px"><label style="flex:1;margin:0">1 stuk = <input id="newPieceGrams" type="number" min="0.1" step="0.1" placeholder="bijv. 110" style="width:120px;display:inline-block"> g</label></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
+<div id="foodModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:50;padding:20px;overflow:auto"><div class="card" style="max-width:600px;margin:30px auto"><h2>Eigen product</h2><label>Naam</label><input id="newName" placeholder="bijv. mijn yoghurt"><div class="grid"><div><label>kcal per 100 g/ml</label><input id="newKcal" type="number" step=".1"></div><div><label>eenheid</label><select id="newUnit" onchange="toggleCustomPieceField()"><option value="g">g</option><option value="ml">ml</option></select></div><div><label>eiwit (g)</label><input id="newP" type="number" step=".1" value="0"></div><div><label>koolhydraten (g)</label><input id="newC" type="number" step=".1" value="0"></div><div><label>vet (g)</label><input id="newF" type="number" step=".1" value="0"></div></div><div id="customPieceField" class="notice" style="margin-top:12px"><b>Stuksgewicht (optioneel)</b><br><span class="tiny">Gebruik dit als het logisch is om dit product in stuks te registreren, bijvoorbeeld een koek, ei, broodje of snack.</span><div class="row" style="margin-top:8px"><label style="flex:1;margin:0">1 stuk = <input id="newPieceGrams" type="number" min="0.1" step="0.1" placeholder="bijv. 110" style="width:120px;display:inline-block"> g</label></div></div><div class="actions"><button class="primary" onclick="saveCustom()">Opslaan</button><button class="secondary hidden" id="saveCustomAsNewBtn" type="button" onclick="saveCustomAsNew()">Opslaan als nieuw product</button><button class="ghost" onclick="closeModal('foodModal')">Annuleren</button></div></div></div>
 
 
 <div id="pieceWeightModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:95;padding:20px;overflow:auto"><div class="card" style="max-width:500px;margin:20vh auto 0"><h2>Stuksgewicht instellen</h2><p id="pieceWeightProductName" class="muted"></p><label>1 stuk weegt</label><div class="row"><input id="pieceWeightValue" type="number" min="0.1" step="0.1" placeholder="bijv. 110"><span>gram</span></div><p class="tiny" style="margin-top:8px">Dit gewicht wordt gebruikt voor stuksregistratie en voor de AI-scan wanneer dit product wordt herkend.</p><div class="actions"><button class="primary" onclick="savePieceWeight()">Opslaan</button><button class="ghost" onclick="closePieceWeightModal()">Annuleren</button></div></div></div>
@@ -589,7 +589,7 @@ function updateRecipeLineCalorie(i){
   </div>
 </div>
 
-<div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:100;padding:20px;overflow:auto"><div class="card" style="max-width:650px;margin:20px auto"><h2>Recept maken</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><div class="grid"><div><label>Aantal porties uit dit recept</label><input id="recipeServings" type="number" min="1" step="1" value="1"></div><div><label>Gebruik</label><div class="notice" style="margin-top:0">De app berekent totaal én per portie.</div></div></div><p class="muted">Zoek per ingrediënt een product, kies de suggestie en vul de hoeveelheid in. Eigen producten staan ook in de zoekresultaten.</p><div id="recipeBuilder"></div><div id="recipePreview" class="notice"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">+ Ingrediënt</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="ghost" onclick="closeRecipeModal()">Annuleren</button></div></div></div>
+<div id="recipeModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:100;padding:20px;overflow:auto"><div class="card" style="max-width:650px;margin:20px auto"><h2>Recept maken</h2><label>Naam recept</label><input id="recipeName" placeholder="bijv. kip-kerrie"><div class="grid"><div><label>Aantal porties uit dit recept</label><input id="recipeServings" type="number" min="1" step="1" value="1"></div><div><label>Gebruik</label><div class="notice" style="margin-top:0">De app berekent totaal én per portie.</div></div></div><p class="muted">Zoek per ingrediënt een product, kies de suggestie en vul de hoeveelheid in. Eigen producten staan ook in de zoekresultaten.</p><div id="recipeBuilder"></div><div id="recipePreview" class="notice"></div><div class="actions"><button class="secondary" onclick="addRecipeLine()">+ Ingrediënt</button><button class="primary" onclick="saveRecipe()">Recept opslaan</button><button class="secondary hidden" id="saveRecipeAsNewBtn" type="button" onclick="saveRecipeAsNew()">Opslaan als nieuw recept</button><button class="ghost" onclick="closeRecipeModal()">Annuleren</button></div></div></div>
 
 <script>
 const BASE={
@@ -1257,6 +1257,7 @@ function editCustomProduct(n){
   toggleCustomPieceField();
   document.querySelector("#foodModal h2").textContent="Eigen product bewerken";
   document.querySelector("#foodModal .primary").textContent="Wijzigingen opslaan";
+  document.getElementById("saveCustomAsNewBtn").classList.remove("hidden");
   document.getElementById("foodModal").classList.remove("hidden");
 }
 
@@ -1272,6 +1273,7 @@ function resetCustomEditor(){
   toggleCustomPieceField();
   document.querySelector("#foodModal h2").textContent="Eigen product";
   document.querySelector("#foodModal .primary").textContent="Opslaan";
+  document.getElementById("saveCustomAsNewBtn")?.classList.add("hidden");
 }
 
 function editRecipe(n){
@@ -1288,6 +1290,7 @@ function editRecipe(n){
   if(!recipeLines.length)recipeLines=[{name:"",amount:100,unit:"g"}];
   document.querySelector("#recipeModal h2").textContent="Recept bewerken";
   document.querySelector("#recipeModal .primary").textContent="Wijzigingen opslaan";
+  document.getElementById("saveRecipeAsNewBtn").classList.remove("hidden");
   document.getElementById("recipeModal").classList.remove("hidden");
   renderRecipeBuilder();
   document.getElementById("recipeServings").oninput=updateRecipePreview;
@@ -1301,6 +1304,7 @@ function resetRecipeEditor(){
   document.getElementById("recipeServings").value=1;
   document.querySelector("#recipeModal h2").textContent="Recept maken";
   document.querySelector("#recipeModal .primary").textContent="Recept opslaan";
+  document.getElementById("saveRecipeAsNewBtn")?.classList.add("hidden");
 }
 
 function saveCustom(){
@@ -1393,6 +1397,27 @@ function renderCustom(){
  </div></div>`).join("")
  :'<p class="muted">Nog geen eigen producten.</p>';
 }
+function saveCustomAsNew(){
+ const sourceName=editingCustomProduct;
+ const enteredName=document.getElementById("newName").value.trim().toLowerCase();
+ const k=+document.getElementById("newKcal").value;
+ if(!sourceName || !data.custom[sourceName]){alert("Open eerst een bestaand eigen product om het als nieuw product op te slaan.");return;}
+ if(!enteredName || !k){alert("Naam en kcal zijn verplicht.");return;}
+ let n=enteredName;
+ if(data.custom[n] || (data.recipes && data.recipes[n])){
+   const proposed=prompt("Deze naam bestaat al. Geef een unieke naam voor het nieuwe product:", n+" (variant)");
+   if(proposed===null)return;
+   n=proposed.trim().toLowerCase();
+   if(!n){alert("Vul een naam in voor het nieuwe product.");return;}
+   if(data.custom[n] || data.recipes[n]){alert("Er bestaat al een product of recept met deze naam. Kies een andere naam.");return;}
+ }
+ const original=data.custom[sourceName];
+ const pieceGrams=Number(document.getElementById("newPieceGrams").value)||0;
+ data.custom[n]={kcal:k,p:+document.getElementById("newP").value||0,c:+document.getElementById("newC").value||0,f:+document.getElementById("newF").value||0,u:document.getElementById("newUnit").value,...(pieceGrams>0?{pieceGrams}:{}),...(original.barcode?{barcode:original.barcode}:{}),...(original.source?{source:original.source}:{}),...(original.brand?{brand:original.brand}:{}),...(original.image?{image:original.image}:{})};
+ save(); closeModal("foodModal"); render();
+ alert("Nieuw product opgeslagen als ‘"+n+"’. Het oorspronkelijke product is ongewijzigd gebleven.");
+}
+
 function deleteCustomProduct(n){
  if(!data.custom[n])return;
  showConfirm(
@@ -1435,6 +1460,25 @@ function selectRecipeProduct(i,name){recipeLines[i].name=name;let p=portionOptio
 function removeRecipeLine(i){recipeLines.splice(i,1);renderRecipeBuilder()}
 function recipeTotals(){let sum={kcal:0,p:0,c:0,f:0};for(const x of recipeLines){let p=product(x.name);if(!p||!x.amount)continue;let v=p[1],f=recipeGrams(x)/100;sum.kcal+=v.kcal*f;sum.p+=v.p*f;sum.c+=v.c*f;sum.f+=v.f*f}return sum}
 function updateRecipePreview(){let el=document.getElementById("recipePreview");if(!el)return;let t=recipeTotals(),s=Math.max(1,+document.getElementById("recipeServings").value||1);el.innerHTML=`Totaal: <b>${Math.round(t.kcal)} kcal</b> • ${Math.round(t.p)} g eiwit. Per portie: <b>${Math.round(t.kcal/s)} kcal</b>`}
+function saveRecipeAsNew(){
+ if(!editingRecipeName || !data.recipes[editingRecipeName]){alert("Open eerst een bestaand recept om het als nieuw recept op te slaan.");return;}
+ for(const x of recipeLines){if(!product(x.name)||!x.amount){alert("Controleer ingrediënt: "+(x.name||"onbekend"));return;}}
+ let n=document.getElementById("recipeName").value.trim().toLowerCase();
+ if(!n){alert("Geef het nieuwe recept een naam.");return;}
+ if(data.recipes[n] || data.custom[n]){
+   const proposed=prompt("Deze naam bestaat al. Geef een unieke naam voor het nieuwe recept:", n+" (variant)");
+   if(proposed===null)return;
+   n=proposed.trim().toLowerCase();
+   if(!n){alert("Vul een naam in voor het nieuwe recept.");return;}
+   if(data.recipes[n] || data.custom[n]){alert("Er bestaat al een recept of product met deze naam. Kies een andere naam.");return;}
+ }
+ document.getElementById("recipeName").value=n;
+ // Clear edit mode so the existing recipe is preserved; saveRecipe creates a separate entry.
+ editingRecipeName=null;
+ document.querySelector("#recipeModal .primary").textContent="Recept opslaan";
+ saveRecipe();
+}
+
 function saveRecipe(){
  let n=document.getElementById("recipeName").value.trim().toLowerCase(),servings=Math.max(1,+document.getElementById("recipeServings").value||1);
  if(!n||!recipeLines.length){alert("Geef een naam en minimaal één ingrediënt.");return}
