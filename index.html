@@ -240,6 +240,9 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 .aiFoodSpinner{width:17px;height:17px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:aiSpin .7s linear infinite}
 @keyframes aiSpin{to{transform:rotate(360deg)}}
 @media(max-width:560px){.aiFoodPanel{padding-left:14px;padding-right:14px}.aiFoodSourceGrid{grid-template-columns:1fr}.aiFoodResultGrid{grid-template-columns:minmax(0,1fr) 105px}.aiFoodFooter{position:sticky;bottom:0;background:var(--card);padding-top:9px}}
+
+/* Keep the weight summary compact on one line above the chart. */
+#weightSummary{font-size:clamp(12px,3.3vw,14px);line-height:1.35;white-space:nowrap;letter-spacing:-.2px;}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -269,7 +272,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.14';
+const APP_VERSION='6.2.15';
 const RELEASE_DATE='7 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
