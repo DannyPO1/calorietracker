@@ -1,4 +1,4 @@
-const CACHE='calorietracker-6.2.16';
+const CACHE='calorietracker-6.2.17';
 const ASSETS=[
   './',
   './index.html',

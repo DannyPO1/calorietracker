@@ -272,8 +272,8 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.16';
-const RELEASE_DATE='7 oktober 2026';
+const APP_VERSION='6.2.17';
+const RELEASE_DATE='10 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
   const a=document.getElementById("appVersion");
@@ -508,7 +508,7 @@ function updateRecipeLineCalorie(i){
   </div>
   <label>Gewichtsverlies per week</label><select id="rate"><option value="0.25">0,25 kg/week</option><option value="0.5">0,5 kg/week</option><option value="0.75">0,75 kg/week</option><option value="1">1,0 kg/week</option></select>
   <div class="actions"><button class="primary" onclick="saveProfile()">Bereken mijn doel</button></div><div id="goalExplanation" class="notice"></div>
- </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt je geregistreerde voedingsgegevens niet naar een server. Bij een barcode-scan wordt alleen de barcode naar Open Food Facts gestuurd om productgegevens op te halen. Bij de optionele AI-fotoscan wordt de gekozen foto eenmalig naar Google Gemini gestuurd voor analyse; de foto wordt niet door CalorieTracker opgeslagen. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
+ </div><div class="card"><h2>Opslag & privacy</h2><p class="muted">Je voedingsgegevens staan in lokale browseropslag. De app verstuurt je geregistreerde voedingsgegevens niet naar een server. Bij een barcode-scan wordt alleen de barcode naar Open Food Facts gestuurd om productgegevens op te halen. Bij de optionele AI-fotoscan wordt de gekozen foto eenmalig naar Gemini of Gemma via OpenRouter gestuurd, afhankelijk van welke provider de analyse uitvoert; de foto wordt niet door CalorieTracker opgeslagen. De programmabestanden kunnen daarnaast door Safari via een service-worker-cache worden bewaard; die cache bevat geen voedingsregistraties.</p><div id="storageDiagnostics" class="notice">Opslag controleren…</div><div class="actions"><button class="secondary" onclick="exportData()">Back-up huidige gegevens</button><button class="secondary" onclick="exportMigrationData()">Migratie-back-up maken</button><button class="secondary" onclick="exportStorageSnapshot()">Volledige opslag-back-up</button><button class="ghost" onclick="document.getElementById('importFile').click()">Back-up / migratie importeren</button><button class="ghost" onclick="inspectStorage()">Opslag opnieuw controleren</button><button class="ghost" onclick="clearAppCaches()">Oude app-cache opruimen</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></div><div class="notice" style="margin-top:10px"><b>Gegevens migreren tussen Safari en de opgeslagen app</b><br><span id="storageContext">Opslagcontext controleren…</span><br><span class="tiny">Gebruik <b>Migratie-back-up maken</b> in de omgeving waar je gegevens staan en importeer het bestand daarna in de andere omgeving. De importeerfunctie kan gegevens veilig samenvoegen zonder bestaande dagen te overschrijven.</span></div><div id="storageActionStatus" class="tiny" style="margin-top:8px"></div></div></section>
 </main>
 
 <nav class="tabs"><button class="active" onclick="tab('today',this)">Vandaag</button><button onclick="tab('history',this)">Voortgang</button><button onclick="tab('food',this)">Voeding</button><button onclick="tab('settings',this)">Instellingen</button></nav>
@@ -521,7 +521,7 @@ function updateRecipeLineCalorie(i){
    <div><div class="sectionKicker">AI VOEDINGSSCAN</div><h2 id="aiFoodTitle">Voeding herkennen met een foto</h2><p class="muted" style="margin:0">Maak een foto van je maaltijd en controleer daarna zelf wat er wordt geregistreerd.</p></div>
    <button class="ghost closeCircle" type="button" onclick="closeAIFoodModal()" aria-label="Sluiten">×</button>
   </div>
-  <div class="aiFoodPrivacy"><b>Privacy:</b> de foto wordt eenmalig naar Google Gemini gestuurd voor analyse. CalorieTracker slaat de foto niet op. Je bevestigt altijd zelf welke producten en hoeveelheden worden geregistreerd.</div>
+  <div class="aiFoodPrivacy"><b>Privacy:</b> de foto wordt eenmalig naar de AI-provider gestuurd die de analyse uitvoert (Gemini of Gemma via OpenRouter). CalorieTracker slaat de foto niet op. Je bevestigt altijd zelf welke producten en hoeveelheden worden geregistreerd.</div>
   <div class="aiFoodSourceGrid">
    <button class="primary aiFoodSource" type="button" onclick="document.getElementById('aiPhotoInput').click()">📷 Foto toevoegen</button>
   </div>
@@ -969,8 +969,35 @@ function renderBarcodeProduct(result){
   const v=result.value||{};
   const image=v.image?`<img src="${esc(v.image)}" alt="" onerror="this.style.display='none'">`:'<div class="barcodeNoImage">🥗</div>';
   const title=result.existing?'Product al opgeslagen':'Product gevonden';
-  document.getElementById('barcodeResult').innerHTML=`<div class="card" style="margin:0;padding:14px;background:var(--cream)"><div class="barcodeProductCard">${image}<div><div class="sectionKicker">${title}</div><b>${esc(result.name)}</b><div class="barcodeMeta">${v.brand?esc(v.brand)+' · ':''}${v.kcal} kcal / 100 ${v.u} · ${v.p} g eiwit · ${v.c} g koolhydraten · ${v.f} g vet<br>EAN ${esc(result.barcode)}</div></div></div><div class="barcodeActions" style="margin-top:12px">${result.existing?'<button class="primary" type="button" onclick="useScannedExistingProduct()">Gebruik product</button><button class="ghost" type="button" onclick="closeBarcodeScanner()">Klaar</button>':'<button class="primary" type="button" onclick="saveScannedProductAndUse()">Opslaan & gebruiken</button><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Gegevens aanpassen</button>'}</div></div>`;
+  document.getElementById('barcodeResult').innerHTML=`<div class="card" style="margin:0;padding:14px;background:var(--cream)"><div class="barcodeProductCard">${image}<div><div class="sectionKicker">${title}</div><b>${esc(result.name)}</b><div class="barcodeMeta">${v.brand?esc(v.brand)+' · ':''}${v.kcal} kcal / 100 ${v.u} · ${v.p} g eiwit · ${v.c} g koolhydraten · ${v.f} g vet<br>EAN ${esc(result.barcode)}</div></div></div><div class="barcodeActions" style="margin-top:12px">${Number.isInteger(aiBarcodeLookupIndex)?'<button class="primary" type="button" onclick="useScannedProductForAI()">Koppel aan AI-resultaat</button><button class="ghost" type="button" onclick="closeBarcodeScanner()">Terug naar analyse</button>':(result.existing?'<button class="primary" type="button" onclick="useScannedExistingProduct()">Gebruik product</button><button class="ghost" type="button" onclick="closeBarcodeScanner()">Klaar</button>':'<button class="primary" type="button" onclick="saveScannedProductAndUse()">Opslaan & gebruiken</button><button class="secondary" type="button" onclick="openNewProductFromBarcode()">Gegevens aanpassen</button>')}</div></div>`;
 }
+function openAIBarcodeLookup(index){
+  if(!aiDetectedItems[index])return;
+  aiBarcodeLookupIndex=index;
+  aiPendingNewProductIndex=index;
+  document.getElementById('aiFoodModal')?.classList.add('hidden');
+  openBarcodeScanner();
+  setBarcodeStatus('Scan de barcode of voer het EAN-nummer handmatig in. Na het koppelen keer je terug naar de AI-analyse.');
+}
+function useScannedProductForAI(){
+  if(!scannedBarcodeProduct || !Number.isInteger(aiBarcodeLookupIndex))return;
+  const index=aiBarcodeLookupIndex, r=scannedBarcodeProduct;
+  let name=String(r.name||'').toLowerCase().trim();
+  if(!r.existing){
+    if(data.custom[name] && String(data.custom[name].barcode||'')!==String(r.barcode)) name=(r.value.brand?`${r.value.brand} ${r.name}`:`${r.name} ${r.barcode}`).toLowerCase().trim();
+    data.custom[name]={...r.value};
+    save(); render(); renderFood();
+  }else name=r.name;
+  const item=aiDetectedItems[index];
+  if(item){item.productName=name;item.productInput=name;item.selected=true;aiRememberMapping(item.name,name);}
+  aiBarcodeLookupIndex=null;
+  aiPendingNewProductIndex=null;
+  closeBarcodeScanner();
+  document.getElementById('aiFoodModal')?.classList.remove('hidden');
+  renderAIFoodResults(false);
+  document.getElementById('aiFoodStatus').innerHTML=`<div class="notice success"><b>Product gekoppeld.</b> ${esc(name)} is opgehaald uit je database of Open Food Facts. Je eerdere AI-analyse is behouden.</div>`;
+}
+
 function useScannedExistingProduct(){
   if(!scannedBarcodeProduct)return;
   closeBarcodeScanner();
@@ -1014,6 +1041,11 @@ function openNewProductFromBarcode(){
 async function closeBarcodeScanner(){
   if(barcodeScanner){try{await barcodeScanner.stop();barcodeScanner.clear();}catch(e){} barcodeScanner=null;}
   document.getElementById('barcodeModal').classList.add('hidden');
+  if(Number.isInteger(aiBarcodeLookupIndex)){
+    aiBarcodeLookupIndex=null;
+    document.getElementById('aiFoodModal')?.classList.remove('hidden');
+    renderAIFoodResults(false);
+  }
 }
 
 function getPieceWeight(productName){
@@ -1910,7 +1942,13 @@ function closeRecipeModal(){
 }
 function closeModal(id){
  document.getElementById(id).classList.add("hidden");
- if(id==="foodModal")resetCustomEditor();
+ if(id==="foodModal"){
+   resetCustomEditor();
+   if(Number.isInteger(aiPendingNewProductIndex) && aiDetectedItems[aiPendingNewProductIndex]){
+     document.getElementById('aiFoodModal')?.classList.remove('hidden');
+     renderAIFoodResults(false);
+   }
+ }
  if(id==="recipeModal")resetRecipeEditor();
 }
 /* CalorieTracker 4.4.2 — portion system */
@@ -2157,6 +2195,8 @@ let aiPreviewUrl=null;
 let aiBusy=false;
 let aiLastFile=null;
 let aiPendingNewProductIndex=null;
+let aiModelSource='';
+let aiBarcodeLookupIndex=null;
 
 function openAIFoodModal(){
   const modal=document.getElementById('aiFoodModal');
@@ -2173,6 +2213,8 @@ function openAIFoodModal(){
   aiBusy=false;
   aiLastFile=null;
   aiPendingNewProductIndex=null;
+  aiModelSource='';
+  aiBarcodeLookupIndex=null;
   if(aiPreviewUrl){URL.revokeObjectURL(aiPreviewUrl);aiPreviewUrl=null;}
 }
 
@@ -2424,7 +2466,7 @@ function renderAIFoodResults(focusFirst=true){
     const confidence=Number.isFinite(conf)?`<span class="aiFoodConfidence">AI ${Math.round(conf*100)}%</span>`:'';
     const selected=item.selected!==false;
     const status=n?`<span class="aiFoodMatched">✓ ${esc(item.productName)} gekoppeld</span>`:`<span class="aiFoodUnmatched">⚠ Nog te koppelen</span>`;
-    const action=n?'':`<div class="actions" style="margin-top:8px"><button type="button" class="secondary" onclick="aiLinkCurrentProduct(${i})">Koppelen</button><button type="button" class="ghost" onclick="openAIProductCreator(${i})">＋ Nieuw product</button></div>`;
+    const action=n?'':`<div class="actions" style="margin-top:8px"><button type="button" class="secondary" onclick="aiLinkCurrentProduct(${i})">Koppelen</button><button type="button" class="secondary" onclick="openAIBarcodeLookup(${i})">▦ Barcode zoeken</button><button type="button" class="ghost" onclick="openAIProductCreator(${i})">＋ Zelf product toevoegen</button></div>`;
     return `<div class="aiFoodResult ${selected?'':'aiFoodResultMuted'}">
       <div class="aiFoodResultTop"><label style="display:flex;align-items:center;gap:8px;margin:0;flex:1"><input type="checkbox" ${selected?'checked':''} onchange="aiToggleSelected(${i},this.checked)" style="width:20px;height:20px"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}</label><button class="iconAction dangerIcon aiFoodResultRemove" type="button" title="Product verwijderen" aria-label="Product verwijderen" onclick="aiRemoveItem(${i})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button></div>
       <div class="aiFoodResultGrid">
@@ -2512,6 +2554,7 @@ async function analyzeAIFoodFile(file){
       throw err;
     }
     const items=Array.isArray(payload?.items)?payload.items:[];
+    aiModelSource=String(payload?.model||'').toLowerCase().includes('gemma')?'Gemma via OpenRouter':'Gemini';
     aiDetectedItems=items.map(x=>({
       name:String(x.name||'Voedingsmiddel'),
       grams:Math.max(1,Number(x.grams)||100),
@@ -2524,10 +2567,10 @@ async function analyzeAIFoodFile(file){
       quantity:Math.max(1,Number(x.grams)||100),
       gramsPerPiece:(()=>{const p=aiPieceInfo(aiBestProduct(String(x.name||''))||'');return p?p.gramsPerPiece:null})()
     }));
-    if(!aiDetectedItems.length)throw new Error('Gemini kon geen duidelijke voedingsmiddelen in de foto herkennen.');
+    if(!aiDetectedItems.length)throw new Error('De AI kon geen duidelijke voedingsmiddelen in de foto herkennen.');
     const currentMeal=document.getElementById('mealType')?.value;
     if(currentMeal)document.getElementById('aiMealType').value=currentMeal;
-    document.getElementById('aiFoodStatus').innerHTML='<div class="notice success"><b>Analyse klaar.</b> Controleer de herkenning en gewichten. De AI-voedingswaarden worden niet gebruikt.</div>';
+    document.getElementById('aiFoodStatus').innerHTML=`<div class="notice success"><b>Analyse klaar.</b> Resultaat van <b>${esc(aiModelSource||'AI-model')}</b>. Controleer de herkenning en gewichten. De AI-voedingswaarden worden niet gebruikt.</div>`;
     renderAIFoodResults();
   }catch(error){
     console.error('AI food analysis failed',error);
@@ -2536,15 +2579,15 @@ async function analyzeAIFoodFile(file){
     let message=error?.message||'Onbekende fout.';
     if(code==='CONFIG_MISSING'){title='AI-fotoscan niet geconfigureerd.';message='De AI-fotoscan is niet correct geconfigureerd. Controleer de Vercel Production-configuratie.';}
     else if(code==='GEMINI_AUTH'){title='AI-configuratie geweigerd.';message='De AI-service accepteert de ingestelde API-sleutel niet. Controleer de Gemini API-key in Vercel.';}
-    else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='Gemini is tijdelijk overbelast of niet bereikbaar. Probeer het met dezelfde foto opnieuw.';}
-    else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De Gemini-capaciteit is tijdelijk bereikt. Probeer het met dezelfde foto later opnieuw.';}
-    else if(code==='GEMINI_BAD_REQUEST'){title='Foto kon niet worden verwerkt.';message='Gemini kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.';}
+    else if(code==='GEMINI_UNAVAILABLE'){title='AI tijdelijk niet beschikbaar.';message='De AI-diensten zijn tijdelijk overbelast of niet bereikbaar. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='GEMINI_QUOTA'){title='AI-capaciteit tijdelijk bereikt.';message='De beschikbare AI-capaciteit is tijdelijk bereikt. Probeer het met dezelfde foto later opnieuw.';}
+    else if(code==='GEMINI_BAD_REQUEST'){title='Foto kon niet worden verwerkt.';message='De AI-dienst kon deze foto-aanvraag niet verwerken. Probeer eventueel een andere of duidelijkere foto.';}
     else if(code==='CLIENT_TIMEOUT'){title='AI reageert te langzaam.';message='De foto is goed ontvangen, maar de AI reageerde niet op tijd. Probeer het met dezelfde foto opnieuw.';}
     else if(code==='NETWORK_ERROR'){title='Verbinding met AI mislukt.';message='De verbinding met de AI-service werd onderbroken. Probeer het met dezelfde foto opnieuw.';}
     else if(code==='IMAGE_TOO_LARGE'){title='Foto is te groot.';}
     else if(code==='INVALID_IMAGE_TYPE'){title='Ongeldig fotoformaat.';}
-    else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='Gemini heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
-    else if(code==='INVALID_AI_OUTPUT'){title='Ongeldig AI-resultaat.';message='Gemini heeft een onbruikbaar resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='NO_AI_OUTPUT'){title='Geen AI-resultaat ontvangen.';message='De AI-dienst heeft geen bruikbaar analyse-resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
+    else if(code==='INVALID_AI_OUTPUT'){title='Ongeldig AI-resultaat.';message='De AI-dienst heeft een onbruikbaar resultaat teruggegeven. Probeer het met dezelfde foto opnieuw.';}
     else if(!navigator.onLine){title='Geen internetverbinding.';message='Controleer je internetverbinding en probeer het met dezelfde foto opnieuw.';}
     const ref=error?.requestId?`<span class="tiny">Referentie: ${esc(error.requestId)}</span>`:'';
     const retry=aiLastFile?'<button class="secondary aiFoodRetry" type="button" onclick="retryAIFood()">↻ Opnieuw proberen met deze foto</button>':'';
