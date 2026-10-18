@@ -272,7 +272,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.19';
+const APP_VERSION='6.2.20';
 const RELEASE_DATE='18 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -2256,12 +2256,14 @@ function aiTokenScore(query,key){
   const q=aiNormalize(query),k=aiNormalize(key);
   if(!q||!k)return 0;
   if(q===k)return 1000;
-  if(k.includes(q))return 800-q.length;
-  if(q.includes(k))return 700-k.length;
-  const qt=q.split(/\s+/).filter(Boolean),kt=k.split(/\s+/).filter(Boolean);
-  let score=0;
-  qt.forEach(t=>{if(kt.includes(t))score+=100;else if(kt.some(x=>x.includes(t)||t.includes(x)))score+=45;});
-  return score;
+  if(k.startsWith(q+' ') || k.endsWith(' '+q) || k.includes(' '+q+' '))return 700-q.length;
+  if(q.startsWith(k+' ') || q.endsWith(' '+k) || q.includes(' '+k+' '))return 650-k.length;
+  const qt=q.split(/\s+/).filter(t=>t.length>=3),kt=k.split(/\s+/).filter(t=>t.length>=3);
+  let score=0,matched=0;
+  qt.forEach(t=>{if(kt.includes(t)){score+=100;matched++;}});
+  // Do not match unrelated foods through accidental substrings (e.g. aardappel/appel).
+  if(!matched)return 0;
+  return score + (matched===qt.length?20:0);
 }
 const AI_PRODUCT_ALIASES={
   'kipfilet':'kipfilet','chicken breast':'kipfilet','chicken':'kipfilet',
@@ -2283,8 +2285,33 @@ function aiFindProducts(name){
   const n=aiNormalize(name);
   const keys=Object.keys(allProducts());
   const alias=AI_PRODUCT_ALIASES[n];
-  if(alias && allProducts()[alias]) return [alias,...keys.filter(k=>k!==alias).sort((a,b)=>aiTokenScore(n,b)-aiTokenScore(n,a)).slice(0,5)];
-  return keys.map(k=>({k,score:aiTokenScore(name,k)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl')).slice(0,8).map(x=>x.k);
+  const ranked=keys.map(k=>({k,score:aiTokenScore(name,k)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl')).map(x=>x.k);
+  if(alias && allProducts()[alias]) return [alias,...ranked.filter(k=>k!==alias)].slice(0,8);
+  return ranked.slice(0,8);
+}
+function aiSearchDatabase(index){
+  const item=aiDetectedItems[index]; if(!item)return;
+  const input=document.getElementById(`aiProductInput${index}`);
+  const query=String(input?.value||item.productInput||item.name||'').trim();
+  item.productInput=query;
+  const q=aiNormalize(query);
+  if(!q){item.databaseSearchResults=[];renderAIFoodResults(false);return;}
+  const products=Object.keys(allProducts());
+  const exact=products.filter(k=>aiNormalize(k)===q);
+  const starts=products.filter(k=>aiNormalize(k).startsWith(q)&&!exact.includes(k));
+  const contains=products.filter(k=>!exact.includes(k)&&!starts.includes(k)&&aiNormalize(k).includes(q));
+  const scored=products.map(k=>({k,score:aiTokenScore(query,k)})).filter(x=>x.score>0&&!exact.includes(x.k)&&!starts.includes(x.k)&&!contains.includes(x.k)).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl')).map(x=>x.k);
+  item.databaseSearchResults=[...exact,...starts,...contains,...scored].slice(0,12);
+  item.databaseSearchQuery=query;
+  renderAIFoodResults(false);
+}
+function aiChooseDatabaseProduct(index,productName){
+  const item=aiDetectedItems[index]; if(!item||!allProducts()[productName])return;
+  item.productName=productName; item.productInput=productName; item.databaseSearchResults=[]; item.databaseSearchQuery=''; item.selected=true;
+  const piece=aiPieceInfo(productName);
+  if(piece && item.quantityMode==='stuks'){item.gramsPerPiece=piece.gramsPerPiece;item.grams=Math.max(.1,Number(item.quantity)||1)*item.gramsPerPiece;}
+  aiRememberMapping(item.name,productName);
+  renderAIFoodResults(false);
 }
 function aiBestProduct(name){
   const n=aiNormalize(name);
@@ -2489,7 +2516,7 @@ function renderAIFoodResults(focusFirst=true){
     return `<div class="aiFoodResult ${selected?'':'aiFoodResultMuted'}">
       <div class="aiFoodResultTop"><label style="display:flex;align-items:center;gap:8px;margin:0;flex:1"><input type="checkbox" ${selected?'checked':''} onchange="aiToggleSelected(${i},this.checked)" style="width:20px;height:20px"><b>${esc(item.name||'Voedingsmiddel')}</b>${confidence}</label><button class="iconAction dangerIcon aiFoodResultRemove" type="button" title="Product verwijderen" aria-label="Product verwijderen" onclick="aiRemoveItem(${i})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button></div>
       <div class="aiFoodResultGrid">
-       <div><label>Productnaam / databasekoppeling</label><input id="aiProductInput${i}" list="aiProductsList" value="${esc(item.productName||item.productInput||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Bijv. kipfilet"></div>
+       <div><label>Productnaam / databasekoppeling</label><div class="grid" style="grid-template-columns:minmax(0,1fr) auto;gap:6px"><input id="aiProductInput${i}" list="aiProductsList" value="${esc(item.productName||item.productInput||item.name||'')}" onchange="aiSetName(${i},this.value)" placeholder="Zoek bijvoorbeeld gebakken aardappelen"><button type="button" class="secondary" onmousedown="event.preventDefault()" onclick="aiSearchDatabase(${i})" style="white-space:nowrap;padding:10px 12px">Zoeken</button></div>${Array.isArray(item.databaseSearchResults)?`<div class="aiDatabaseSearchResults" style="display:grid;gap:6px;margin-top:8px">${item.databaseSearchResults.length?item.databaseSearchResults.map(k=>`<button type="button" class="secondary" style="text-align:left;white-space:normal" onclick="aiChooseDatabaseProduct(${i},${JSON.stringify(k).replace(/&/g,'&amp;').replace(/</g,'&lt;')})">${esc(k)}${allProducts()[k]?` <span class="tiny">· ${Math.round(Number(allProducts()[k].kcal)||0)} kcal / 100 g</span>`:''}</button>`).join(''):'<div class="tiny">Geen passende producten gevonden. Probeer een andere zoekterm.</div>'}</div>`:''}</div>
        <div><label>Hoeveelheid</label>${(()=>{const piece=aiPieceInfo(item.productName);const mode=item.quantityMode==='stuks'&&piece?'stuks':'g';if(mode==='stuks'){item.gramsPerPiece=Math.max(.1,Number(item.gramsPerPiece)||piece.gramsPerPiece);item.quantity=Math.max(.1,Number(item.quantity)||1);item.grams=item.quantity*item.gramsPerPiece;}else{item.quantity=Math.max(1,Number(item.grams)||1);}return `<div class="grid" style="gap:8px"><input type="number" min="0.1" max="3000" step="${mode==='stuks'?'0.5':'1'}" value="${mode==='stuks'?Math.round(item.quantity*10)/10:Math.round(item.grams)}" onchange="${mode==='stuks'?`aiSetPieceQuantity(${i},this.value)`:`aiSetGrams(${i},this.value)`}"><select onchange="aiSetQuantityMode(${i},this.value)" ${piece?'':'disabled'}><option value="g" ${mode==='g'?'selected':''}>gram</option>${piece?`<option value="stuks" ${mode==='stuks'?'selected':''}>stuks</option>`:''}</select></div>${piece?`<div class="tiny" style="margin-top:6px">1 stuk = <input type="number" min="0.1" step="0.1" value="${Math.round(item.gramsPerPiece*10)/10}" onchange="aiSetGramsPerPiece(${i},this.value)" style="display:inline-block;width:92px;padding:5px 8px;margin:0 3px"> g</div>`:''}`})()}</div>
       </div>
       <div class="aiFoodMatch">${status}</div>
