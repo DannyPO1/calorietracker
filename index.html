@@ -253,12 +253,9 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 .foodTile:active{transform:scale(.985)}
 .foodTile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .foodTileArt{height:112px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--accent-soft)}
-.foodTile:nth-child(2) .foodTileArt{background:var(--cream)}
-.foodTile:nth-child(3) .foodTileArt{background:color-mix(in srgb,var(--accent-soft) 60%,var(--card))}
-.foodTile:nth-child(4) .foodTileArt{background:color-mix(in srgb,var(--accent) 10%,var(--card))}
 .foodTileArt img{width:100%;height:100%;object-fit:contain;display:block}
-.foodTileTitle{font-size:15px;font-weight:750;line-height:1.25;margin-top:3px}
-.foodTileSub{font-size:12px;line-height:1.35;color:var(--muted);min-height:30px}
+.foodTileTitle{font-size:clamp(13px,3.8vw,15px);font-weight:750;line-height:1.25;margin-top:3px;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.foodTileSub{font-size:12px;line-height:1.35;color:var(--muted);min-height:30px;overflow-wrap:anywhere}
 .foodSectionHeader{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:4px 0 14px}
 .foodSectionHeader h2{margin:0}
 @media(min-width:560px){.foodTileGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.foodTile{padding:14px}.foodTileArt{height:150px}}
@@ -292,7 +289,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.3.0';
+const APP_VERSION='6.3.1';
 const RELEASE_DATE='18 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
