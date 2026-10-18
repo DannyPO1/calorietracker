@@ -10,7 +10,7 @@ const ALLOWED_ORIGINS = new Set([
 const RESPONSE_SCHEMA = {
   type: 'object', properties: { items: { type: 'array', items: { type: 'object',
     properties: {
-      name: { type: 'string', description: 'Concrete Dutch name of one clearly visible food or drink.' },
+      name: { type: 'string', description: 'Concrete Dutch name of one individual, clearly visible food ingredient or drink; split visible mixed dishes into separate ingredients.' },
       grams: { type: 'number', description: 'Estimated edible weight in grams or milliliters, based only on visible size.' },
       confidence: { type: 'number', description: 'Confidence from 0 to 1.' },
       notes: { type: 'string', description: 'Short Dutch note about uncertainty or estimated amount.' }
@@ -71,6 +71,11 @@ export default async function handler(req,res) {
       'Wees conservatief: gebruik oppervlak, textuur, kleur en context; herken voedsel niet alleen aan een ronde of platte vorm.',
       'Noem iets alleen hamburger of broodje als duidelijke kenmerken zichtbaar zijn. Een ronde koek, pannenkoek of omelet is niet automatisch een hamburger.',
       'Maak een lijst van afzonderlijke, duidelijk zichtbare voedingsmiddelen of dranken met concrete Nederlandse productnamen.',
+      'BELANGRIJK: geef ingrediënten afzonderlijk terug, niet als één gecombineerde salade, mix of gerecht wanneer de onderdelen zichtbaar zijn.',
+      'Voorbeeld: een salade waarin tomaat, komkommer en rode ui zichtbaar zijn, wordt drie aparte items: tomaat, komkommer en rode ui, elk met een eigen geschat eetbaar gewicht.',
+      'Splits ook andere zichtbare combinaties, zoals sla met tomaat, komkommer en dressing, in aparte items per zichtbaar ingrediënt. Geef dressing apart terug als die zichtbaar is of duidelijk herkenbaar is.',
+      'Noem niet óók het samengestelde gerecht als extra item wanneer je de zichtbare ingrediënten al afzonderlijk hebt vermeld; voorkom zo dubbeltelling.',
+      'Als een onderdeel niet betrouwbaar herkenbaar is, raad het niet; laat het weg of vermeld de onzekerheid in notes.',
       'Schat per item het eetbare gewicht in gram; voor vloeistoffen mag milliliter als gram worden benaderd. Gebruik geen standaard 100 g als het gewicht onzeker is.',
       'Splits een gerecht in zichtbare onderdelen als dat redelijk kan. Neem geen bord, bestek, verpakking of decoratie op.',
       'Verzin geen verborgen ingrediënten. Geef geen calorieën of macro’s; de app haalt voedingswaarden uit de database.',
