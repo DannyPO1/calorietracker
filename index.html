@@ -247,6 +247,22 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 .dailyTotalsList{max-height:none}
 #customProductSearch,#historyFrom,#historyTo{margin-bottom:2px}
 #customProductCount,#historyCount{color:var(--muted)}
+
+.foodTileGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.foodTile{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:18px;padding:10px;text-align:left;min-width:0;display:flex;flex-direction:column;gap:5px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s ease,border-color .15s ease}
+.foodTile:active{transform:scale(.985)}
+.foodTile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.foodTileArt{height:112px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--accent-soft)}
+.foodTile:nth-child(2) .foodTileArt{background:var(--cream)}
+.foodTile:nth-child(3) .foodTileArt{background:color-mix(in srgb,var(--accent-soft) 60%,var(--card))}
+.foodTile:nth-child(4) .foodTileArt{background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.foodTileArt img{width:100%;height:100%;object-fit:contain;display:block}
+.foodTileTitle{font-size:15px;font-weight:750;line-height:1.25;margin-top:3px}
+.foodTileSub{font-size:12px;line-height:1.35;color:var(--muted);min-height:30px}
+.foodSectionHeader{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:4px 0 14px}
+.foodSectionHeader h2{margin:0}
+@media(min-width:560px){.foodTileGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.foodTile{padding:14px}.foodTileArt{height:150px}}
+@media(prefers-reduced-motion:reduce){.foodTile{transition:none}}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -276,7 +292,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.22';
+const APP_VERSION='6.3.0';
 const RELEASE_DATE='18 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -479,26 +495,49 @@ function updateRecipeLineCalorie(i){
 </section>
 
 <section id="food" class="hidden">
- <div class="card">
-  <div class="row between"><div><h2>Voedingsdatabase</h2><p class="muted">Zoek een standaardproduct. Tik op een resultaat om de productgegevens te bekijken en het stukgewicht in te stellen of aan te passen.</p></div></div>
-  <input id="standardProductSearch" placeholder="Zoek in de voedingsdatabase…" oninput="renderStandardProducts()" autocomplete="off">
-  <div id="standardProductList" style="margin-top:10px"></div>
- </div>
- <div class="card">
-  <div class="row between"><div><h2>Eigen producten</h2><p class="muted">Producten die je zelf hebt toegevoegd en kunt gebruiken bij Vandaag en in recepten.</p></div>
-   <button class="primary" onclick="openNewProduct()">Toevoegen</button>
+ <div id="foodHome">
+  <div class="card">
+   <h2>Voeding</h2>
+   <p class="muted">Wat wil je beheren?</p>
+   <div class="foodTileGrid">
+    <button class="foodTile" type="button" onclick="openFoodSection('recipes')">
+     <span class="foodTileArt"><img src="./tile-eigen-recepten.png" alt=""></span>
+     <span class="foodTileTitle">Eigen recepten</span><span class="foodTileSub">Recepten bekijken en beheren</span>
+    </button>
+    <button class="foodTile" type="button" onclick="openFoodSection('custom')">
+     <span class="foodTileArt"><img src="./tile-eigen-producten.png" alt=""></span>
+     <span class="foodTileTitle">Eigen producten</span><span class="foodTileSub">Zoeken en bewerken</span>
+    </button>
+    <button class="foodTile" type="button" onclick="openFoodSection('standard')">
+     <span class="foodTileArt"><img src="./tile-standaardproducten.png" alt=""></span>
+     <span class="foodTileTitle">Standaardproducten</span><span class="foodTileSub">Voedingsdatabase doorzoeken</span>
+    </button>
+    <button class="foodTile" type="button" onclick="openFoodSection('barcode')">
+     <span class="foodTileArt"><img src="./tile-barcode-scannen.png" alt=""></span>
+     <span class="foodTileTitle">Barcode scannen</span><span class="foodTileSub">Product snel opzoeken</span>
+    </button>
+   </div>
   </div>
-  <label for="customProductSearch">Zoek in eigen producten</label>
-  <input id="customProductSearch" type="search" placeholder="Zoek op productnaam…" oninput="renderCustom(true)" autocomplete="off">
-  <p id="customProductCount" class="tiny" style="margin:8px 0 0"></p>
-  <div id="customList"></div>
-  <div class="actions"><button id="customShowMore" class="secondary hidden" type="button" onclick="showMoreCustomProducts()">Toon meer producten</button></div>
  </div>
- <div class="card">
-  <div class="row between"><div><h2>Eigen recepten</h2><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div>
-   <button class="primary" onclick="openNewRecipe()">Toevoegen</button>
+ <div id="foodSectionRecipes" class="hidden">
+  <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen recepten</h2></div>
+  <div class="card"><div class="row between"><div><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div><button class="primary" onclick="openNewRecipe()">Toevoegen</button></div><div id="recipeList"></div></div>
+ </div>
+ <div id="foodSectionCustom" class="hidden">
+  <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen producten</h2></div>
+  <div class="card"><div class="row between"><div><p class="muted">Producten die je zelf hebt toegevoegd en kunt gebruiken bij Vandaag en in recepten.</p></div><button class="primary" onclick="openNewProduct()">Toevoegen</button></div>
+   <label for="customProductSearch">Zoek in eigen producten</label><input id="customProductSearch" type="search" placeholder="Zoek op productnaam…" oninput="renderCustom(true)" autocomplete="off">
+   <p id="customProductCount" class="tiny" style="margin:8px 0 0"></p><div id="customList"></div>
+   <div class="actions"><button id="customShowMore" class="secondary hidden" type="button" onclick="showMoreCustomProducts()">Toon meer producten</button></div>
   </div>
-  <div id="recipeList"></div>
+ </div>
+ <div id="foodSectionStandard" class="hidden">
+  <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Standaardproducten</h2></div>
+  <div class="card"><p class="muted">Zoek een standaardproduct. Tik op een resultaat om de productgegevens te bekijken en het stukgewicht in te stellen of aan te passen.</p><input id="standardProductSearch" placeholder="Zoek in de voedingsdatabase…" oninput="renderStandardProducts()" autocomplete="off"><div id="standardProductList" style="margin-top:10px"></div></div>
+ </div>
+ <div id="foodSectionBarcode" class="hidden">
+  <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Barcode scannen</h2></div>
+  <div class="card"><p class="muted">Scan de barcode van een product om het op te zoeken.</p><button class="primary" type="button" onclick="openBarcodeScanner()">Barcode scanner openen</button></div>
  </div>
 </section>
 
@@ -1295,18 +1334,32 @@ function saveProfile(){
  if(!vals.age||!vals.height||!vals.weight||!vals.goalWeight){alert("Vul leeftijd, lengte, gewicht en streefgewicht in.");return}
  data.profile=vals;data.weights=data.weights.filter(x=>x.date!==today());data.weights.push({date:today(),weight:vals.weight});save();render();alert("Doel berekend en profiel opgeslagen.")
 }
+function openFoodSection(name){
+ document.getElementById("foodHome").classList.add("hidden");
+ ["Recipes","Custom","Standard","Barcode"].forEach(x=>document.getElementById("foodSection"+x).classList.add("hidden"));
+ const target={recipes:"Recipes",custom:"Custom",standard:"Standard",barcode:"Barcode"}[name];
+ if(target)document.getElementById("foodSection"+target).classList.remove("hidden");
+ if(name==="recipes")renderRecipes();
+ if(name==="custom")renderCustom(true);
+ if(name==="standard")renderStandardProducts();
+ if(name==="barcode")openBarcodeScanner();
+}
+function closeFoodSection(){
+ ["Recipes","Custom","Standard","Barcode"].forEach(x=>document.getElementById("foodSection"+x).classList.add("hidden"));
+ document.getElementById("foodHome").classList.remove("hidden");
+}
 function renderFood(){
- renderStandardProducts();
- renderCustom();
- renderRecipes();
+ closeFoodSection();
 }
 function openNewProduct(){
  pendingBarcodeForCustom=null;
  tab("food",document.querySelectorAll(".tabs button")[2]);
+ closeFoodSection();
  setTimeout(()=>openModal("foodModal"),0);
 }
 function openNewRecipe(){
  tab("food",document.querySelectorAll(".tabs button")[2]);
+ closeFoodSection();
  setTimeout(()=>openModal("recipeModal"),0);
 }
 function renderSettings(){

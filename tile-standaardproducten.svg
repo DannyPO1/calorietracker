@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320">
+<defs>
+ <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F8FCF5"/><stop offset="1" stop-color="#DCEBDD"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#102D20" flood-opacity=".17"/></filter>
+</defs>
+<g filter="url(#shadow)" transform="translate(68 26)">
+ <rect x="32" y="15" width="270" height="231" rx="24" fill="url(#panel)" stroke="#7FB38B" stroke-width="5"/>
+ <rect x="55" y="38" width="224" height="45" rx="14" fill="#E4EFE1" stroke="#B9D5BA" stroke-width="3"/>
+ <circle cx="76" cy="60" r="9" fill="none" stroke="#4E8D5D" stroke-width="4"/>
+ <path d="M83 67l10 10" stroke="#4E8D5D" stroke-width="4" stroke-linecap="round"/>
+ <path d="M110 60h145" stroke="#8BAF8F" stroke-width="5" stroke-linecap="round"/>
+ <g transform="translate(57 105)">
+  <rect width="62" height="104" rx="13" fill="#DDE9F5" stroke="#789DBB" stroke-width="3"/>
+  <rect x="11" y="13" width="40" height="8" rx="4" fill="#789DBB"/>
+  <path d="M14 70q17-35 34 0q-16 24-34 0" fill="#5B9C69"/>
+  <circle cx="31" cy="54" r="10" fill="#E5B95F"/>
+ </g>
+ <g transform="translate(135 105)">
+  <rect width="62" height="104" rx="13" fill="#F5E7C8" stroke="#D1AE62" stroke-width="3"/>
+  <rect x="11" y="13" width="40" height="8" rx="4" fill="#D1AE62"/>
+  <circle cx="31" cy="57" r="18" fill="#E4A55C"/>
+  <path d="M18 58q13-19 26 0" fill="none" stroke="#FFF0C7" stroke-width="4"/>
+ </g>
+ <g transform="translate(213 105)">
+  <rect width="62" height="104" rx="13" fill="#F3DFDC" stroke="#C88B7E" stroke-width="3"/>
+  <rect x="11" y="13" width="40" height="8" rx="4" fill="#C88B7E"/>
+  <path d="M13 65q4-29 18-29t18 29q-18 23-36 0" fill="#4E9660"/>
+  <circle cx="31" cy="58" r="9" fill="#D76E55"/>
+ </g>
+</g>
+<g transform="translate(350 83)">
+ <circle cx="47" cy="47" r="39" fill="#F3D889" stroke="#C6A24D" stroke-width="5"/>
+ <path d="M74 75l38 38" stroke="#C6A24D" stroke-width="12" stroke-linecap="round"/>
+ <circle cx="47" cy="47" r="22" fill="#FFF6D8"/>
+ <path d="M30 48q17-20 34 0" fill="none" stroke="#D7B65F" stroke-width="5" stroke-linecap="round"/>
+</g>
+</svg>

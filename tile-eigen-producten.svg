@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320">
+<defs>
+ <linearGradient id="jar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#EAF4E8" stop-opacity=".96"/><stop offset="1" stop-color="#A9D0B1" stop-opacity=".78"/></linearGradient>
+ <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4D9868"/><stop offset="1" stop-color="#21613D"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#102D20" flood-opacity=".18"/></filter>
+</defs>
+<g filter="url(#shadow)" transform="translate(130 18)">
+ <rect x="47" y="29" width="164" height="35" rx="10" fill="url(#lid)" stroke="#174B32" stroke-width="4"/>
+ <path d="M58 65h142l-10 185q-2 19-22 19H89q-20 0-22-19Z" fill="url(#jar)" stroke="#43845A" stroke-width="5"/>
+ <path d="M68 149h122l-6 92q-1 13-15 13H91q-13 0-15-13Z" fill="#D4B16A" opacity=".92"/>
+ <path d="M69 163q27-13 48 0t74 0" fill="none" stroke="#F4D99B" stroke-width="5"/>
+ <g fill="#F7E9BF" stroke="#D5B56C" stroke-width="2">
+  <ellipse cx="91" cy="177" rx="8" ry="13" transform="rotate(-28 91 177)"/>
+  <ellipse cx="117" cy="191" rx="8" ry="13" transform="rotate(22 117 191)"/>
+  <ellipse cx="151" cy="178" rx="8" ry="13" transform="rotate(-20 151 178)"/>
+  <ellipse cx="174" cy="202" rx="8" ry="13" transform="rotate(25 174 202)"/>
+  <ellipse cx="94" cy="219" rx="8" ry="13" transform="rotate(18 94 219)"/>
+  <ellipse cx="138" cy="223" rx="8" ry="13" transform="rotate(-30 138 223)"/>
+ </g>
+ <path d="M82 82v54 M101 82v54" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g transform="translate(339 67)">
+ <circle cx="36" cy="36" r="31" fill="#F4D98D" stroke="#B78C3C" stroke-width="5"/>
+ <path d="M59 60l35 35" stroke="#B78C3C" stroke-width="11" stroke-linecap="round"/>
+ <circle cx="36" cy="36" r="17" fill="#FFF6D9" opacity=".65"/>
+</g>
+<circle cx="92" cy="78" r="6" fill="#5EAA75"/><circle cx="80" cy="101" r="4" fill="#D9B85F"/>
+</svg>
