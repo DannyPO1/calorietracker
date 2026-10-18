@@ -1,8 +1,22 @@
-# CalorieTracker v6.2.21
+# CalorieTracker v6.2.22
 
 Persoonlijke calorie- en voedingsregistratie voor iPhone/Safari. Gegevens worden lokaal op dit apparaat opgeslagen; een account is niet nodig.
 
-## Release notes — v6.2.21
+## Release notes — v6.2.22
+
+### Eigen producten makkelijker beheren
+- Zoekveld toegevoegd aan de lijst met eigen producten.
+- Standaard maximaal 30 resultaten, met een knop om meer producten te laden.
+- Aantal gevonden en getoonde producten wordt vermeld.
+
+### Dagtotaal overzichtelijk houden
+- Standaard maximaal 14 geregistreerde dagen tegelijk zichtbaar.
+- Datumvelden toegevoegd om een eigen periode te kiezen.
+- Snelle filters voor 7, 30, 90 dagen of alle dagen.
+- Met 'Toon meer dagen' kunnen oudere resultaten binnen de gekozen periode stapsgewijs worden geladen.
+- Bestaande dagregistraties blijven behouden.
+
+### Functionaliteit uit v6.2.21 behouden
 
 ### Productnamen met speciale tekens
 - Zoeken en selecteren werkt betrouwbaarder voor productnamen met apostrofs, typografische apostrofs, accenten en andere leestekens, zoals `g’woon` en `côte d’or`.
@@ -22,9 +36,9 @@ Persoonlijke calorie- en voedingsregistratie voor iPhone/Safari. Gegevens worden
 - Alleen een gekozen databaseproduct levert de voedingswaarden voor registratie; AI-geschatte voedingswaarden worden niet gebruikt.
 
 ### Technisch
-- Applicatieversie bijgewerkt naar **v6.2.21**.
-- Service-workercache bijgewerkt naar **6.2.21**.
+- Applicatieversie bijgewerkt naar **v6.2.22**.
+- Service-workercache bijgewerkt naar **6.2.22**.
 - Alle bestaande functies uit v6.2.19 blijven behouden.
 
 ## Deployment
-Upload `CalorieTracker-iPhone-v6.2.21.zip` naar de repository en commit de ZIP. De bestaande GitHub Actions-workflow installeert de release, maakt de releasecommit en tag `v6.2.21`.
+Upload `CalorieTracker-iPhone-v6.2.22.zip` naar de repository en commit de ZIP. De bestaande GitHub Actions-workflow installeert de release, maakt de releasecommit en tag `v6.2.22`.

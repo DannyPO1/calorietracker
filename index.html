@@ -243,6 +243,10 @@ html[data-theme="dark"] .aiFoodLauncher{background:linear-gradient(135deg,#20372
 
 /* Keep the weight summary compact on one line above the chart. */
 #weightSummary{font-size:clamp(12px,3.3vw,14px);line-height:1.35;white-space:nowrap;letter-spacing:-.2px;}
+
+.dailyTotalsList{max-height:none}
+#customProductSearch,#historyFrom,#historyTo{margin-bottom:2px}
+#customProductCount,#historyCount{color:var(--muted)}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -272,7 +276,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.2.21';
+const APP_VERSION='6.2.22';
 const RELEASE_DATE='18 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -460,7 +464,18 @@ function updateRecipeLineCalorie(i){
   <div class="row between"><div><h2>Advies voor je doel</h2><p class="muted">Op basis van je geregistreerde voeding en je ingestelde calorie-doel.</p></div><span class="adviceIcon">↗</span></div>
   <div id="foodAdvice"></div>
  </div>
- <div class="card"><h2>Dagtotalen</h2><div id="historyList"></div></div>
+ <div class="card">
+  <h2>Dagtotalen</h2>
+  <p class="muted">Kies een periode om je geregistreerde dagen terug te vinden.</p>
+  <div class="grid">
+   <div><label for="historyFrom">Vanaf</label><input id="historyFrom" type="date" onchange="renderHistory(true)"></div>
+   <div><label for="historyTo">Tot en met</label><input id="historyTo" type="date" onchange="renderHistory(true)"></div>
+  </div>
+  <div class="actions"><button type="button" class="secondary" onclick="setHistoryPeriod(7)">7 dagen</button><button type="button" class="secondary" onclick="setHistoryPeriod(30)">30 dagen</button><button type="button" class="secondary" onclick="setHistoryPeriod(90)">90 dagen</button><button type="button" class="ghost" onclick="setHistoryPeriod(0)">Alles</button></div>
+  <p id="historyCount" class="tiny" style="margin:8px 0 0"></p>
+  <div id="historyList" class="dailyTotalsList"></div>
+  <div class="actions"><button id="historyShowMore" class="secondary hidden" type="button" onclick="showMoreHistory()">Toon meer dagen</button></div>
+ </div>
 </section>
 
 <section id="food" class="hidden">
@@ -473,7 +488,11 @@ function updateRecipeLineCalorie(i){
   <div class="row between"><div><h2>Eigen producten</h2><p class="muted">Producten die je zelf hebt toegevoegd en kunt gebruiken bij Vandaag en in recepten.</p></div>
    <button class="primary" onclick="openNewProduct()">Toevoegen</button>
   </div>
+  <label for="customProductSearch">Zoek in eigen producten</label>
+  <input id="customProductSearch" type="search" placeholder="Zoek op productnaam…" oninput="renderCustom(true)" autocomplete="off">
+  <p id="customProductCount" class="tiny" style="margin:8px 0 0"></p>
   <div id="customList"></div>
+  <div class="actions"><button id="customShowMore" class="secondary hidden" type="button" onclick="showMoreCustomProducts()">Toon meer producten</button></div>
  </div>
  <div class="card">
   <div class="row between"><div><h2>Eigen recepten</h2><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div>
@@ -1445,14 +1464,23 @@ function renderStandardProducts(){
  box.innerHTML=keys.length?keys.map(n=>{const v=BASE[n],piece=getPieceWeight(n);return `<div class="standardResult" role="button" tabindex="0" onclick="openStandardProductEditor(${jsArg(n)})" onkeydown="if(event.key==='Enter'||event.key===' ')openStandardProductEditor(${jsArg(n)})"><div class="standardResultMain"><b>${esc(n)}</b><small>${v.kcal} kcal/100 ${v.u} · ${piece>0?`1 stuk = ${piece} g`:'Stuksgewicht niet ingesteld'}</small></div><span class="standardResultArrow">›</span></div>`}).join(''):'<p class="muted">Geen standaardproduct gevonden.</p>';
  if(total>30)box.insertAdjacentHTML('beforeend',`<p class="tiny" style="margin-top:8px">Toon de eerste 30 resultaten. Verfijn je zoekopdracht voor meer.</p>`);
 }
-function renderCustom(){
- let keys=Object.keys(data.custom).sort();
- document.getElementById("customList").innerHTML=keys.length?
- keys.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}${Number(data.custom[n].pieceGrams)>0?` • 1 stuk = ${data.custom[n].pieceGrams} g`:''}${data.custom[n].barcode?` • barcode ${esc(data.custom[n].barcode)}`:''}${data.custom[n].source==='openfoodfacts'?' • Open Food Facts':''}</small></div><div class="foodItemActions">
- <button class="iconAction" type="button" title="Product bewerken" aria-label="Product bewerken" onclick="editCustomProduct(${jsArg(n)})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg><span class="srOnly">Bewerken</span></button>
- <button class="iconAction dangerIcon" type="button" title="Product verwijderen" aria-label="Product verwijderen" onclick="deleteCustomProduct(${jsArg(n)})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button>
- </div></div>`).join("")
- :'<p class="muted">Nog geen eigen producten.</p>';
+let customProductsLimit=30;
+function showMoreCustomProducts(){customProductsLimit+=30;renderCustom(false)}
+function renderCustom(resetLimit=true){
+  if(resetLimit)customProductsLimit=30;
+  const box=document.getElementById("customList");if(!box)return;
+  const query=productSearchKey(document.getElementById("customProductSearch")?.value||"");
+  const allKeys=Object.keys(data.custom).sort((a,b)=>a.localeCompare(b,"nl"));
+  const filtered=allKeys.filter(n=>!query||productSearchKey(n).includes(query));
+  const shown=filtered.slice(0,customProductsLimit);
+  box.innerHTML=shown.length?shown.map(n=>`<div class="foodItem"><div class="foodItemInfo"><b>${esc(n)}</b><small>${data.custom[n].kcal} kcal/100 ${data.custom[n].u}${Number(data.custom[n].pieceGrams)>0?` • 1 stuk = ${data.custom[n].pieceGrams} g`:''}${data.custom[n].barcode?` • barcode ${esc(data.custom[n].barcode)}`:''}${data.custom[n].source==='openfoodfacts'?' • Open Food Facts':''}</small></div><div class="foodItemActions">
+  <button class="iconAction" type="button" title="Product bewerken" aria-label="Product bewerken" onclick="editCustomProduct(${jsArg(n)})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg><span class="srOnly">Bewerken</span></button>
+  <button class="iconAction dangerIcon" type="button" title="Product verwijderen" aria-label="Product verwijderen" onclick="deleteCustomProduct(${jsArg(n)})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg><span class="srOnly">Verwijderen</span></button>
+  </div></div>`).join(""):(allKeys.length?'<p class="muted">Geen eigen producten gevonden. Probeer een andere zoekterm.</p>':'<p class="muted">Nog geen eigen producten.</p>');
+  const count=document.getElementById("customProductCount");
+  if(count)count.textContent=query?`${filtered.length} resultaat/resultaten • ${shown.length} getoond`:`${allKeys.length} eigen product(en) • ${shown.length} getoond`;
+  const more=document.getElementById("customShowMore");
+  if(more){more.classList.toggle("hidden",filtered.length<=shown.length);more.textContent=`Toon meer producten (${filtered.length-shown.length} resterend)`;}
 }
 function saveCustomAsNew(){
  const sourceName=editingCustomProduct;
@@ -1627,11 +1655,29 @@ function closeConfirm(){
 }
 
 function logWeight(){let d=weightDate.value,w=+weightEntry.value;if(!d||!w)return;data.weights=data.weights.filter(x=>x.date!==d);data.weights.push({date:d,weight:w});data.profile.weight=w;save();render();drawChart()}
-function renderHistory(){
- let dates=Object.keys(data.days).sort().reverse(),arr=data.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)),goal=data.profile.goalWeight;
- document.getElementById("weightSummary").innerHTML=arr.length?`Laatste gewicht: <b>${arr[arr.length-1].weight.toFixed(1)} kg</b>${goal?` • streefgewicht: <b>${goal} kg</b>`:""}`:"Log je gewicht bij Instellingen.";
- document.getElementById("historyList").innerHTML=dates.length?dates.map(d=>`<div class="item"><span>${new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"})}</span><b>${Math.round(totals(data.days[d]).kcal)} kcal</b></div>`).join(""):'<div class="empty">Nog geen dagen geregistreerd.</div>';
- drawChart();renderFourWeekDashboard()
+let historyLimit=14;
+function setHistoryPeriod(days){
+  const to=document.getElementById("historyTo"),from=document.getElementById("historyFrom"),todayKey=today();
+  if(to)to.value=todayKey;
+  if(from)from.value=days>0?addDays(todayKey,-(days-1)):"";
+  renderHistory(true);
+}
+function showMoreHistory(){historyLimit+=14;renderHistory(false)}
+function renderHistory(resetLimit=true){
+  if(resetLimit)historyLimit=14;
+  let dates=Object.keys(data.days).sort().reverse(),arr=data.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)),goal=data.profile.goalWeight;
+  document.getElementById("weightSummary").innerHTML=arr.length?`Laatste gewicht: <b>${arr[arr.length-1].weight.toFixed(1)} kg</b>${goal?` • streefgewicht: <b>${goal} kg</b>`:""}`:"Log je gewicht bij Instellingen.";
+  const fromEl=document.getElementById("historyFrom"),toEl=document.getElementById("historyTo");
+  if(fromEl&&!fromEl.value)fromEl.value=addDays(today(),-29);
+  if(toEl&&!toEl.value)toEl.value=today();
+  const from=fromEl?.value||"",to=toEl?.value||"";
+  const filtered=dates.filter(d=>(!from||d>=from)&&(!to||d<=to));
+  const shown=filtered.slice(0,historyLimit);
+  document.getElementById("historyList").innerHTML=shown.length?shown.map(d=>`<div class="item"><span>${new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}</span><b>${Math.round(totals(data.days[d]).kcal)} kcal</b></div>`).join(""):'<div class="empty">Geen geregistreerde dagen in deze periode.</div>';
+  const count=document.getElementById("historyCount");if(count)count.textContent=`${filtered.length} geregistreerde dag(en) in deze periode • ${shown.length} getoond`;
+  const more=document.getElementById("historyShowMore");
+  if(more){more.classList.toggle("hidden",filtered.length<=shown.length);more.textContent=`Toon meer dagen (${filtered.length-shown.length} resterend)`;}
+  drawChart();renderFourWeekDashboard()
 }
 function weightForecastData(){
  const allWeights=data.weights.slice().sort((x,y)=>x.date.localeCompare(y.date)).filter(x=>Number.isFinite(+x.weight)&&x.date);
