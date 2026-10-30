@@ -1,10 +1,10 @@
-# CalorieTracker v7.0.0
+# CalorieTracker v7.0.1
 
-## Wijzigingen
-- Recepten uit Mijn Recepten kunnen rechtstreeks via het klembord worden ontvangen.
-- Nieuwe knop ‘Recept ontvangen’ leest de gekopieerde receptgegevens en opent direct de bestaande controle- en berekeningsstap.
-- Als iOS klembordlezen blokkeert, kan de gebruiker de receptgegevens in het tekstveld plakken.
-- JSON-bestandsimport blijft beschikbaar als aanvullende terugvaloptie.
-- Bestaande productkoppelingen, hoeveelheidsvoorstellen, portie-instellingen en bereid gewicht blijven behouden.
-- Productiedatabase en bestaande opslagstructuur blijven ongewijzigd.
-- Productiecache is vernieuwd naar `calorietracker-7.0.0`.
+## Releasenotes
+- Ondersteuning toegevoegd voor de receptoverdracht-deeplink vanuit Mijn Recepten.
+- Bij openen via de deeplink wordt direct **Voeding → Eigen recepten** getoond.
+
+## Bijzonderheden
+- Na het openen tik je op **Recept ontvangen** om de gekopieerde receptgegevens vanaf het klembord in te lezen.
+- iOS kan een deeplink afhankelijk van de openingscontext in Safari openen in plaats van in de geïnstalleerde Home Screen-webapp. Automatisch openen van die webapp is daarom niet gegarandeerd.
+- Bestaande gegevensopslag en JSON-import blijven ongewijzigd.
