@@ -296,7 +296,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.4.3';
+const APP_VERSION='7.0.0';
 const RELEASE_DATE='30 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -345,7 +345,7 @@ async function checkForUpdate(){
   }
 }
 </script>
-<meta name="app-version" content="6.2.3"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
+<meta name="app-version" content="7.0.0"><script>document.addEventListener("DOMContentLoaded",syncVersionUI);</script><script>
 function primaryPortion(productName){
   const p=portionOptions(productName);
   return p && p.length ? p[0] : null;
@@ -525,7 +525,7 @@ function updateRecipeLineCalorie(i){
  </div>
  <div id="foodSectionRecipes" class="hidden">
   <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen recepten</h2></div>
-  <div class="card"><div class="row between"><div><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div><button class="primary" onclick="openNewRecipe()">Toevoegen</button></div><div class="notice" style="margin:12px 0"><b>Recept uit Mijn Recepten importeren</b><p class="muted" style="margin:5px 0 9px">Kies een JSON-export. De app doet alvast slimme voorstellen voor producten en hoeveelheden. Controleer de voorstellen, sla kruiden over en importeer.</p><input id="recipeImportFile" type="file" accept=".json,application/json" onchange="handleRecipeImportFile(this.files?.[0])"><div id="recipeImportStatus" class="tiny" style="margin-top:8px"></div></div><div id="recipeImportReview" class="hidden"></div><div id="recipeList"></div></div>
+  <div class="card"><div class="row between"><div><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div><button class="primary" onclick="openNewRecipe()">Toevoegen</button></div><div class="notice" style="margin:12px 0"><b>Recept uit Mijn Recepten ontvangen</b><p class="muted" style="margin:5px 0 9px">Kopieer in Mijn Recepten een recept via ‘Naar CalorieTracker’. Tik hierna op de knop hieronder. De ingrediënten en porties worden direct klaargezet om te controleren.</p><button class="primary" type="button" onclick="receiveRecipeFromClipboard()">Recept ontvangen</button><details style="margin-top:10px"><summary class="tiny" style="cursor:pointer">Lukt klembord lezen niet? Plak het recept hier</summary><textarea id="recipeTransferPaste" rows="4" placeholder="Plak hier de gekopieerde receptgegevens" style="width:100%;margin-top:8px"></textarea><button class="secondary" type="button" style="margin-top:7px" onclick="handlePastedRecipeTransfer()">Recept verwerken</button></details><div class="tiny" style="margin-top:10px">Je kunt ook nog steeds een JSON-back-upbestand importeren: <input id="recipeImportFile" type="file" accept=".json,application/json" onchange="handleRecipeImportFile(this.files?.[0])"></div><div id="recipeImportStatus" class="tiny" style="margin-top:8px"></div></div><div id="recipeImportReview" class="hidden"></div><div id="recipeList"></div></div>
  </div>
  <div id="foodSectionCustom" class="hidden">
   <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen producten</h2></div>
@@ -1738,18 +1738,38 @@ function importQuantitySuggestion(ing,productName){
  if(/middelgrote/.test(raw))return {amount:piece||100,unit:'g',note:'geschatte hoeveelheid'};
  return {amount:100,unit:'g',note:'standaardvoorstel 100 g; controleren'};
 }
+function handleExternalRecipeText(text){
+ const parsed=JSON.parse(String(text||''));
+ const list=Array.isArray(parsed)?parsed:(Array.isArray(parsed.recipes)?parsed.recipes:(Array.isArray(parsed.data?.recipes)?parsed.data.recipes:null));
+ if(!list||!list.length)throw new Error('Geen recepten gevonden. Kopieer eerst een recept vanuit Mijn Recepten.');
+ if(list.some(r=>!r||typeof r.name!=='string'))throw new Error('Het recept bevat geen geldige naam.');
+ pendingExternalRecipe=list;
+ document.getElementById('recipeImportStatus').textContent=`${list.length} recept(en) ontvangen. Controleer de koppelingen en hoeveelheden hieronder.`;
+ renderExternalRecipePicker();
+ document.getElementById('recipeImportReview')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
 async function handleRecipeImportFile(file){
  if(!file)return;
- try{
-  const parsed=JSON.parse(await file.text());
-  const list=Array.isArray(parsed)?parsed:(Array.isArray(parsed.recipes)?parsed.recipes:(Array.isArray(parsed.data?.recipes)?parsed.data.recipes:null));
-  if(!list||!list.length)throw new Error('Geen recepten gevonden. Kies een JSON-export met een recipes-lijst.');
-  if(list.some(r=>!r||typeof r.name!=='string'))throw new Error('Het bestand bevat een recept zonder geldige naam.');
-  pendingExternalRecipe=list;
-  document.getElementById('recipeImportStatus').textContent=`${list.length} recept(en) gevonden. Kies hieronder welk recept je wilt importeren.`;
-  renderExternalRecipePicker();
- }catch(e){document.getElementById('recipeImportStatus').textContent=e.message||'Het JSON-bestand kan niet worden gelezen.';pendingExternalRecipe=null;}
+ try{handleExternalRecipeText(await file.text());}
+ catch(e){document.getElementById('recipeImportStatus').textContent=e.message||'Het JSON-bestand kan niet worden gelezen.';pendingExternalRecipe=null;}
  document.getElementById('recipeImportFile').value='';
+}
+async function receiveRecipeFromClipboard(){
+ const status=document.getElementById('recipeImportStatus');
+ try{
+  if(!navigator.clipboard?.readText)throw new Error('Klembord lezen wordt niet ondersteund. Gebruik de plakmogelijkheid hieronder.');
+  const text=await navigator.clipboard.readText();
+  if(!text.trim())throw new Error('Het klembord is leeg. Ga terug naar Mijn Recepten en kopieer eerst een recept.');
+  handleExternalRecipeText(text);
+ }catch(e){
+  status.textContent=(e.message||'Klembord lezen is niet gelukt.')+' Je kunt de receptgegevens hieronder plakken.';
+  document.getElementById('recipeTransferPaste')?.focus();
+ }
+}
+function handlePastedRecipeTransfer(){
+ const box=document.getElementById('recipeTransferPaste');
+ try{handleExternalRecipeText(box?.value||'');if(box)box.value='';}
+ catch(e){document.getElementById('recipeImportStatus').textContent=e.message||'De geplakte gegevens zijn niet geldig.';}
 }
 function renderExternalRecipePicker(){
  const box=document.getElementById('recipeImportReview');
