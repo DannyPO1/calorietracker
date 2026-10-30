@@ -1,9 +1,13 @@
-# CalorieTracker v6.4.0
+# CalorieTracker v6.4.1
 
 ## Wijzigingen
-- Receptimport vanuit een JSON-export van Mijn Recepten toegevoegd.
-- Bij import worden ingrediënten gekoppeld aan producten uit de bestaande CalorieTracker-database.
-- Voedingswaarden en macro’s worden berekend met de bestaande productgegevens en hoeveelheid per ingrediënt.
-- Geïmporteerde recepten worden opgeslagen in het bestaande receptenoverzicht en zijn beschikbaar voor registratie in Vandaag.
-- Onbekende of niet-ondersteunde eenheden worden niet stilzwijgend als gram geïnterpreteerd.
+- Receptimport vanuit Mijn Recepten verbeterd.
+- Slimmere productherkenning met synoniemen en eerder opgeslagen koppelingen.
+- Direct zoeken naar producten via invoerveld en suggesties, zonder lange selectielijst.
+- Hoeveelheden worden waar mogelijk omgerekend naar gram/ml; onduidelijke hoeveelheden krijgen een expliciet voorstel.
+- Ingrediënten kunnen per regel worden uitgesloten, bijvoorbeeld kruiden, specerijen, water of smaakmakers.
+- Gekozen productkoppelingen worden onthouden voor volgende imports.
 - Bestaande lokale opslag, producten, recepten en dagboekregistraties blijven behouden.
+
+## Let op
+Hoeveelheden die niet uit de bron zijn af te leiden blijven schattingen en worden als zodanig gemarkeerd. Controleer deze voordat je het recept opslaat.

@@ -289,7 +289,7 @@ function initTheme(){
 }
 initTheme();
 
-const APP_VERSION='6.4.0';
+const APP_VERSION='6.4.1';
 const RELEASE_DATE='30 oktober 2026';
 function syncVersionUI(){
   const h=document.getElementById("headerVersion");
@@ -518,7 +518,7 @@ function updateRecipeLineCalorie(i){
  </div>
  <div id="foodSectionRecipes" class="hidden">
   <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen recepten</h2></div>
-  <div class="card"><div class="row between"><div><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div><button class="primary" onclick="openNewRecipe()">Toevoegen</button></div><div class="notice" style="margin:12px 0"><b>Recept uit Mijn Recepten importeren</b><p class="muted" style="margin:5px 0 9px">Kies een JSON-export. Koppel de ingrediënten aan producten uit CalorieTracker en bereken daarna de voedingswaarden.</p><input id="recipeImportFile" type="file" accept=".json,application/json" onchange="handleRecipeImportFile(this.files?.[0])"><div id="recipeImportStatus" class="tiny" style="margin-top:8px"></div></div><div id="recipeImportReview" class="hidden"></div><div id="recipeList"></div></div>
+  <div class="card"><div class="row between"><div><p class="muted">Recepten die je zelf hebt samengesteld en kunt toevoegen aan Vandaag.</p></div><button class="primary" onclick="openNewRecipe()">Toevoegen</button></div><div class="notice" style="margin:12px 0"><b>Recept uit Mijn Recepten importeren</b><p class="muted" style="margin:5px 0 9px">Kies een JSON-export. De app doet alvast slimme voorstellen voor producten en hoeveelheden. Controleer de voorstellen, sla kruiden over en importeer.</p><input id="recipeImportFile" type="file" accept=".json,application/json" onchange="handleRecipeImportFile(this.files?.[0])"><div id="recipeImportStatus" class="tiny" style="margin-top:8px"></div></div><div id="recipeImportReview" class="hidden"></div><div id="recipeList"></div></div>
  </div>
  <div id="foodSectionCustom" class="hidden">
   <div class="foodSectionHeader"><button type="button" class="secondary" onclick="closeFoodSection()">‹ Terug naar Voeding</button><h2>Eigen producten</h2></div>
@@ -1655,15 +1655,81 @@ function importedQuantity(name,amount,unit){
  const u=normalizeImportUnit(unit);
  if(u==='kg')return {amount:amount*1000,unit:'g'};
  if(u==='l')return {amount:amount*1000,unit:'ml'};
- if(u==='stuks'){const grams=getPieceWeight(name);if(!(grams>0))return null;return {amount,unit:`portion:${grams}`};}
+ if(u==='stuks'){const grams=getPieceWeight(name);if(!(grams>0))return null;return {amount:amount*grams,unit:'g'};}
  if(u==='ml')return {amount,unit:'ml'};
  if(u==='g')return {amount,unit:'g'};
  return null;
 }
+function importAlias(name){
+ const n=productSearchKey(name);
+ const aliases={
+  'kip':'kipfilet','kippenvlees':'kipfilet','kipfilet':'kipfilet','kipfilet of kipdij':'kipfilet',
+  'wortel':'wortel','winterpeen':'wortel','peen':'wortel',
+  'doperwt':'doperwten','erwten':'doperwten','paprika':'paprika',
+  'knoflookpoeder of verse knoflook':'knoflook','verse knoflook':'knoflook',
+  'rijst':'rijst gekookt','witte rijst':'rijst gekookt','basmati rijst':'basmatirijst gekookt',
+  'olie':'olijfolie','olijfolie of zonnebloemolie':'olijfolie',
+  'zout':'','peper':'','zwarte peper':'','paprikapoeder':'','kerriepoeder':'',
+  'water':'','bouillon':'','italiaanse kruiden':'','peterselie':'','koriander':'',
+  'nasi boemboe':'','boemboe nasi':'','ketjap manis':'','knoflookpoeder':''
+ };
+ if(Object.prototype.hasOwnProperty.call(aliases,n))return aliases[n];
+ return '';
+}
 function findImportProduct(name){
- const keys=Object.keys(allProducts());
- const norm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
- return keys.find(k=>norm(k)===norm(name))||'';
+ const keys=Object.keys(allProducts()),n=productSearchKey(name);
+ const remembered=data.aiMappings?.[`recipe:${n}`];
+ if(remembered&&allProducts()[remembered])return remembered;
+ const alias=importAlias(name);
+ if(alias&&allProducts()[alias])return alias;
+ const exact=keys.find(k=>productSearchKey(k)===n);if(exact)return exact;
+ const tokens=n.split(' ').filter(t=>t.length>2);
+ const scored=keys.map(k=>{
+  const p=productSearchKey(k),pt=p.split(' ');
+  let score=0;
+  if(p.includes(n)||n.includes(p))score+=Math.min(8,Math.min(p.length,n.length)/2);
+  score+=tokens.filter(t=>pt.includes(t)||p.includes(t)).length*3;
+  if(n==='kip'&&p==='kipfilet')score+=30;
+  if(n.includes('kip')&&p==='kipfilet')score+=12;
+  return {k,score};
+ }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.k.localeCompare(b.k,'nl'));
+ return scored[0]?.k||'';
+}
+function importQuantitySuggestion(ing,productName){
+ const raw=String(ing.qty??ing.amount??'').trim().toLowerCase().replace(',','.');
+ const sourceUnit=String(ing.unit||'').trim().toLowerCase();
+ const parsed=raw.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+ let amount=parsed?Number(parsed[1]):0,tail=parsed?parsed[2]:'';
+ const unit=normalizeImportUnit(sourceUnit||tail);
+ if(amount>0){
+  if(unit==='kg')return {amount:amount*1000,unit:'g',note:'kg omgerekend'};
+  if(unit==='l')return {amount:amount*1000,unit:'ml',note:'liter omgerekend'};
+  if(unit==='stuks'){
+   const piece=getPieceWeight(productName);
+   if(piece)return {amount:amount*piece,unit:'g',note:`stuk omgerekend (${piece} g/stuk)`};
+   return {amount:amount*100,unit:'g',note:'schatting: 100 g per stuk'};
+  }
+  if(['g','ml'].includes(unit))return {amount,unit,note:''};
+  if(/grote|middelgrote|kleine/.test(tail)){
+   const piece=getPieceWeight(productName)||100;
+   const factor=/grote/.test(tail)?1.25:(/kleine/.test(tail)?.7:1);
+   return {amount:amount*piece*factor,unit:'g',note:'geschat op basis van stukgewicht'};
+  }
+  if(/eetlepel/.test(tail))return {amount:amount*15,unit:'g',note:'geschat: 15 g per eetlepel'};
+  if(/theelepel/.test(tail))return {amount:amount*5,unit:'g',note:'geschat: 5 g per theelepel'};
+  if(/pakje/.test(tail))return {amount:amount*100,unit:'g',note:'schatting: 100 g per pakje'};
+  return {amount,unit:'g',note:'hoeveelheid als gram geïnterpreteerd'};
+ }
+ const piece=getPieceWeight(productName);
+ if(/naar behoefte|beetje|scheut|snuf|optioneel/.test(raw)){
+  if(/olie/.test(productSearchKey(ing.name)))return {amount:10,unit:'g',note:'voorstel 10 g; controleren'};
+  if(/naar behoefte/.test(raw)&&piece)return {amount:piece,unit:'g',note:'voorstelhoeveelheid; controleren'};
+  if(/beetje|scheut|snuf/.test(raw))return {amount:5,unit:'g',note:'kleine voorstelhoeveelheid; controleren'};
+  return {amount:100,unit:'g',note:'voorstel 100 g; controleren'};
+ }
+ if(/grote/.test(raw))return {amount:(piece||100)*1.25,unit:'g',note:'geschatte hoeveelheid'};
+ if(/middelgrote/.test(raw))return {amount:piece||100,unit:'g',note:'geschatte hoeveelheid'};
+ return {amount:100,unit:'g',note:'standaardvoorstel 100 g; controleren'};
 }
 async function handleRecipeImportFile(file){
  if(!file)return;
@@ -1673,8 +1739,7 @@ async function handleRecipeImportFile(file){
   if(!list||!list.length)throw new Error('Geen recepten gevonden. Kies een JSON-export met een recipes-lijst.');
   if(list.some(r=>!r||typeof r.name!=='string'))throw new Error('Het bestand bevat een recept zonder geldige naam.');
   pendingExternalRecipe=list;
-  const status=document.getElementById('recipeImportStatus');
-  status.textContent=`${list.length} recept(en) gevonden. Kies hieronder welk recept je wilt importeren.`;
+  document.getElementById('recipeImportStatus').textContent=`${list.length} recept(en) gevonden. Kies hieronder welk recept je wilt importeren.`;
   renderExternalRecipePicker();
  }catch(e){document.getElementById('recipeImportStatus').textContent=e.message||'Het JSON-bestand kan niet worden gelezen.';pendingExternalRecipe=null;}
  document.getElementById('recipeImportFile').value='';
@@ -1689,24 +1754,38 @@ function renderExternalRecipePicker(){
 function renderExternalRecipeMapping(){
  const idx=+(document.getElementById('externalRecipeChoice')?.value||0),r=pendingExternalRecipe?.[idx];
  const box=document.getElementById('externalRecipeMapping');if(!box||!r)return;
- const ingredients=(r.ingredients||[]).filter(x=>x&&x.name);
+ const ingredients=(r.ingredients||[]).filter(x=>x&&x.name),keys=Object.keys(allProducts()).sort((a,b)=>a.localeCompare(b,'nl'));
  if(!ingredients.length){box.innerHTML='<p class="notice warn">Dit recept bevat geen ingrediënten en kan daarom nog niet worden berekend.</p>';return;}
- const keys=Object.keys(allProducts()).sort();
- box.innerHTML=`<p class="muted">Koppel elk ingrediënt aan een voedingsmiddel uit CalorieTracker. De hoeveelheden worden overgenomen; controleer vooral stuks, lepels en andere niet-gewichtseenheden.</p>${ingredients.map((ing,i)=>{const match=findImportProduct(ing.name);const qty=String(ing.qty??ing.amount??'').replace(',','.');const unit=normalizeImportUnit(ing.unit);return `<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin:9px 0"><b>${esc(ing.name)}</b><div class="grid" style="margin-top:8px"><div><label>Product koppelen</label><select id="externalProduct${i}"><option value="">Kies product…</option>${keys.map(k=>`<option value="${esc(k)}" ${k===match?'selected':''}>${esc(k)}</option>`).join('')}</select></div><div><label>Hoeveelheid</label><input id="externalAmount${i}" type="number" min="0.1" step="0.1" value="${esc(qty)}"></div><div><label>Eenheid uit bron</label><input value="${esc(ing.unit||'g')}" disabled></div></div></div>`}).join('')}<div class="actions"><button class="primary" type="button" onclick="importSelectedExternalRecipe(${idx})">Recept importeren en berekenen</button><button class="secondary" type="button" onclick="cancelExternalRecipeImport()">Annuleren</button></div>`;
+ const options=keys.map(k=>`<option value="${esc(k)}"></option>`).join('');
+ box.innerHTML=`<p class="muted">Controleer de voorgestelde koppelingen. Zoek direct door te typen; je hoeft niet meer door de volledige productenlijst te scrollen. Niet-relevante ingrediënten kun je uitsluiten.</p><datalist id="externalProductOptions">${options}</datalist>
+ ${ingredients.map((ing,i)=>{const match=findImportProduct(ing.name),suggestion=importQuantitySuggestion(ing,match||ing.name),skip=!match&&!!importAlias(ing.name)===false&&/kruiden|poeder|water|bouillon|zout|peper|ketjap|boemboe|olie/.test(productSearchKey(ing.name));return `<div style="border:1px solid var(--line);border-radius:12px;padding:11px;margin:9px 0">
+ <div class="row between" style="gap:8px;align-items:center"><b>${esc(ing.name)}</b><label style="display:flex;align-items:center;gap:6px;font-weight:normal;margin:0"><input id="externalSkip${i}" type="checkbox" ${skip?'checked':''} style="width:auto"> Niet meetellen</label></div>
+ <div class="grid" style="margin-top:8px"><div><label>Product (typ om te zoeken)</label><input id="externalProduct${i}" list="externalProductOptions" autocomplete="off" placeholder="Zoek product…" value="${esc(match)}" oninput="rememberExternalMapping(${i})"></div><div><label>Hoeveelheid in gram/ml</label><input id="externalAmount${i}" type="number" min="0.1" step="0.1" value="${suggestion.amount}"></div></div>
+ <div class="tiny muted" style="margin-top:5px">${suggestion.note?`Voorstel: ${esc(suggestion.note)}.`:'Hoeveelheid overgenomen of omgerekend.'} ${ing.unit?`Bron: ${esc(ing.qty??ing.amount??'')} ${esc(ing.unit)}.`:''}</div></div>`}).join('')}
+ <div class="actions"><button class="primary" type="button" onclick="importSelectedExternalRecipe(${idx})">Recept importeren en berekenen</button><button class="secondary" type="button" onclick="cancelExternalRecipeImport()">Annuleren</button></div>`;
+}
+function rememberExternalMapping(i){
+ const input=document.getElementById(`externalProduct${i}`);if(!input)return;
+ const ingredient=(pendingExternalRecipe?.[+(document.getElementById('externalRecipeChoice')?.value||0)]?.ingredients||[]).filter(x=>x&&x.name)[i];
+ const selected=input.value.trim(),resolved=product(selected);
+ if(ingredient&&resolved){data.aiMappings=data.aiMappings||{};data.aiMappings[`recipe:${productSearchKey(ingredient.name)}`]=resolved[0];save();}
 }
 function cancelExternalRecipeImport(){pendingExternalRecipe=null;renderExternalRecipePicker();document.getElementById('recipeImportStatus').textContent='Import geannuleerd.';}
 function importSelectedExternalRecipe(idx){
  const source=pendingExternalRecipe?.[idx];if(!source)return;
  const raw=(source.ingredients||[]).filter(x=>x&&x.name),ingredients=[];let sum={kcal:0,p:0,c:0,f:0};
  for(let i=0;i<raw.length;i++){
-  const name=document.getElementById('externalProduct'+i)?.value,amount=Number(document.getElementById('externalAmount'+i)?.value),sourceUnit=raw[i].unit||'g';
-  if(!name||!(amount>0)){alert(`Controleer de productkoppeling en hoeveelheid voor “${raw[i].name}”.`);return;}
-  const found=product(name);if(!found){alert(`Product “${name}” is niet beschikbaar.`);return;}
-  const converted=importedQuantity(name,amount,sourceUnit);if(!converted){alert(`Voor “${raw[i].name}” is geen gewicht per stuk bekend voor product “${name}”. Gebruik een gramhoeveelheid in Mijn Recepten of voeg eerst een stukgewicht toe aan CalorieTracker.`);return;}
-  const grams=amountInGrams(name,converted.amount,converted.unit);if(!(grams>0)){alert(`De hoeveelheid voor “${raw[i].name}” kan niet worden omgerekend.`);return;}
+  if(document.getElementById('externalSkip'+i)?.checked)continue;
+  const selected=document.getElementById('externalProduct'+i)?.value.trim(),resolved=product(selected);
+  const amount=Number(document.getElementById('externalAmount'+i)?.value);
+  if(!resolved||!(amount>0)){alert(`Controleer de productkoppeling en hoeveelheid voor “${raw[i].name}”, of vink “Niet meetellen” aan.`);return;}
+  const name=resolved[0],found=resolved,sourceUnit=(allProducts()[name]?.u||'g');
+  const grams=amount;
   const factor=grams/100,v=found[1];sum.kcal+=v.kcal*factor;sum.p+=v.p*factor;sum.c+=v.c*factor;sum.f+=v.f*factor;
-  ingredients.push({name:found[0],amount:converted.amount,unit:converted.unit,grams});
+  ingredients.push({name,amount:grams,unit:sourceUnit==='ml'?'ml':'g',grams});
+  data.aiMappings=data.aiMappings||{};data.aiMappings[`recipe:${productSearchKey(raw[i].name)}`]=name;
  }
+ if(!ingredients.length){alert('Er moeten minimaal één ingrediënt worden meegerekend.');return;}
  const servings=Math.max(1,Number(source.servings)||1),baseName=source.name.trim().toLowerCase();let name=baseName;
  if(data.recipes[name]){let n=2;while(data.recipes[`${baseName} (${n})`])n++;name=`${baseName} (${n})`;}
  data.recipes[name]={ingredients,servings,total:sum,perServing:{kcal:sum.kcal/servings,p:sum.p/servings,c:sum.c/servings,f:sum.f/servings},source:'Mijn Recepten',sourceRecipeId:source.id||null,sourceUpdatedAt:source.updatedAt||null};
