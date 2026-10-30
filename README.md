@@ -1,13 +1,12 @@
-# CalorieTracker v6.4.1
+# CalorieTracker v6.4.3
 
 ## Wijzigingen
-- Receptimport vanuit Mijn Recepten verbeterd.
-- Slimmere productherkenning met synoniemen en eerder opgeslagen koppelingen.
-- Direct zoeken naar producten via invoerveld en suggesties, zonder lange selectielijst.
-- Hoeveelheden worden waar mogelijk omgerekend naar gram/ml; onduidelijke hoeveelheden krijgen een expliciet voorstel.
-- Ingrediënten kunnen per regel worden uitgesloten, bijvoorbeeld kruiden, specerijen, water of smaakmakers.
-- Gekozen productkoppelingen worden onthouden voor volgende imports.
-- Bestaande lokale opslag, producten, recepten en dagboekregistraties blijven behouden.
+- Bij receptimport kun je het aantal porties controleren en aanpassen.
+- Optioneel kun je het totale gewicht van het bereide gerecht invullen.
+- Als het bereid gewicht bekend is, berekent CalorieTracker ook voedingswaarden per 100 gram.
+- Bij toevoegen aan Vandaag kun je kiezen tussen een aantal porties of een gewicht in gram.
+- Registreren in gram is alleen beschikbaar voor recepten waarvan het totale bereid gewicht is vastgelegd.
+- De productdropdown uit v6.4.2 en alle eerdere importverbeteringen blijven behouden.
 
-## Let op
-Hoeveelheden die niet uit de bron zijn af te leiden blijven schattingen en worden als zodanig gemarkeerd. Controleer deze voordat je het recept opslaat.
+## Belangrijk
+Weeg het volledige gerecht na bereiding om een betrouwbare voedingswaarde per 100 gram te krijgen. Laat het veld leeg als je het gerecht niet weegt; registreren per portie blijft dan gewoon mogelijk.
