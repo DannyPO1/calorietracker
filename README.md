@@ -1,6 +1,9 @@
-# CalorieTracker v6.3.1
+# CalorieTracker v6.4.0
 
 ## Wijzigingen
-- Achtergrond van alle vier Voeding-tegels gelijkgetrokken in zowel light mode als dark mode.
-- Titel en ondertekst van tegels passen zich beter aan de beschikbare breedte aan; lange titels zoals ‘Standaardproducten’ blijven binnen de tegel.
-- Overige functionaliteit van v6.3.0 behouden.
+- Receptimport vanuit een JSON-export van Mijn Recepten toegevoegd.
+- Bij import worden ingrediënten gekoppeld aan producten uit de bestaande CalorieTracker-database.
+- Voedingswaarden en macro’s worden berekend met de bestaande productgegevens en hoeveelheid per ingrediënt.
+- Geïmporteerde recepten worden opgeslagen in het bestaande receptenoverzicht en zijn beschikbaar voor registratie in Vandaag.
+- Onbekende of niet-ondersteunde eenheden worden niet stilzwijgend als gram geïnterpreteerd.
+- Bestaande lokale opslag, producten, recepten en dagboekregistraties blijven behouden.
